@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:user_ocean_learn/Page/LoginPage/LoginPage.dart';
+import 'package:user_ocean_learn/Routing/oceab_learn_pages.dart';
+import 'package:user_ocean_learn/Routing/ocean_learn_route.dart';
 
 void main() {
   runApp(const MyApp());
@@ -13,9 +14,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      home: LoginScreen(),
-
-      
+      debugShowCheckedModeBanner: false,
+      getPages: OceanLearnPages.pages,
+      initialRoute: OceanLearnRoutes.loginPage,
 
     );
   }
