@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:user_ocean_learn/Routing/ocean_learn_route.dart';
 import 'package:user_ocean_learn/Widgets/ColorPallete.dart';
 import 'package:user_ocean_learn/Widgets/mybutton.dart';
 import 'package:user_ocean_learn/Widgets/myimage.dart';
@@ -7,6 +8,8 @@ import 'package:user_ocean_learn/Widgets/mycard.dart';
 import 'package:user_ocean_learn/Widgets/mytext.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:user_ocean_learn/Page/LoginPage/registerpage.dart';
+import 'package:get/get.dart';
+
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -152,12 +155,10 @@ class _LoginScreenState extends State<LoginScreen> {
                           Padding(
                             padding:
                                 const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: Text(
-                              "Sign in with",
-                              style: TextStyle(
-                                color: Colors.grey[600],
-                                fontSize: 12,
-                              ),
+                            child: MyText(
+                              text: "Sign in with",
+                              fontSize: 12,
+                              color: Colors.grey[600]!,
                             ),
                           ),
                           Expanded(
@@ -202,10 +203,10 @@ class _LoginScreenState extends State<LoginScreen> {
                       MyButton(
                         text: "Sign In",
                         isPrimary: true,
-                        backgroundColor: primarycolor,
-                        textColor: Colors.white,
+                        backgroundColor: secondarycolor,
+                        textColor: textcolor,
                         fullWidth: true,
-                        onTap: () {},
+                        onTap: () {Get.toNamed(OceanLearnRoutes.homePage);},
                       ),
                     ],
                   ),
