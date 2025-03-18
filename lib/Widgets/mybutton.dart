@@ -35,9 +35,9 @@ class MyButton extends StatelessWidget {
           height: 48,
           decoration: BoxDecoration(
             color: isActive ? Colors.blue.shade100 : Colors.white,
-            borderRadius: BorderRadius.circular(5),
+            borderRadius: BorderRadius.circular(10),
             border: Border.all(
-              color: Colors.blue.shade100,
+              color: Colors.transparent,
               width: isActive ? 0 : 1.5,
             ),
           ),
@@ -46,7 +46,7 @@ class MyButton extends StatelessWidget {
             style: TextButton.styleFrom(
               padding: EdgeInsets.zero,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(4),
+                borderRadius: BorderRadius.circular(10),
               ),
               
             ),

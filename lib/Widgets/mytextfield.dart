@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:user_ocean_learn/Widgets/ColorPallete.dart';
 
 class MyTextField extends StatelessWidget {
   final String hintText;
@@ -20,7 +21,7 @@ class MyTextField extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey[300]!),
+        border: Border.all(color: primarycolor),
       ),
       child: TextField(
         obscureText: obscureText,
@@ -30,10 +31,10 @@ class MyTextField extends StatelessWidget {
           contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           border: InputBorder.none,
           suffixIcon: suffixIcon != null
-              ? Icon(suffixIcon, color: Colors.grey[400])
+              ? Icon(suffixIcon, color: Colors.black)
               : null,
           prefixIcon: prefixIcon != null
-              ? Icon(prefixIcon, color: Colors.grey[400])
+              ? Icon(prefixIcon, color: Colors.black)
               : null,
         ),
       ),
