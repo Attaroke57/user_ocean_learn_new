@@ -6,26 +6,24 @@ import 'package:user_ocean_learn/Routing/ocean_learn_route.dart';
 class NavDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    // Get screen width to make drawer half the width
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Drawer(
       backgroundColor: Colors.white,
-      width: screenWidth * 0.7, // Make drawer width half of screen width
+      width: screenWidth * 0.7, 
       child: Column(
         children: [
-          // App Header with Logo
           Container(
             padding: EdgeInsets.only(top: 40, bottom: 10),
             width: double.infinity,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // App Logo
+               
                 SvgPicture.asset(
                   'Assets/images/ocean.svg',
                   fit: BoxFit.contain,
-                  height: 100,
+                  height: 120,
                   width: 70,
                 ),
                 SizedBox(height: 5),
@@ -33,7 +31,7 @@ class NavDrawer extends StatelessWidget {
                 Text(
                   'Ocean Learn',
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 20,
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
                   ),
@@ -42,7 +40,7 @@ class NavDrawer extends StatelessWidget {
                 Text(
                   'Dive into learning, as deep as the sea.',
                   style: TextStyle(
-                    fontSize: 10,
+                    fontSize: 13,
                     color: Colors.grey,
                   ),
                   textAlign: TextAlign.center,
@@ -50,20 +48,21 @@ class NavDrawer extends StatelessWidget {
               ],
             ),
           ),
+          SizedBox(height: 10),
 
-          // User Profile Section
+          
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             child: Row(
               children: [
-                // User Profile Image
-                SvgPicture.asset(
-                  'Assets/images/profile.svg',
-                  height: 40, // Sesuaikan dengan radius 20 dari CircleAvatar
-                  width: 40,
-                ),
-                const SizedBox(width: 10),
-                // User Name and Email
+                
+                 SvgPicture.asset(
+                        'Assets/images/profile.svg',
+                        fit: BoxFit.contain,
+                        height: 60,
+                        width: 120,
+                      ),
+                const SizedBox(height: 15),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -72,14 +71,14 @@ class NavDrawer extends StatelessWidget {
                         'Samudra',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: 14,
+                          fontSize: 20,
                         ),
                       ),
                       Text(
                         'samudra@gmail.com',
                         style: TextStyle(
                           color: Colors.grey,
-                          fontSize: 10,
+                          fontSize: 15,
                         ),
                       ),
                     ],
@@ -98,24 +97,24 @@ class NavDrawer extends StatelessWidget {
                 padding: EdgeInsets.symmetric(vertical: 5),
                 child: Column(
                   children: [
-                    // Home Menu Item
+                    // Home
                     _buildMenuItem(
                       icon: Icons.home,
                       title: 'Home',
                       isActive: true,
                       onTap: () {
-                        Navigator.pop(context);
+                        Get.toNamed(OceanLearnRoutes.homePage);
                       },
                     ),
 
-                    // // Jadwal Menu Item
+                    
                     // _buildMenuItem(
                     //   icon: Icons.calendar_today,
                     //   title: 'Jadwal',
                     //   isActive: false,
                     //   onTap: () {
-                    //     Navigator.pop(context);
-                    //     // Navigate to Schedule page
+                    //     Get.toNamed(OceanLearnRoutes.schedulepage);
+                        
                     //   },
                     // ),
 
@@ -136,7 +135,7 @@ class NavDrawer extends StatelessWidget {
                       title: 'Profile',
                       isActive: false,
                       onTap: () {
-                        Get.toNamed(OceanLearnRoutes.homePage);
+                        Get.toNamed(OceanLearnRoutes.profilepage);
 
                         // Navigate to Profile page
                       },
