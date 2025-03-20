@@ -56,7 +56,7 @@ class SubscriptionPage extends StatelessWidget {
                       MyCard(
                         child: Center(
                           child: SvgPicture.asset(
-                            'Assets/images/login.svg',
+                            'Assets/images/subscribe.svg',
                             fit: BoxFit.contain,
                             height: 200,
                             width: 120,

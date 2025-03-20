@@ -10,7 +10,10 @@ class MyButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final bool isHeaderStyle;
   final bool isActive;
-  final VoidCallback onTap; // Keep as required
+  final VoidCallback onTap;
+  final IconData? icon; // Parameter opsional untuk ikon
+  final Color? iconColor; // Parameter opsional untuk warna ikon
+  final bool hasIcon;  // Keep as required
 
   const MyButton({
     Key? key,
@@ -23,6 +26,9 @@ class MyButton extends StatelessWidget {
     this.onPressed,
     this.isHeaderStyle = false,
     this.isActive = false,
+    this.icon,
+    this.iconColor,
+    this.hasIcon = false,
     required this.onTap, // Keep this as required
   }) : super(key: key);
 

@@ -4,6 +4,7 @@ import 'package:user_ocean_learn/Dashboard/dashboard.dart';
 import 'package:user_ocean_learn/Page/HomePage/HomePage.dart';
 import 'package:user_ocean_learn/Page/LoginPage/LoginPage.dart';
 import 'package:user_ocean_learn/Page/ProfilePage/ProfilePage.dart';
+import 'package:user_ocean_learn/Page/SchedulePage/SchedulePage.dart';
 import 'package:user_ocean_learn/Routing/ocean_learn_route.dart';
 
 
@@ -14,6 +15,7 @@ class OceanLearnPages {
     GetPage(name: OceanLearnRoutes.homePage, page: () => Homepage()),
     GetPage(name: OceanLearnRoutes.dashboard, page: () => NavDrawer()),
     GetPage(name: OceanLearnRoutes.profilepage, page: () => ProfilePage()),
+    GetPage(name: OceanLearnRoutes.schedulepage, page: () => SchedulePage()),
    
   ];
 }
