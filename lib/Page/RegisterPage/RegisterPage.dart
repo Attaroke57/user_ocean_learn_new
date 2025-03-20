@@ -111,8 +111,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       MyButton(
                         text: "Sign Up",
                         isPrimary: true,
-                        backgroundColor: primarycolor,
-                        textColor: Colors.white,
+                        backgroundColor: secondarycolor,
+                        textColor: textcolor,
                         fullWidth: true,
                         onTap: () {},
                       ),

@@ -1,39 +1,38 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:user_ocean_learn/Dashboard/dashboardcontroller.dart';
 import 'package:user_ocean_learn/Routing/ocean_learn_route.dart';
 
 class NavDrawer extends StatelessWidget {
+  final DashboardController dashboardController =
+      Get.put(DashboardController());
+
   @override
   Widget build(BuildContext context) {
-    // Get screen width to make drawer half the width
     final screenWidth = MediaQuery.of(context).size.width;
 
     return Drawer(
       backgroundColor: Colors.white,
-      width: screenWidth * 0.7, // Make drawer width half of screen width
+      width: screenWidth * 0.7,
       child: Column(
         children: [
-          // App Header with Logo
           Container(
             padding: EdgeInsets.only(top: 40, bottom: 10),
             width: double.infinity,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // App Logo
-                SvgPicture.asset(
-                  'Assets/images/ocean.svg',
-                  fit: BoxFit.contain,
+                Image.asset(
+                  'Assets/images/sidebar.png',
+                  width: 180,
                   height: 100,
-                  width: 70,
                 ),
                 SizedBox(height: 5),
-
                 Text(
                   'Ocean Learn',
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 20,
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
                   ),
@@ -42,7 +41,7 @@ class NavDrawer extends StatelessWidget {
                 Text(
                   'Dive into learning, as deep as the sea.',
                   style: TextStyle(
-                    fontSize: 10,
+                    fontSize: 13,
                     color: Colors.grey,
                   ),
                   textAlign: TextAlign.center,
@@ -50,20 +49,17 @@ class NavDrawer extends StatelessWidget {
               ],
             ),
           ),
+          SizedBox(height: 10),
 
-          // User Profile Section
           Padding(
             padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
             child: Row(
               children: [
-                // User Profile Image
-                SvgPicture.asset(
-                  'Assets/images/profile.svg',
-                  height: 40, // Sesuaikan dengan radius 20 dari CircleAvatar
-                  width: 40,
+                CircleAvatar(
+                  radius: 25,
+                  backgroundImage: AssetImage('Assets/images/profile.png'),
                 ),
-                const SizedBox(width: 10),
-                // User Name and Email
+                const SizedBox(height: 15),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -72,14 +68,14 @@ class NavDrawer extends StatelessWidget {
                         'Samudra',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: 14,
+                          fontSize: 20,
                         ),
                       ),
                       Text(
                         'samudra@gmail.com',
                         style: TextStyle(
                           color: Colors.grey,
-                          fontSize: 10,
+                          fontSize: 15,
                         ),
                       ),
                     ],
@@ -96,53 +92,40 @@ class NavDrawer extends StatelessWidget {
             child: SingleChildScrollView(
               child: Padding(
                 padding: EdgeInsets.symmetric(vertical: 5),
-                child: Column(
-                  children: [
-                    // Home Menu Item
-                    _buildMenuItem(
-                      icon: Icons.home,
-                      title: 'Home',
-                      isActive: true,
-                      onTap: () {
-                        Navigator.pop(context);
-                      },
-                    ),
-
-                    // // Jadwal Menu Item
-                    // _buildMenuItem(
-                    //   icon: Icons.calendar_today,
-                    //   title: 'Jadwal',
-                    //   isActive: false,
-                    //   onTap: () {
-                    //     Navigator.pop(context);
-                    //     // Navigate to Schedule page
-                    //   },
-                    // ),
-
-                    // // Pembayaran Menu Item
-                    // _buildMenuItem(
-                    //   icon: Icons.payment,
-                    //   title: 'Pembayaran',
-                    //   isActive: false,
-                    //   onTap: () {
-                    //     Navigator.pop(context);
-                    //     // Navigate to Payment page
-                    //   },
-                    // ),
-
-                    // Profile Menu Item
-                    _buildMenuItem(
-                      icon: Icons.person,
-                      title: 'Profile',
-                      isActive: false,
-                      onTap: () {
-                        Get.toNamed(OceanLearnRoutes.homePage);
-
-                        // Navigate to Profile page
-                      },
-                    ),
-                  ],
-                ),
+                child: Obx(() => Column(
+                      children: [
+                        _buildMenuItem(
+                          icon: Icons.home,
+                          title: 'Home',
+                          isActive:
+                              dashboardController.selectedIndex.value == 0,
+                          onTap: () {
+                            dashboardController.changeMenu(0);
+                            Get.toNamed(OceanLearnRoutes.homePage);
+                          },
+                        ),
+                        _buildMenuItem(
+                          icon: Icons.calendar_today,
+                          title: 'Jadwal',
+                          isActive:
+                              dashboardController.selectedIndex.value == 1,
+                          onTap: () {
+                            dashboardController.changeMenu(1);
+                            Get.toNamed(OceanLearnRoutes.schedulepage);
+                          },
+                        ),
+                        _buildMenuItem(
+                          icon: Icons.person,
+                          title: 'Profile',
+                          isActive:
+                              dashboardController.selectedIndex.value == 2,
+                          onTap: () {
+                            dashboardController.changeMenu(2);
+                            Get.toNamed(OceanLearnRoutes.profilepage);
+                          },
+                        ),
+                      ],
+                    )),
               ),
             ),
           ),
