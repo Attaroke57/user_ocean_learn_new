@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:user_ocean_learn/Page/LoginPage/LoginController.dart';
 import 'package:user_ocean_learn/Routing/ocean_learn_route.dart';
 import 'package:user_ocean_learn/Widgets/ColorPallete.dart';
 import 'package:user_ocean_learn/Widgets/mybutton.dart';
@@ -7,16 +8,17 @@ import 'package:user_ocean_learn/Widgets/mytextfield.dart';
 import 'package:user_ocean_learn/Widgets/mycard.dart';
 import 'package:user_ocean_learn/Widgets/mytext.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:user_ocean_learn/Page/LoginPage/registerpage.dart';
 import 'package:get/get.dart';
 
 
 class LoginScreen extends StatefulWidget {
   @override
   _LoginScreenState createState() => _LoginScreenState();
+  
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  final LoginController loginController = Get.put(LoginController());
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -61,11 +63,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           textColor: Colors.grey.shade400,
                           onTap: () {
                             // Navigate to registration screen
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => RegisterScreen(),
-                              ),
+                            Get.toNamed(OceanLearnRoutes.RegisterScreen
                             );
                           },
                         ),
@@ -206,7 +204,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         backgroundColor: secondarycolor,
                         textColor: textcolor,
                         fullWidth: true,
-                        onTap: () {Get.toNamed(OceanLearnRoutes.homePage);},
+                        onTap: () {
+                          Get.toNamed(OceanLearnRoutes.homePage);},
                       ),
                     ],
                   ),

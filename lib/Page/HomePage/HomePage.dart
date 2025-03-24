@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:user_ocean_learn/Page/HomePage/HomeController.dart';
 import 'package:user_ocean_learn/Widgets/ColorPallete.dart';
 import 'package:user_ocean_learn/Widgets/mybutton.dart';
 import 'package:user_ocean_learn/Widgets/mycard.dart';
@@ -7,9 +9,11 @@ import 'package:user_ocean_learn/Widgets/mytext.dart'; // Import MyText widget
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:user_ocean_learn/Dashboard/dashboard.dart';
 
-class Homepage extends StatelessWidget {
+class Homepage extends GetView <HomeController> {
   Homepage({super.key});
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+
+  final HomeController controller = Get.put(HomeController());
 
   @override
   Widget build(BuildContext context) {
@@ -112,6 +116,8 @@ class Homepage extends StatelessWidget {
                 const SizedBox(height: 24),
 
                 // Lesson list
+                _buildLessonItem('Lesson Title', 'March 5 2025'),
+                const SizedBox(height: 12),
                 _buildLessonItem('Lesson Title', 'March 5 2025'),
                 const SizedBox(height: 12),
                 _buildLessonItem('Lesson Title', 'March 5 2025'),
