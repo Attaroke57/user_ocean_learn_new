@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       getPages: OceanLearnPages.pages,
-      initialRoute: OceanLearnRoutes.loginPage,
+      initialRoute: OceanLearnRoutes.SplashScreen,
 
     );
   }
