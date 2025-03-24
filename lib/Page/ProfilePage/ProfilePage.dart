@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:user_ocean_learn/Page/ProfilePage/SubscriptionPage.dart';
+import 'package:get/get.dart';
+import 'package:user_ocean_learn/Page/ProfilePage/ProfileController.dart';
 import 'package:user_ocean_learn/Widgets/mycard.dart';
 import 'package:user_ocean_learn/Widgets/mytext.dart';
 import 'package:user_ocean_learn/Widgets/mybutton.dart';
 import 'package:user_ocean_learn/Dashboard/dashboard.dart';
 import 'package:user_ocean_learn/Widgets/ColorPallete.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends GetView<ProfileController> {
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  final ProfileController controller = Get.put(ProfileController());
 
   @override
   Widget build(BuildContext context) {
@@ -16,129 +18,133 @@ class ProfilePage extends StatelessWidget {
       key: _scaffoldKey,
       drawer: NavDrawer(),
       body: SafeArea(
-        child: Column(
+        child: Obx(() => Stack(
           children: [
-            // App Bar
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // Menu icon now uses the scaffold key to open drawer
-                  InkWell(
-                    onTap: () {
-                      _scaffoldKey.currentState?.openDrawer();
-                    },
-                    child: Icon(Icons.menu),
+            Column(
+              children: [
+                // App Bar
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      InkWell(
+                        onTap: () {
+                          _scaffoldKey.currentState?.openDrawer();
+                        },
+                        child: Icon(Icons.menu),
+                      ),
+                      MyText.header('Manage your profile here!'),
+                      Icon(Icons.notifications_outlined),
+                    ],
                   ),
-                  MyText.header('Manage your profile here!'),
-                  Icon(Icons.notifications_outlined),
-                ],
-              ),
+                ),
+                
+                // Profile content
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      children: [
+                        // Profile Card
+                        MyCard(
+                          child: Column(
+                            children: [
+                              CircleAvatar(
+                                radius: 48,
+                                backgroundImage: AssetImage(controller.profileImagePath.value),
+                              ),
+                              SizedBox(height: 16),
+                              RichText(
+                                text: TextSpan(
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    color: Colors.black,
+                                  ),
+                                  children: [
+                                    TextSpan(text: 'Hello, '),
+                                    TextSpan(
+                                      text: controller.userTitle.value,
+                                      style: TextStyle(
+                                        color: Colors.blue,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    TextSpan(text: ' ${controller.userName.value}!'),
+                                  ],
+                                ),
+                              ),
+                              SizedBox(height: 20),
+                              // Subscription Button
+                              MyButton(
+                                text: 'My Subscription',
+                                backgroundColor: secondarycolor,
+                                textColor: primarycolor,
+                                fullWidth: true,
+                                onTap: controller.goToSubscriptionPage,
+                              ),
+                              SizedBox(height: 8),
+                              MyText.subtitle('manage your subscription right here'),
+                            ],
+                          ),
+                        ),
+                        
+                        SizedBox(height: 15),
+                        
+                        // Account Settings Section
+                        MyCard(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.only(left: 8.0, bottom: 16.0),
+                                child: MyText.title('Account Settings'),
+                              ),
+                              _buildSettingsItem(
+                                context,
+                                'Change my password',
+                                Icons.arrow_forward_ios,
+                                controller.goToChangePasswordPage,
+                              ),
+                              Divider(),
+                              _buildSettingsItem(
+                                context,
+                                'Edit personal details',
+                                Icons.arrow_forward_ios,
+                                controller.goToEditProfilePage,
+                              ),
+                            ],
+                          ),
+                        ),
+                        
+                        Spacer(),
+                        
+                        // Logout Button
+                        MyButton(
+                          text: 'Log out',
+                          backgroundColor: Colors.white,
+                          textColor: Colors.black87,
+                          fullWidth: true,
+                          hasBorder: true,
+                          onTap: controller.showLogoutConfirmation,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
             
-            // Rest of your ProfilePage code with MyText and MyCard
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    // Profile Card using MyCard
-                    MyCard(
-                      child: Column(
-                        children: [
-                          CircleAvatar(
-                            radius: 48,
-                            backgroundImage: AssetImage('Assets/images/profile.png'),
-                          ),
-                          SizedBox(height: 16),
-                          RichText(
-                            text: TextSpan(
-                              style: TextStyle(
-                                fontSize: 18,
-                                color: Colors.black,
-                              ),
-                              children: [
-                                TextSpan(text: 'Hello, '),
-                                TextSpan(
-                                  text: 'Divers',
-                                  style: TextStyle(
-                                    color: Colors.blue,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                TextSpan(text: ' Samudra!'),
-                              ],
-                            ),
-                          ),
-                          SizedBox(height: 20),
-                          // Subscription Button using MyButton
-                          MyButton(
-                            text: 'My Subscription',
-                            backgroundColor: secondarycolor,
-                            textColor: primarycolor,
-                            fullWidth: true,
-                            onTap: () {
-                              print("Navigation button pressed");
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (context) => SubscriptionPage()),
-                              );
-                            },
-                          ),
-                          SizedBox(height: 8),
-                          MyText.subtitle('manage your subscription right here'),
-                        ],
-                      ),
-                    ),
-                    
-                    SizedBox(height: 15),
-                    
-                    // Account Settings Section with MyCard and MyText
-                    MyCard(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.only(left: 8.0, bottom: 16.0),
-                            child: MyText.title('Account Settings'),
-                          ),
-                          _buildSettingsItem(
-                            context,
-                            'Change my password',
-                            Icons.arrow_forward_ios,
-                            () {},
-                          ),
-                          Divider(),
-                          _buildSettingsItem(
-                            context,
-                            'Edit personal details',
-                            Icons.arrow_forward_ios,
-                            () {},
-                          ),
-                        ],
-                      ),
-                    ),
-                    
-                    Spacer(),
-                    
-                    // Logout Button with MyButton
-                    MyButton(
-                      text: 'Log out',
-                      backgroundColor: Colors.white,
-                      textColor: Colors.black87,
-                      fullWidth: true,
-                      hasBorder: true,
-                      onTap: () {
-                        // Logout functionality would go here
-                      },
-                    ),
-                  ],
+            // Loading overlay
+            if (controller.isLoading.value)
+              Container(
+                color: Colors.black.withOpacity(0.3),
+                child: Center(
+                  child: CircularProgressIndicator(),
                 ),
               ),
-            ),
           ],
-        ),
+        )),
       ),
     );
   }
