@@ -204,7 +204,8 @@ class _LoginScreenState extends State<LoginScreen> {
                         backgroundColor: secondarycolor,
                         textColor: textcolor,
                         fullWidth: true,
-                        onTap: () {Get.toNamed(OceanLearnRoutes.homePage);},
+                        onTap: () {
+                          Get.toNamed(OceanLearnRoutes.homePage);},
                       ),
                     ],
                   ),

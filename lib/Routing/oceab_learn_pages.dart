@@ -2,6 +2,7 @@
 import 'package:get/get.dart';
 import 'package:user_ocean_learn/Dashboard/dashboard.dart';
 import 'package:user_ocean_learn/Page/HomePage/HomePage.dart';
+import 'package:user_ocean_learn/Page/IntroPage/IntroPage.dart';
 import 'package:user_ocean_learn/Page/LoginPage/LoginPage.dart';
 import 'package:user_ocean_learn/Page/ProfilePage/ProfilePage.dart';
 import 'package:user_ocean_learn/Page/ProfilePage/SubscriptionPage.dart';
@@ -20,6 +21,7 @@ class OceanLearnPages {
     GetPage(name: OceanLearnRoutes.schedulepage, page: () => SchedulePage()),
     GetPage(name: OceanLearnRoutes.RegisterScreen, page: () => RegisterScreen()),
     GetPage(name: OceanLearnRoutes.SubscriptionPage, page: () => SubscriptionPage()),
+    GetPage(name: OceanLearnRoutes.IntroPage, page: () => IntroPage()),
    
   ];
 }

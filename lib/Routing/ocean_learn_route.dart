@@ -1,5 +1,3 @@
-
-
 class OceanLearnRoutes {
   static const loginPage = "/login";
   static const dashboard = "/dashboard";
@@ -8,6 +6,7 @@ class OceanLearnRoutes {
   static const schedulepage = "/schedule";
   static const RegisterScreen = "/register";
   static const SubscriptionPage = "/subscription";
+  static const IntroPage = "/intro";
   
 
 }
