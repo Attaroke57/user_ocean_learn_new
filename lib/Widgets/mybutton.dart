@@ -10,7 +10,16 @@ class MyButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final bool isHeaderStyle;
   final bool isActive;
+<<<<<<< Updated upstream
   final VoidCallback onTap; // Keep as required
+=======
+  final VoidCallback onTap;
+  final IconData? icon;
+  final Color? iconColor;
+  final bool hasIcon;
+  final double height;
+  final double borderRadius;
+>>>>>>> Stashed changes
 
   const MyButton({
     Key? key,
@@ -23,7 +32,16 @@ class MyButton extends StatelessWidget {
     this.onPressed,
     this.isHeaderStyle = false,
     this.isActive = false,
+<<<<<<< Updated upstream
     required this.onTap, // Keep this as required
+=======
+    this.icon,
+    this.iconColor,
+    this.hasIcon = false,
+    required this.onTap,
+    this.height = 48.0,  // Default height
+    this.borderRadius = 10.0,  // Default border radius
+>>>>>>> Stashed changes
   }) : super(key: key);
 
   @override
@@ -32,10 +50,14 @@ class MyButton extends StatelessWidget {
     if (isHeaderStyle) {
       return Expanded(
         child: Container(
-          height: 48,
+          height: height,
           decoration: BoxDecoration(
             color: isActive ? Colors.blue.shade100 : Colors.white,
+<<<<<<< Updated upstream
             borderRadius: BorderRadius.circular(5),
+=======
+            borderRadius: BorderRadius.circular(borderRadius),
+>>>>>>> Stashed changes
             border: Border.all(
               color: Colors.blue.shade100,
               width: isActive ? 0 : 1.5,
@@ -46,9 +68,12 @@ class MyButton extends StatelessWidget {
             style: TextButton.styleFrom(
               padding: EdgeInsets.zero,
               shape: RoundedRectangleBorder(
+<<<<<<< Updated upstream
                 borderRadius: BorderRadius.circular(4),
+=======
+                borderRadius: BorderRadius.circular(borderRadius),
+>>>>>>> Stashed changes
               ),
-              
             ),
             child: Text(
               text,
@@ -66,8 +91,9 @@ class MyButton extends StatelessWidget {
     // Original button style
     return SizedBox(
       width: fullWidth ? double.infinity : null,
+      height: height,
       child: ElevatedButton(
-        onPressed: onTap, // Use onTap instead of onPressed
+        onPressed: onTap,
         style: ElevatedButton.styleFrom(
           backgroundColor: backgroundColor,
           foregroundColor: textColor,
@@ -76,7 +102,7 @@ class MyButton extends StatelessWidget {
             vertical: 1,
           ),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(borderRadius),
             side: hasBorder
                 ? BorderSide(color: Colors.grey[300]!)
                 : BorderSide.none,

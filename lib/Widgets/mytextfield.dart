@@ -5,6 +5,7 @@ class MyTextField extends StatelessWidget {
   final IconData? suffixIcon;
   final IconData? prefixIcon; // Changed to IconData and made optional
   final bool obscureText;
+  final TextEditingController? controller;
   
   const MyTextField({
     Key? key,
@@ -12,6 +13,7 @@ class MyTextField extends StatelessWidget {
     this.suffixIcon,
     this.prefixIcon, // Now optional
     this.obscureText = false,
+    this.controller,
   }) : super(key: key);
 
   @override

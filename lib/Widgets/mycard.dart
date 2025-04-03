@@ -2,29 +2,32 @@ import 'package:flutter/material.dart';
 
 class MyCard extends StatelessWidget {
   final Widget child;
-  
+  final Color? backgroundColor;
+  final EdgeInsetsGeometry? padding;
+  final double? elevation;
+  final BorderRadiusGeometry? borderRadius;
+
   const MyCard({
     Key? key,
     required this.child,
+    this.backgroundColor = Colors.white,
+    this.padding = const EdgeInsets.all(16),
+    this.elevation = 2,
+    this.borderRadius,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 10,
-            offset: Offset(0, 4),
-          ),
-        ],
+    return Card(
+      color: backgroundColor,
+      elevation: elevation,
+      shape: RoundedRectangleBorder(
+        borderRadius: borderRadius ?? BorderRadius.circular(16),
       ),
-      padding: EdgeInsets.all(16),
-      child: child,
+      child: Padding(
+        padding: padding!,
+        child: child,
+      ),
     );
   }
 }

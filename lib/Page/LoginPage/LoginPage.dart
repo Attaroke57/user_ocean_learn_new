@@ -10,8 +10,14 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+<<<<<<< Updated upstream
   bool isSignIn = true; // Track which tab is active
 
+=======
+  final LoginController loginController = Get.put(LoginController());
+  final TextEditingController usernameController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+>>>>>>> Stashed changes
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -89,14 +95,16 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: Column(
                     children: [
                       MyTextField(
-                        hintText: "username",
-                        suffixIcon: Icons.person_outline,
+                        hintText: "Email",
+                        suffixIcon: Icons.email_outlined,
+                        controller: loginController.emailController,
                       ),
                       const SizedBox(height: 12),
                       MyTextField(
                         hintText: "password",
                         suffixIcon: Icons.lock_outline,
                         obscureText: true,
+                        controller: loginController.passwordController,
                       ),
                       const SizedBox(height: 12),
 
@@ -195,6 +203,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ],
                       ),
 
+<<<<<<< Updated upstream
                       const SizedBox(
                       height: 30), 
                       MyButton(
@@ -205,6 +214,21 @@ class _LoginScreenState extends State<LoginScreen> {
                         fullWidth: true,
                         onTap: () {},
                       ),
+=======
+                      const SizedBox(height: 10),
+                     Obx(() => MyButton(
+                            text: loginController.isLoading.value
+                                ? "Loading..."
+                                : "Sign In",
+                            isPrimary: true,
+                            backgroundColor: secondarycolor,
+                            textColor: textcolor,
+                            fullWidth: true,
+                            onTap: loginController.isLoading.value
+                                ? () {}
+                                : () => loginController.login(),
+                          )),
+>>>>>>> Stashed changes
                     ],
                   ),
                 ),
