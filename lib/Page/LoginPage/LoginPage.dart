@@ -1,37 +1,51 @@
 import 'package:flutter/material.dart';
+import 'package:user_ocean_learn/Page/LoginPage/LoginController.dart';
+import 'package:user_ocean_learn/Routing/ocean_learn_route.dart';
+import 'package:user_ocean_learn/Widgets/ColorPallete.dart';
 import 'package:user_ocean_learn/Widgets/mybutton.dart';
 import 'package:user_ocean_learn/Widgets/myimage.dart';
 import 'package:user_ocean_learn/Widgets/mytextfield.dart';
 import 'package:user_ocean_learn/Widgets/mycard.dart';
+import 'package:user_ocean_learn/Widgets/mytext.dart';
+import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart';
+
 
 class LoginScreen extends StatefulWidget {
   @override
   _LoginScreenState createState() => _LoginScreenState();
+  
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-<<<<<<< Updated upstream
+
+
   bool isSignIn = true; // Track which tab is active
 
-=======
+
   final LoginController loginController = Get.put(LoginController());
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
->>>>>>> Stashed changes
+
+
+  final LoginController loginController = Get.put(LoginController());
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: netralcolor,
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
+                
                 // Header with Sign In/Sign Out buttons
                 Container(
                   decoration: BoxDecoration(
                     color: Colors.white,
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(15),
                     border: Border.all(
                       color: Colors.blue.shade100,
                       width: 1.5,
@@ -39,31 +53,31 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   child: Row(
                     children: [
-                      MyButton(
-                        text: "Sign In",
-                        isHeaderStyle: true,
-                        isActive: isSignIn,
-                        backgroundColor: Colors.transparent,
-                        textColor:
-                            isSignIn ? Colors.blue : Colors.grey.shade400,
-                        onTap: () {
-                          setState(() {
-                            isSignIn = true;
-                          });
-                        },
+                      Expanded(
+                        child: MyButton(
+                          text: "Sign In",
+                          isHeaderStyle: true,
+                          isActive: true,
+                          backgroundColor: Colors.transparent,
+                          textColor: Colors.blue,
+                          onTap: () {
+                            // Already on login screen
+                          },
+                        ),
                       ),
-                      MyButton(
-                        text: "Sign Out",
-                        isHeaderStyle: true,
-                        isActive: !isSignIn,
-                        backgroundColor: Colors.transparent,
-                        textColor:
-                            !isSignIn ? Colors.blue : Colors.grey.shade400,
-                        onTap: () {
-                          setState(() {
-                            isSignIn = false;
-                          });
-                        },
+                      Expanded(
+                        child: MyButton(
+                          text: "Sign Up",
+                          isHeaderStyle: true,
+                          isActive: false,
+                          backgroundColor: Colors.transparent,
+                          textColor: Colors.grey.shade400,
+                          onTap: () {
+                            // Navigate to registration screen
+                            Get.toNamed(OceanLearnRoutes.RegisterScreen
+                            );
+                          },
+                        ),
                       ),
                     ],
                   ),
@@ -71,22 +85,21 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 30),
 
                 // Welcome text
-                Text(
-                  "Welcome back!",
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.grey[800],
-                  ),
+                MyText(
+                  text: "Welcome back!",
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey[800]!,
                 ),
                 const SizedBox(height: 15),
 
-                // Illustration
-                MyImage(
-                  child: Image.asset(
-                    'Assets/images/login.png',
-                    fit: BoxFit.contain,
-                  ),
+                
+                SvgPicture.asset(
+                  'Assets/images/login.svg',
+                  fit: BoxFit.contain,
+                  height: 200,
+                  width: 120,
+
                 ),
                 const SizedBox(height: 30),
 
@@ -126,21 +139,19 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                               ),
                               const SizedBox(width: 8),
-                              Text(
-                                "remember me",
-                                style: TextStyle(
-                                  color: Colors.grey[600],
-                                  fontSize: 12,
-                                ),
+                              MyText(
+                                text: "Remember me",
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.grey[800]!,
                               ),
                             ],
                           ),
-                          Text(
-                            "forgot password?",
-                            style: TextStyle(
-                              color: Colors.grey[600],
-                              fontSize: 12,
-                            ),
+                          MyText(
+                            text: "Forgot password?",
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: textcolor,
                           ),
                         ],
                       ),
@@ -155,12 +166,10 @@ class _LoginScreenState extends State<LoginScreen> {
                           Padding(
                             padding:
                                 const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: Text(
-                              "Sign in with",
-                              style: TextStyle(
-                                color: Colors.grey[600],
-                                fontSize: 12,
-                              ),
+                            child: MyText(
+                              text: "Sign in with",
+                              fontSize: 12,
+                              color: Colors.grey[600]!,
                             ),
                           ),
                           Expanded(
@@ -169,7 +178,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ],
                       ),
 
-                      SizedBox(height: 30),
+                      SizedBox(height: 10),
 
                       // Sign in with social media icons
                       Row(
@@ -177,8 +186,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         children: [
                           MyImage(
                             height: 40,
-                            width: 40,
-                            isCircular: true,
+                            width: 40,                         
                             child: Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: Image.asset(
@@ -191,7 +199,6 @@ class _LoginScreenState extends State<LoginScreen> {
                           MyImage(
                             height: 40,
                             width: 40,
-                            isCircular: true,
                             child: Padding(
                               padding: const EdgeInsets.all(8.0),
                               child: Image.asset(
@@ -203,18 +210,21 @@ class _LoginScreenState extends State<LoginScreen> {
                         ],
                       ),
 
-<<<<<<< Updated upstream
+
                       const SizedBox(
                       height: 30), 
+                      const SizedBox(height: 10),
+
                       MyButton(
                         text: "Sign In",
                         isPrimary: true,
-                        backgroundColor: Colors.blue[300]!,
-                        textColor: Colors.white,
+                        backgroundColor: secondarycolor,
+                        textColor: textcolor,
                         fullWidth: true,
-                        onTap: () {},
+                        onTap: () {
+                          Get.toNamed(OceanLearnRoutes.homePage);},
                       ),
-=======
+
                       const SizedBox(height: 10),
                      Obx(() => MyButton(
                             text: loginController.isLoading.value
@@ -228,7 +238,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ? () {}
                                 : () => loginController.login(),
                           )),
->>>>>>> Stashed changes
+
                     ],
                   ),
                 ),
