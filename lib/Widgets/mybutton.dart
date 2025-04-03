@@ -66,7 +66,7 @@ class MyButton extends StatelessWidget {
           child: TextButton(
             onPressed: onTap, 
             style: TextButton.styleFrom(
-              padding: EdgeInsets.zero,
+              padding: EdgeInsets.zero, 
               shape: RoundedRectangleBorder(
 <<<<<<< Updated upstream
                 borderRadius: BorderRadius.circular(4),
