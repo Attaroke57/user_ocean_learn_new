@@ -1,4 +1,4 @@
-import 'package:user_ocean_learn/Page/SplashScreen/SplashScreen.dart';
+
 
 class OceanLearnRoutes {
   static const loginPage = "/login";
@@ -10,6 +10,7 @@ class OceanLearnRoutes {
   static const SubscriptionPage = "/subscription";
   static const IntroPage = "/intro";
   static const SplashScreen = "/splashscreen";
+  static const LessonDetailPage = "/lessonDetail";
   
 
 }
