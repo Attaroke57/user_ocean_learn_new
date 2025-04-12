@@ -4,17 +4,19 @@ import 'package:user_ocean_learn/Widgets/ColorPallete.dart';
 class MyTextField extends StatelessWidget {
   final String hintText;
   final IconData? suffixIcon;
-  final IconData? prefixIcon; // Changed to IconData and made optional
+  final IconData? prefixIcon;
   final bool obscureText;
-  final TextEditingController? controller;
+  final TextEditingController? controller;  // Added this parameter
+  final Function(String)? onChanged;  // Added this parameter
   
   const MyTextField({
     Key? key,
     required this.hintText,
     this.suffixIcon,
-    this.prefixIcon, // Now optional
+    this.prefixIcon,
     this.obscureText = false,
-    this.controller,
+    this.controller,  // Add controller parameter
+    this.onChanged,  // Add onChanged parameter
   }) : super(key: key);
 
   @override
@@ -26,7 +28,9 @@ class MyTextField extends StatelessWidget {
         border: Border.all(color: primarycolor),
       ),
       child: TextField(
+        controller: controller,
         obscureText: obscureText,
+        onChanged: onChanged,
         decoration: InputDecoration(
           hintText: hintText,
           hintStyle: TextStyle(color: Colors.grey[500]),

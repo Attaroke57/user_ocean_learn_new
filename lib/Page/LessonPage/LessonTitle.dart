@@ -7,16 +7,24 @@ import 'package:user_ocean_learn/Widgets/mybutton.dart';
 import 'package:user_ocean_learn/Widgets/mytext.dart';
 import 'package:user_ocean_learn/Widgets/mycard.dart';
 
-class LessonTitle extends StatelessWidget {
-  LessonTitle({Key? key}) : super(key: key);
+class LessonDetailPage extends StatefulWidget {
+  final String lessonTitle;
+  final String lessonDate;
 
-  final LessonController controller = Get.put(LessonController());
+  LessonDetailPage({
+    this.lessonTitle ='', 
+    this.lessonDate = ''
+  });
+
+  @override
+  _LessonDetailPageState createState() => _LessonDetailPageState();
+}
+
+class _LessonDetailPageState extends State<LessonDetailPage> {
+  bool _isNoteMode = false;
 
   @override
   Widget build(BuildContext context) {
-    final String lessonTitle = Get.arguments?['lessonTitle'] ?? 'Lesson Title';
-    final String lessonDate = Get.arguments?['lessonDate'] ?? 'March 8 2025';
-
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -24,20 +32,25 @@ class LessonTitle extends StatelessWidget {
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Get.back(),
+          onPressed: () => Navigator.of(context).pop(),
         ),
         title: MyText(
-          text: lessonTitle,
+          text: widget.lessonTitle,
           fontSize: 18,
           fontWeight: FontWeight.w600,
         ),
       ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
             // Incoming Class Info
-            MyCard(
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              decoration: BoxDecoration(
+                color: Color(0xFFF0F8FF),
+                borderRadius: BorderRadius.circular(12),
+              ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -50,7 +63,7 @@ class LessonTitle extends StatelessWidget {
                         fontWeight: FontWeight.w500,
                       ),
                       MyText(
-                        text: lessonDate,
+                        text: widget.lessonDate,
                         fontSize: 12,
                         color: Colors.grey,
                       ),
@@ -69,11 +82,7 @@ class LessonTitle extends StatelessWidget {
                         ),
                       ],
                     ),
-                    child: MyText(
-                      text: 'Attendance',
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                    ),
+                    child: Text('Attendance'),
                   ),
                 ],
               ),
@@ -91,91 +100,92 @@ class LessonTitle extends StatelessWidget {
             SizedBox(height: 24),
 
             // Buttons and Note Section
-            Obx(() => !controller.isNoteMode.value
-                ? Column(
+            if (!_isNoteMode)
+              Column(
+                children: [
+                  MyButton(
+                    text: "Let's check the lessons!",
+                    backgroundColor: Color(0xFFF0F8FF),
+                    textColor: Colors.black,
+                    fullWidth: true,
+                    onPressed: () {
+                      // Implement lesson check functionality
+                    }, 
+                    onTap: () {},
+                  ),
+                  SizedBox(height: 16),
+                  MyButton(
+                    text: 'I want to write a note',
+                    backgroundColor: Colors.white,
+                    textColor: Colors.black,
+                    fullWidth: true,
+                    onPressed: () {
+                      setState(() {
+                        _isNoteMode = true;
+                      });
+                    }, 
+                    onTap: () {},
+                  ),
+                ],
+              )
+            else
+              Column(
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey.shade300),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Column(
+                      children: [
+                        TextField(
+                          decoration: InputDecoration(
+                            hintText: 'Point 1:',
+                            border: InputBorder.none,
+                            contentPadding: EdgeInsets.all(12),
+                          ),
+                          maxLines: null,
+                        ),
+                        Divider(),
+                        TextField(
+                          decoration: InputDecoration(
+                            hintText: 'Point 2:',
+                            border: InputBorder.none,
+                            contentPadding: EdgeInsets.all(12),
+                          ),
+                          maxLines: null,
+                        ),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  Row(
                     children: [
-                      MyButton(
-                        text: "Let's check the lessons!",
-                        backgroundColor: Color(0xFFF0F8FF),
-                        textColor: Colors.black,
-                        fullWidth: true,
-                        height: 50.0, // Added height parameter
-                        borderRadius: 12,
-                        onPressed: () {
-                          // Implement lesson check functionality
-                        },
-                        onTap: () {},
-                      ),
-                      SizedBox(height: 16),
-                      MyButton(
-                        text: 'I want to write a note',
-                        backgroundColor: Colors.white,
-                        textColor: Colors.black,
-                        fullWidth: true,
-                        height: 50.0, // Added height parameter
-                        borderRadius: 12,
-                        onPressed: () {
-                          controller.toggleNoteMode(true);
-                        },
-                        onTap: () {},
-                      ),
-                    ],
-                  )
-                : Column(
-                    children: [
-                      MyCard(
-                        child: Column(
-                          children: [
-                            TextField(
-                              decoration: InputDecoration(
-                                hintText: 'Point 1:',
-                                border: InputBorder.none,
-                                contentPadding: EdgeInsets.all(12),
-                              ),
-                              onChanged: controller.updatePoint1,
-                              maxLines: null,
-                            ),
-                            Divider(),
-                            TextField(
-                              decoration: InputDecoration(
-                                hintText: 'Point 2:',
-                                border: InputBorder.none,
-                                contentPadding: EdgeInsets.all(12),
-                              ),
-                              onChanged: controller.updatePoint2,
-                              maxLines: null,
-                            ),
-                          ],
+                      Expanded(
+                        child: MyButton(
+                          text: 'Save note',
+                          backgroundColor: Color(0xFFF0F8FF),
+                          textColor: Colors.black,
+                          fullWidth: true,
+                          onPressed: () {
+                            // Save note functionality
+                          },
+                          onTap: () {},
                         ),
                       ),
-                      SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: MyButton(
-                              text: 'Save note',
-                              backgroundColor: Color(0xFFF0F8FF),
-                              textColor: Colors.black,
-                              fullWidth: true,
-                              height: 50.0, // Added height parameter
-                              borderRadius: 12,
-                              onPressed: () {
-                                controller.saveNotes();
-                              },
-                              onTap: () {},
-                            ),
-                          ),
-                          SizedBox(width: 8),
-                          IconButton(
-                            icon: Icon(Icons.close),
-                            onPressed: () {
-                              controller.clearNotes();
-                            },
-                          ),
-                        ],
+                      SizedBox(width: 8),
+                      IconButton(
+                        icon: Icon(Icons.close),
+                        onPressed: () {
+                          setState(() {
+                            _isNoteMode = false;
+                          });
+                        },
                       ),
                     ],
-                  )),
+                  ),
+                ],
+              ),
           ],
         ),
       ),

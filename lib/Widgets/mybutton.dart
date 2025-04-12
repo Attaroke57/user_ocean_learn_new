@@ -10,18 +10,12 @@ class MyButton extends StatelessWidget {
   final VoidCallback? onPressed;
   final bool isHeaderStyle;
   final bool isActive;
-  final VoidCallback onTap; // Keep as required;
+  final VoidCallback onTap;
   final IconData? icon;
   final Color? iconColor;
   final bool hasIcon;
   final double height;
   final double borderRadius;
-
-  final VoidCallback onTap;
-  final IconData? icon; // Parameter opsional untuk ikon
-  final Color? iconColor; // Parameter opsional untuk warna ikon
-  final bool hasIcon;  // Keep as required
-
 
   const MyButton({
     Key? key,
@@ -34,20 +28,12 @@ class MyButton extends StatelessWidget {
     this.onPressed,
     this.isHeaderStyle = false,
     this.isActive = false,
-
-    this.icon,
-    this.iconColor,
-    this.hasIcon = false,
-
-    required this.onTap, // Keep this as required
-
-    this.icon,
-    this.iconColor,
-    this.hasIcon = false,
     required this.onTap,
-    this.height = 48.0,  // Default height
-    this.borderRadius = 10.0,  // Default border radius
-
+    this.icon,
+    this.iconColor,
+    this.hasIcon = false,
+    this.height = 48.0,
+    this.borderRadius = 10.0,
   }) : super(key: key);
 
   @override
@@ -59,14 +45,7 @@ class MyButton extends StatelessWidget {
           height: height,
           decoration: BoxDecoration(
             color: isActive ? Colors.blue.shade100 : Colors.white,
-
-            borderRadius: BorderRadius.circular(5),
-
             borderRadius: BorderRadius.circular(borderRadius),
-
-
-            borderRadius: BorderRadius.circular(10),
-
             border: Border.all(
               color: Colors.transparent,
               width: isActive ? 0 : 1.5,
@@ -77,13 +56,7 @@ class MyButton extends StatelessWidget {
             style: TextButton.styleFrom(
               padding: EdgeInsets.zero, 
               shape: RoundedRectangleBorder(
-
-                borderRadius: BorderRadius.circular(4),
-
                 borderRadius: BorderRadius.circular(borderRadius),
-
-                borderRadius: BorderRadius.circular(10),
-
               ),
             ),
             child: Text(
@@ -120,12 +93,32 @@ class MyButton extends StatelessWidget {
           ),
           elevation: 0,
         ),
-        child: Text(
-          text,
-          style: TextStyle(
-            fontWeight: FontWeight.w500,
-          ),
-        ),
+        child: hasIcon 
+            ? Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (icon != null) 
+                    Icon(
+                      icon,
+                      color: iconColor ?? textColor,
+                      size: 20,
+                    ),
+                  if (icon != null) 
+                    SizedBox(width: 8),
+                  Text(
+                    text,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              )
+            : Text(
+                text,
+                style: TextStyle(
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
       ),
     );
   }

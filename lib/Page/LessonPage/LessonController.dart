@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 
+
 class LessonController extends GetxController {
   // Reactive variables for note-taking
   final RxString point1 = RxString('');
@@ -10,16 +11,13 @@ class LessonController extends GetxController {
   void toggleNoteMode(bool mode) {
     isNoteMode.value = mode;
   }
-
-  // Method to update point 1
   void updatePoint1(String value) {
     point1.value = value;
   }
-
-  // Method to update point 2
   void updatePoint2(String value) {
     point2.value = value;
   }
+
 
   // Method to save notes
   void saveNotes() {
@@ -34,9 +32,16 @@ class LessonController extends GetxController {
   }
 
   // Method to clear notes
+  
   void clearNotes() {
     point1.value = '';
     point2.value = '';
-    isNoteMode.value = false;
   }
 }
+
+  // Function to save notes (you can implement saving logic here)
+ 
+
+  // Function to clear notes
+
+
