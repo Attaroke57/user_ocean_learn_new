@@ -10,15 +10,31 @@ import 'package:user_ocean_learn/Widgets/mytext.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 
-
 class LoginScreen extends StatefulWidget {
   @override
   _LoginScreenState createState() => _LoginScreenState();
-  
 }
 
 class _LoginScreenState extends State<LoginScreen> {
+  bool isSignIn = true; // Track which tab is active
   final LoginController loginController = Get.put(LoginController());
+  
+  // Create TextEditingController instances to use in the MyTextField widgets
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  
+  @override
+  void initState() {
+    super.initState();
+    // Add listeners to update the LoginController values when text changes
+    _emailController.addListener(() {
+      loginController.emailController.text = _emailController.text;
+    });
+    _passwordController.addListener(() {
+      loginController.passwordController.text = _passwordController.text;
+    });
+  }
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -63,8 +79,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           textColor: Colors.grey.shade400,
                           onTap: () {
                             // Navigate to registration screen
-                            Get.toNamed(OceanLearnRoutes.RegisterScreen
-                            );
+                            Get.toNamed(OceanLearnRoutes.RegisterScreen);
                           },
                         ),
                       ),
@@ -82,13 +97,11 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 15),
 
-                
                 SvgPicture.asset(
                   'Assets/images/login.svg',
                   fit: BoxFit.contain,
                   height: 200,
                   width: 120,
-
                 ),
                 const SizedBox(height: 30),
 
@@ -96,15 +109,19 @@ class _LoginScreenState extends State<LoginScreen> {
                 MyCard(
                   child: Column(
                     children: [
+                      // Use the local _emailController
                       MyTextField(
-                        hintText: "username",
-                        suffixIcon: Icons.person_outline,
+                        hintText: "Email",
+                        suffixIcon: Icons.email_outlined,
+                        controller: _emailController,
                       ),
                       const SizedBox(height: 12),
+                      // Use the local _passwordController
                       MyTextField(
-                        hintText: "password",
+                        hintText: "Password",
                         suffixIcon: Icons.lock_outline,
                         obscureText: true,
+                        controller: _passwordController,
                       ),
                       const SizedBox(height: 12),
 
@@ -114,17 +131,19 @@ class _LoginScreenState extends State<LoginScreen> {
                         children: [
                           Row(
                             children: [
-                              SizedBox(
+                              Obx(() => SizedBox(
                                 width: 24,
                                 height: 24,
                                 child: Checkbox(
-                                  value: false,
-                                  onChanged: (value) {},
+                                  value: loginController.rememberMe.value,
+                                  onChanged: (value) {
+                                    loginController.rememberMe.value = value ?? false;
+                                  },
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(4),
                                   ),
                                 ),
-                              ),
+                              )),
                               const SizedBox(width: 8),
                               MyText(
                                 text: "Remember me",
@@ -134,11 +153,17 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                             ],
                           ),
-                          MyText(
-                            text: "Forgot password?",
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                            color: textcolor,
+                          GestureDetector(
+                            onTap: () {
+                              // Navigate to forgot password screen
+                              // Add your navigation code here
+                            },
+                            child: MyText(
+                              text: "Forgot password?",
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: textcolor,
+                            ),
                           ),
                         ],
                       ),
@@ -165,7 +190,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ],
                       ),
 
-                      SizedBox(height: 10),
+                      const SizedBox(height: 10),
 
                       // Sign in with social media icons
                       Row(
@@ -197,15 +222,19 @@ class _LoginScreenState extends State<LoginScreen> {
                         ],
                       ),
 
-                      const SizedBox(height: 10),
-                      MyButton(
-                        text: "Sign In",
-                        isPrimary: true,
-                        backgroundColor: secondarycolor,
-                        textColor: textcolor,
-                        fullWidth: true,
-                        onTap: () {
-                          Get.toNamed(OceanLearnRoutes.homePage);},
+                      const SizedBox(height: 30),
+                      
+                      // Sign In Button - Connected to API login
+                      Obx(() => loginController.isLoading.value
+                        ? CircularProgressIndicator(color: secondarycolor)
+                        : MyButton(
+                            text: "Sign In",
+                            isPrimary: true,
+                            backgroundColor: secondarycolor,
+                            textColor: textcolor,
+                            fullWidth: true,
+                            onTap: () => loginController.login(),
+                          ),
                       ),
                     ],
                   ),
@@ -216,5 +245,12 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
+  }
+  
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
   }
 }

@@ -11,9 +11,11 @@ class MyButton extends StatelessWidget {
   final bool isHeaderStyle;
   final bool isActive;
   final VoidCallback onTap;
-  final IconData? icon; // Parameter opsional untuk ikon
-  final Color? iconColor; // Parameter opsional untuk warna ikon
-  final bool hasIcon;  // Keep as required
+  final IconData? icon;
+  final Color? iconColor;
+  final bool hasIcon;
+  final double height;
+  final double borderRadius;
 
   const MyButton({
     Key? key,
@@ -26,10 +28,12 @@ class MyButton extends StatelessWidget {
     this.onPressed,
     this.isHeaderStyle = false,
     this.isActive = false,
+    required this.onTap,
     this.icon,
     this.iconColor,
     this.hasIcon = false,
-    required this.onTap, // Keep this as required
+    this.height = 48.0,
+    this.borderRadius = 10.0,
   }) : super(key: key);
 
   @override
@@ -38,10 +42,10 @@ class MyButton extends StatelessWidget {
     if (isHeaderStyle) {
       return Expanded(
         child: Container(
-          height: 48,
+          height: height,
           decoration: BoxDecoration(
             color: isActive ? Colors.blue.shade100 : Colors.white,
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(borderRadius),
             border: Border.all(
               color: Colors.transparent,
               width: isActive ? 0 : 1.5,
@@ -50,11 +54,10 @@ class MyButton extends StatelessWidget {
           child: TextButton(
             onPressed: onTap, 
             style: TextButton.styleFrom(
-              padding: EdgeInsets.zero,
+              padding: EdgeInsets.zero, 
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(borderRadius),
               ),
-              
             ),
             child: Text(
               text,
@@ -72,8 +75,9 @@ class MyButton extends StatelessWidget {
     // Original button style
     return SizedBox(
       width: fullWidth ? double.infinity : null,
+      height: height,
       child: ElevatedButton(
-        onPressed: onTap, // Use onTap instead of onPressed
+        onPressed: onTap,
         style: ElevatedButton.styleFrom(
           backgroundColor: backgroundColor,
           foregroundColor: textColor,
@@ -82,19 +86,39 @@ class MyButton extends StatelessWidget {
             vertical: 1,
           ),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
+            borderRadius: BorderRadius.circular(borderRadius),
             side: hasBorder
                 ? BorderSide(color: Colors.grey[300]!)
                 : BorderSide.none,
           ),
           elevation: 0,
         ),
-        child: Text(
-          text,
-          style: TextStyle(
-            fontWeight: FontWeight.w500,
-          ),
-        ),
+        child: hasIcon 
+            ? Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (icon != null) 
+                    Icon(
+                      icon,
+                      color: iconColor ?? textColor,
+                      size: 20,
+                    ),
+                  if (icon != null) 
+                    SizedBox(width: 8),
+                  Text(
+                    text,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              )
+            : Text(
+                text,
+                style: TextStyle(
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
       ),
     );
   }
