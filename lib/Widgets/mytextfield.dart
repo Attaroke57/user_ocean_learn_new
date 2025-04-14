@@ -6,15 +6,19 @@ class MyTextField extends StatelessWidget {
   final IconData? suffixIcon;
   final IconData? prefixIcon;
   final bool obscureText;
+  final int? maxLines;
+  final TextInputType? keyboardType;
   final Function(String)? onChanged;
-  final TextEditingController? controller;  // This is defined but not used
-  
+  final TextEditingController? controller; // This is defined but not used
+
   const MyTextField({
     Key? key,
     required this.hintText,
     this.suffixIcon,
     this.prefixIcon,
     this.obscureText = false,
+    this.maxLines, // <<< tambahkan ini
+    this.keyboardType,
     this.onChanged,
     this.controller,
   }) : super(key: key);
@@ -28,20 +32,22 @@ class MyTextField extends StatelessWidget {
         border: Border.all(color: primarycolor),
       ),
       child: TextField(
-        controller: controller,  // Add this line to use the controller
+        controller: controller, // Add this line to use the controller
         obscureText: obscureText,
-        onChanged: onChanged,  // Make sure this is included too
+        onChanged: onChanged,
+        maxLines: obscureText ? 1 : maxLines, // <<< tambahkan ini
+        keyboardType: keyboardType, // Make sure this is included too
         decoration: InputDecoration(
           hintText: hintText,
           hintStyle: TextStyle(color: Colors.grey[500]),
           contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           border: InputBorder.none,
-          suffixIcon: suffixIcon != null
-              ? Icon(suffixIcon, color: Colors.black)
-              : null,
-          prefixIcon: prefixIcon != null
-              ? Icon(prefixIcon, color: Colors.black)
-              : null,
+          enabledBorder: InputBorder.none,
+          focusedBorder: InputBorder.none,
+          suffixIcon:
+              suffixIcon != null ? Icon(suffixIcon, color: Colors.black) : null,
+          prefixIcon:
+              prefixIcon != null ? Icon(prefixIcon, color: Colors.black) : null,
         ),
       ),
     );
