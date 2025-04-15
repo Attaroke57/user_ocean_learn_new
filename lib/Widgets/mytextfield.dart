@@ -17,7 +17,7 @@ class MyTextField extends StatelessWidget {
     this.suffixIcon,
     this.prefixIcon,
     this.obscureText = false,
-    this.maxLines, // <<< tambahkan ini
+    this.maxLines, // <<< t, required TextInputType keyboardTypeambahkan ini
     this.keyboardType,
     this.onChanged,
     this.controller,

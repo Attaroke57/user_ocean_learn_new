@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:user_ocean_learn/Dashboard/dashboard.dart';
 import 'package:user_ocean_learn/Page/ProfilePage/ProfileController.dart';
 import 'package:user_ocean_learn/Widgets/mycard.dart';
 import 'package:user_ocean_learn/Widgets/mytext.dart';
 import 'package:user_ocean_learn/Widgets/mybutton.dart';
-import 'package:user_ocean_learn/Dashboard/dashboard.dart';
 import 'package:user_ocean_learn/Widgets/ColorPallete.dart';
 
 class ProfilePage extends GetView<ProfileController> {
