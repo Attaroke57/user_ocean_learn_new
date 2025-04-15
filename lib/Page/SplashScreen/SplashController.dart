@@ -19,8 +19,8 @@ class SplashScreenController extends GetxController {
     // For example, check if user is already logged in
 
     // Option 1: Navigate to intro page
-    Get.offNamed(OceanLearnRoutes.IntroPage);
-    
+    Get.offNamed(OceanLearnRoutes.introPage);
+  
     // Option 2: Navigate directly to login page
     // Get.offNamed(OceanLearnRoutes.loginPage);
     

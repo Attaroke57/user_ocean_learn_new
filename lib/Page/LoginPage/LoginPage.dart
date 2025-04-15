@@ -16,7 +16,6 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  bool isSignIn = true; // Track which tab is active
   final LoginController loginController = Get.put(LoginController());
   
   // Create TextEditingController instances to use in the MyTextField widgets
@@ -79,7 +78,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           textColor: Colors.grey.shade400,
                           onTap: () {
                             // Navigate to registration screen
-                            Get.toNamed(OceanLearnRoutes.RegisterScreen);
+                            Get.toNamed(OceanLearnRoutes.registerScreen);
                           },
                         ),
                       ),
@@ -97,6 +96,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 15),
 
+                
                 SvgPicture.asset(
                   'Assets/images/login.svg',
                   fit: BoxFit.contain,
@@ -109,14 +109,14 @@ class _LoginScreenState extends State<LoginScreen> {
                 MyCard(
                   child: Column(
                     children: [
-                      // Use the local _emailController
+                      // Use the local _emailController instead
                       MyTextField(
                         hintText: "Email",
                         suffixIcon: Icons.email_outlined,
                         controller: _emailController,
                       ),
                       const SizedBox(height: 12),
-                      // Use the local _passwordController
+                      // Use the local _passwordController instead
                       MyTextField(
                         hintText: "Password",
                         suffixIcon: Icons.lock_outline,
@@ -190,7 +190,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ],
                       ),
 
-                      const SizedBox(height: 10),
+                      SizedBox(height: 10),
 
                       // Sign in with social media icons
                       Row(
@@ -222,7 +222,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ],
                       ),
 
-                      const SizedBox(height: 30),
+                      const SizedBox(height: 10),
                       
                       // Sign In Button - Connected to API login
                       Obx(() => loginController.isLoading.value

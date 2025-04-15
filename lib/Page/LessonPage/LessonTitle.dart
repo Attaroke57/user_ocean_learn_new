@@ -12,7 +12,7 @@ class LessonDetailPage extends StatelessWidget {
   final String lessonDate;
 
   LessonDetailPage(
-      {Key? key, required this.lessonTitle, required this.lessonDate})
+      {Key? key, this.lessonTitle = "",  this.lessonDate =""})
       : super(key: key);
 
   final LessonController controller = Get.put(LessonController());

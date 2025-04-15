@@ -2,15 +2,12 @@ class OceanLearnRoutes {
   static const loginPage = "/login";
   static const dashboard = "/dashboard";
   static const homePage = "/home";
-  static const profilepage = "/profile";
-  static const schedulepage = "/schedule";
-  static const RegisterScreen = "/register";
-  static const SubscriptionPage = "/subscription";
-  static const IntroPage = "/intro";
-  static const SplashScreen = "/splashscreen";
-  static const LessonTitle = "/lesson-detail";
-  static const LessonDetailPage = "/lessonDetail";
-
-  
-
+  static const profilePage = "/profile";
+  static const schedulePage = "/schedule";
+  static const registerScreen = "/register";
+  static const subscriptionPage = "/subscription";
+  static const introPage = "/intro";
+  static const splashScreen = "/splashscreen";
+  static const lessonTitle = "/lesson-detail";
+  static const lessonDetailPage = "/lessonDetail";
 }
