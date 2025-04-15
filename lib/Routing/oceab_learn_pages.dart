@@ -26,8 +26,7 @@ class OceanLearnPages {
     GetPage(name: OceanLearnRoutes.SubscriptionPage, page: () => SubscriptionPage()),
     GetPage(name: OceanLearnRoutes.IntroPage, page: () => IntroPage()),
     GetPage(name: OceanLearnRoutes.SplashScreen, page: () => SplashScreen()),
-    
-    
+    GetPage(name: OceanLearnRoutes.LessonTitle, page: () => LessonDetailPage()),
    
   ];
 }

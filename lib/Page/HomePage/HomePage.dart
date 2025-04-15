@@ -8,12 +8,12 @@ import 'package:user_ocean_learn/Widgets/mycard.dart';
 import 'package:user_ocean_learn/Widgets/mytextfield.dart';
 import 'package:user_ocean_learn/Widgets/mytext.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:user_ocean_learn/Dashboard/dashboard.dart'; // New import for lesson detail page
+import 'package:user_ocean_learn/Dashboard/dashboard.dart';
+import 'package:user_ocean_learn/Page/LessonPage/LessonController.dart';
 
 class Homepage extends GetView<HomeController> {
   Homepage({super.key});
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
   final HomeController controller = Get.put(HomeController());
 
   @override
@@ -59,23 +59,20 @@ class Homepage extends GetView<HomeController> {
                       SizedBox(height: 4),
                       MyText.date('March 8 2025'),
                       SizedBox(height: 16),
-
                       SvgPicture.asset(
                         'Assets/images/home.svg',
                         fit: BoxFit.contain,
                         height: 180,
                         width: 120,
                       ),
-
                       const SizedBox(height: 16),
-                    
                       MyButton(
                         text: 'More Detail..',
                         isPrimary: false,
                         backgroundColor: secondarycolor,
                         textColor: Colors.black,
                         onPressed: () {
-                         
+                          // Implement navigation to lecture details
                         },
                         fullWidth: true,
                         onTap: () {
@@ -85,9 +82,7 @@ class Homepage extends GetView<HomeController> {
                     ],
                   ),
                 ),
-
                 const SizedBox(height: 24),
-
                 // Search bar
                 Row(
                   children: [
@@ -113,15 +108,25 @@ class Homepage extends GetView<HomeController> {
                     ),
                   ],
                 ),
-
                 const SizedBox(height: 24),
-
                 // Lesson list
                 _buildLessonItem('Lesson Title 1', 'March 5 2025'),
                 const SizedBox(height: 12),
                 _buildLessonItem('Lesson Title 2', 'March 5 2025'),
                 const SizedBox(height: 12),
                 _buildLessonItem('Lesson Title 3', 'March 5 2025'),
+                const SizedBox(height: 12),
+                _buildLessonItem('Lesson Title 4', 'March 5 2025'),
+                const SizedBox(height: 12),
+                _buildLessonItem('Lesson Title', 'March 5 2025'),
+                const SizedBox(height: 12),
+                _buildLessonItem('Lesson Title 1', 'March 5 2025'),
+                const SizedBox(height: 12),
+                _buildLessonItem('Lesson Title 2', 'March 5 2025'),
+                const SizedBox(height: 12),
+                _buildLessonItem('Lesson Title 3', 'March 5 2025'),
+                const SizedBox(height: 12),
+                _buildLessonItem('Lesson Title', 'March 5 2025'),
                 const SizedBox(height: 12),
                 _buildLessonItem('Lesson Title 4', 'March 5 2025'),
               ],
@@ -136,10 +141,10 @@ class Homepage extends GetView<HomeController> {
     return GestureDetector(
       onTap: () {
         // Navigate to Lesson Detail Page when tapped
-        Get.to(() => LessonDetailPage(
-          lessonTitle: title,
-          lessonDate: date,
-        ));
+        Get.toNamed('/lesson-detail', arguments: {
+          'lessonTitle': title,
+          'lessonDate': date,
+        });
       },
       child: MyCard(
         child: Row(
