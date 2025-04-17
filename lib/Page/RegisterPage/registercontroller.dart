@@ -1,10 +1,12 @@
 import 'package:get/get.dart';
+import 'package:user_ocean_learn/Services/RegisterService.dart';
 
 class RegisterController extends GetxController {
   // Observable variables for form fields
   final username = ''.obs;
   final password = ''.obs;
   final email = ''.obs;
+  final obscurePassword = true.obs; // For password visibility toggle
   
   // Loading state
   final isLoading = false.obs;
@@ -31,6 +33,11 @@ class RegisterController extends GetxController {
     email.value = value;
   }
   
+  // Toggle password visibility
+  void togglePasswordVisibility() {
+    obscurePassword.value = !obscurePassword.value;
+  }
+  
   // Sign up method
   Future<void> signUp() async {
     if (!isFormValid) {
@@ -41,23 +48,24 @@ class RegisterController extends GetxController {
     try {
       isLoading.value = true;
       
-      // TODO: Implement your authentication logic here
-      // Example:
-      // await authService.registerUser(
-      //   username: username.value,
-      //   password: password.value,
-      //   email: email.value,
-      // );
+      // Call the RegisterService with all required fields
+      final result = await RegisterService.register(
+        username.value,
+        password.value,
+        email.value
+      );
       
-      // Simulate API call with delay for demonstration
-      await Future.delayed(const Duration(seconds: 2));
-      
-      // Clear form and error on success
-      clearForm();
-      errorMessage.value = '';
-      
-      // Navigate to login or home page after successful registration
-      Get.offNamed('/login');
+      if (result['success']) {
+        // Clear form and error on success
+        clearForm();
+        errorMessage.value = '';
+        
+        // Navigate to login or home page after successful registration
+        Get.offNamed('/login');
+      } else {
+        // Show error message from the API
+        errorMessage.value = result['message'];
+      }
       
     } catch (e) {
       errorMessage.value = 'Registration failed: ${e.toString()}';

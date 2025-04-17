@@ -4,22 +4,30 @@ import 'dart:convert';
 class RegisterService {
   static Future<Map<String, dynamic>> register(String username, String password, String email) async {
     try {
+      // Prepare the request body
+      final Map<String, String> body = {
+        'name': username,        // Make sure it's 'name', not 'username'
+        'password': password,
+        'email': email,
+        'role': 'admin',
+        'subscription': 'premium'
+      };
+      
+      // Print the request details for debugging
+      print('Register request body: $body');
+      
       // Use the exact URL for registration
       final response = await http.post(
         Uri.parse('https://ocean-learn-api.rplrus.com/api/v1/user/register'),
-        // Set content type for form data
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },
-        // Format body as form data
-        body: {
-          'username': username,
-          'password': password,
-          'email': email,
-        },
+        body: body,
       );
 
+      // Print detailed response for debugging
       print('Register response status: ${response.statusCode}');
+      print('Register response headers: ${response.headers}');
       print('Register response body: ${response.body}');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
