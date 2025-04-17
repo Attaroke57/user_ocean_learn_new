@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:user_ocean_learn/Page/HomePage/HomeController.dart';
-import 'package:user_ocean_learn/Page/LessonPage/LessonTitle.dart';
 import 'package:user_ocean_learn/Widgets/ColorPallete.dart';
 import 'package:user_ocean_learn/Widgets/mybutton.dart';
 import 'package:user_ocean_learn/Widgets/mycard.dart';
@@ -9,7 +8,6 @@ import 'package:user_ocean_learn/Widgets/mytextfield.dart';
 import 'package:user_ocean_learn/Widgets/mytext.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:user_ocean_learn/Dashboard/dashboard.dart';
-import 'package:user_ocean_learn/Page/LessonPage/LessonController.dart';
 
 class Homepage extends GetView<HomeController> {
   Homepage({super.key});
@@ -52,83 +50,161 @@ class Homepage extends GetView<HomeController> {
             child: Column(
               children: [
                 // Featured lecture card
-                MyCard(
-                  child: Column(
-                    children: [
-                      MyText.title('Lecture Title'),
-                      SizedBox(height: 4),
-                      MyText.date('March 8 2025'),
-                      SizedBox(height: 16),
-                      SvgPicture.asset(
-                        'Assets/images/home.svg',
-                        fit: BoxFit.contain,
-                        height: 180,
-                        width: 120,
+                Obx(() => controller.featuredLecture.value == null
+                    ? const SizedBox()
+                    : MyCard(
+                        child: Column(
+                          children: [
+                            MyText.title(controller.featuredLecture.value!.title),
+                            SizedBox(height: 4),
+                            MyText.date(controller.featuredLecture.value!.date),
+                            SizedBox(height: 16),
+                            SvgPicture.asset(
+                              controller.featuredLecture.value!.imageUrl,
+                              fit: BoxFit.contain,
+                              height: 180,
+                              width: 120,
+                            ),
+                            const SizedBox(height: 16),
+                            MyButton(
+                              text: 'More Detail..',
+                              isPrimary: false,
+                              backgroundColor: secondarycolor,
+                              textColor: Colors.black,
+                              onPressed: () {
+                                controller.goToFeaturedLectureDetails();
+                              },
+                              fullWidth: true,
+                              onTap: () {
+                                controller.goToFeaturedLectureDetails();
+                              },
+                            ),
+                          ],
+                        ),
                       ),
-                      const SizedBox(height: 16),
-                      MyButton(
-                        text: 'More Detail..',
-                        isPrimary: false,
-                        backgroundColor: secondarycolor,
-                        textColor: Colors.black,
-                        onPressed: () {
-                          // Implement navigation to lecture details
-                        },
-                        fullWidth: true,
-                        onTap: () {
-                          // Implement navigation to lecture details
-                        },
-                      ),
-                    ],
-                  ),
                 ),
                 const SizedBox(height: 24),
-                // Search bar
+                // Search bar and filter
                 Row(
                   children: [
                     Expanded(
                       child: MyTextField(
                         hintText: 'Find your lesson',
-                        prefixIcon: Icons.search, 
+                        prefixIcon: Icons.search,
+                        controller: controller.searchController,
+                        onChanged: controller.onSearchChanged,
                       ),
                     ),
                     SizedBox(width: 8),
-                    Container(
+                    Obx(() => Container(
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: primarycolor),
                       ),
-                      child: IconButton(
-                        icon: const Icon(Icons.filter_list),
-                        color: primarycolor,
-                        onPressed: () {
-                          // Implement filter functionality
-                        },
+                      child: Stack(
+                        children: [
+                          IconButton(
+                            icon: const Icon(Icons.filter_list),
+                            color: primarycolor,
+                            onPressed: () {
+                              controller.showFilterOptions();
+                            },
+                          ),
+                          // Show indicator if filtering is active
+                          if (controller.sortOrder.value != SortOrder.none)
+                            Positioned(
+                              right: 0,
+                              top: 0,
+                              child: Container(
+                                padding: EdgeInsets.all(4),
+                                decoration: BoxDecoration(
+                                  color: primarycolor,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Text(
+                                  controller.sortOrder.value == SortOrder.newest ? '↑' : '↓',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
                       ),
-                    ),
+                    )),
                   ],
                 ),
-                const SizedBox(height: 24),
-                // Lesson list
-                _buildLessonItem('Lesson Title 1', 'March 5 2025'),
-                const SizedBox(height: 12),
-                _buildLessonItem('Lesson Title 2', 'March 5 2025'),
-                const SizedBox(height: 12),
-                _buildLessonItem('Lesson Title 3', 'March 5 2025'),
-                const SizedBox(height: 12),
-                _buildLessonItem('Lesson Title 4', 'March 5 2025'),
-                const SizedBox(height: 12),
-                _buildLessonItem('Lesson Title', 'March 5 2025'),
-                const SizedBox(height: 12),
-                _buildLessonItem('Lesson Title 1', 'March 5 2025'),
-                const SizedBox(height: 12),
-                _buildLessonItem('Lesson Title 2', 'March 5 2025'),
-                const SizedBox(height: 12),
-                _buildLessonItem('Lesson Title 3', 'March 5 2025'),
-                const SizedBox(height: 12),
-                _buildLessonItem('Lesson Title', 'March 5 2025'),
-                const SizedBox(height: 12),
-                _buildLessonItem('Lesson Title 4', 'March 5 2025'),
+                const SizedBox(height: 16),
+                // Active filter indicator
+                Obx(() => controller.sortOrder.value != SortOrder.none
+                    ? Row(
+                        children: [
+                          Container(
+                            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            decoration: BoxDecoration(
+                              color: Colors.grey[200],
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  'Sorting: ${controller.sortOrder.value == SortOrder.newest ? 'Newest First' : 'Oldest First'}',
+                                  style: TextStyle(fontSize: 12),
+                                ),
+                                SizedBox(width: 4),
+                                InkWell(
+                                  onTap: () {
+                                    controller.clearSorting();
+                                  },
+                                  child: Icon(Icons.close, size: 16),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      )
+                    : SizedBox()),
+                const SizedBox(height: 16),
+                // Lesson list with filtering
+                Obx(() => controller.isLoading.value
+                    ? const Center(child: CircularProgressIndicator())
+                    : controller.filteredLessons.isEmpty
+                        ? Center(
+                            child: Column(
+                              children: [
+                                const SizedBox(height: 20),
+                                const Icon(Icons.search_off, size: 64, color: Colors.grey),
+                                const SizedBox(height: 12),
+                                const MyText(
+                                  text: 'No lessons found',
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                ),
+                                const SizedBox(height: 8),
+                                TextButton(
+                                  onPressed: () => controller.clearSearch(),
+                                  child: const Text('Clear search'),
+                                ),
+                              ],
+                            ),
+                          )
+                        : Column(
+                            children: controller.filteredLessons
+                                .map((lesson) => Padding(
+                                      padding: const EdgeInsets.only(bottom: 12),
+                                      child: _buildLessonItem(
+                                        lesson.title,
+                                        lesson.date,
+                                        lesson.id,
+                                      ),
+                                    ))
+                                .toList(),
+                          ),
+                ),
               ],
             ),
           ),
@@ -137,14 +213,10 @@ class Homepage extends GetView<HomeController> {
     );
   }
 
-  Widget _buildLessonItem(String title, String date) {
+  Widget _buildLessonItem(String title, String date, String lessonId) {
     return GestureDetector(
       onTap: () {
-        // Navigate to Lesson Detail Page when tapped
-        Get.toNamed('/lesson-detail', arguments: {
-          'lessonTitle': title,
-          'lessonDate': date,
-        });
+        controller.goToLessonDetails(lessonId);
       },
       child: MyCard(
         child: Row(
@@ -170,7 +242,44 @@ class Homepage extends GetView<HomeController> {
             IconButton(
               icon: const Icon(Icons.more_vert),
               onPressed: () {
-                // Implement more options functionality
+                // Show options menu for this lesson
+                Get.bottomSheet(
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: const BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(16),
+                        topRight: Radius.circular(16),
+                      ),
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        ListTile(
+                          leading: const Icon(Icons.info_outline),
+                          title: const Text('View Details'),
+                          onTap: () {
+                            Get.back();
+                            controller.goToLessonDetails(lessonId);
+                          },
+                        ),
+                        ListTile(
+                          leading: const Icon(Icons.bookmark_outline),
+                          title: const Text('Save for Later'),
+                          onTap: () {
+                            Get.back();
+                            Get.snackbar(
+                              'Saved',
+                              'Lesson saved for later',
+                              snackPosition: SnackPosition.BOTTOM,
+                            );
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                );
               },
             ),
           ],

@@ -8,12 +8,7 @@ import 'package:get/get.dart';
 import 'package:user_ocean_learn/Widgets/mytextfield.dart';
 
 class LessonDetailPage extends StatelessWidget {
-  final String lessonTitle;
-  final String lessonDate;
-
-  LessonDetailPage(
-      {Key? key, this.lessonTitle = "",  this.lessonDate =""})
-      : super(key: key);
+  LessonDetailPage({Key? key}) : super(key: key);
 
   final LessonController controller = Get.put(LessonController());
 
@@ -28,11 +23,11 @@ class LessonDetailPage extends StatelessWidget {
           icon: Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () => Navigator.of(context).pop(),
         ),
-        title: MyText(
-          text: lessonTitle,
+        title: Obx(() => MyText(
+          text: controller.lessonTitle.value,
           fontSize: 18,
           fontWeight: FontWeight.w600,
-        ),
+        )),
       ),
       body: Obx(() => SingleChildScrollView(
             child: Padding(
@@ -76,7 +71,7 @@ class LessonDetailPage extends StatelessWidget {
                                       fontWeight: FontWeight.w500,
                                     ),
                                     MyText(
-                                      text: lessonDate,
+                                      text: controller.lessonDate.value,
                                       fontSize: 12,
                                       color: Colors.grey,
                                     ),
@@ -201,17 +196,14 @@ class LessonDetailPage extends StatelessWidget {
                                 SizedBox(width: 8),
                                 Expanded(
                                   child: Container(
-                                    height:
-                                        100, // dibuat lebih tinggi supaya muat beberapa baris
+                                    height: 100,
                                     child: MyTextField(
                                       hintText: 'Enter point a',
                                       controller: controller.point1aController,
-                                      maxLines:
-                                          null,
-                                      keyboardType: TextInputType
-                                          .multiline, 
+                                      maxLines: null,
+                                      keyboardType: TextInputType.multiline, 
                                       onChanged: (value) {
-                                       
+                                        // Handle text change
                                       },
                                     ),
                                   ),

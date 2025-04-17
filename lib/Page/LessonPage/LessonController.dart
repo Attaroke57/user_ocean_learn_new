@@ -2,6 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class LessonController extends GetxController {
+  // Lesson information
+  final lessonId = ''.obs;
+  final lessonTitle = ''.obs;
+  final lessonDate = ''.obs;
+  final isLoading = false.obs;
+  
+  // Note mode variables
   var isNoteMode = false.obs;
   var point1a = ''.obs;
   var point1b = ''.obs;
@@ -18,12 +25,69 @@ class LessonController extends GetxController {
   final TextEditingController point2bController = TextEditingController();
   final TextEditingController point2cController = TextEditingController();
 
+  @override
+  void onInit() {
+    super.onInit();
+    
+    // Get arguments from navigation
+    final Map<String, dynamic> args = Get.arguments ?? {};
+    lessonId.value = args['lessonId'] ?? '';
+    lessonTitle.value = args['lessonTitle'] ?? 'Lesson Title';
+    lessonDate.value = args['lessonDate'] ?? '';
+    
+    // Debug output
+    print('LessonController initialized with:');
+    print('ID: ${lessonId.value}');
+    print('Title: ${lessonTitle.value}');
+    print('Date: ${lessonDate.value}');
+    
+    // Load any saved notes for this lesson
+    loadSavedNotes();
+  }
+  
+  void loadSavedNotes() {
+    // Here you would load saved notes from database or storage
+    // For now, we'll just simulate it
+    
+    isLoading.value = true;
+    Future.delayed(Duration(milliseconds: 500), () {
+      // For demo purposes, let's just initialize with some example text
+      // In a real app, you'd load notes associated with this lessonId
+      
+      // Uncomment below lines if you want to simulate pre-loaded notes
+      /*
+      point1a.value = 'Sample note 1a for ${lessonTitle.value}';
+      point1b.value = 'Sample note 1b for ${lessonTitle.value}';
+      point1c.value = 'Sample note 1c for ${lessonTitle.value}';
+      point2a.value = 'Sample note 2a for ${lessonTitle.value}';
+      point2b.value = 'Sample note 2b for ${lessonTitle.value}';
+      point2c.value = 'Sample note 2c for ${lessonTitle.value}';
+      
+      // Update controllers to match the loaded values
+      point1aController.text = point1a.value;
+      point1bController.text = point1b.value;
+      point1cController.text = point1c.value;
+      point2aController.text = point2a.value;
+      point2bController.text = point2b.value;
+      point2cController.text = point2c.value;
+      */
+      
+      isLoading.value = false;
+    });
+  }
+
   void toggleNoteMode(bool value) {
     isNoteMode.value = value;
     
-    // Clear text fields if closing note mode
+    // Clear text fields if closing note mode without saving
     if (!value) {
-      clearNotes();
+      // Revert text controllers to current saved values
+      point1aController.text = point1a.value;
+      point1bController.text = point1b.value;
+      point1cController.text = point1c.value;
+      point2aController.text = point2a.value;
+      point2bController.text = point2b.value;
+      point2cController.text = point2c.value;
     }
   }
 
@@ -36,7 +100,7 @@ class LessonController extends GetxController {
     point2b.value = point2bController.text;
     point2c.value = point2cController.text;
     
-    print('Notes Saved:');
+    print('Notes Saved for lesson "${lessonTitle.value}":');
     print('Point 1a: ${point1a.value}');
     print('Point 1b: ${point1b.value}');
     print('Point 1c: ${point1c.value}');
@@ -45,6 +109,22 @@ class LessonController extends GetxController {
     print('Point 2c: ${point2c.value}');
     
     // Here you can add logic to save notes to a database or local storage
+    // For example:
+    // saveNotesToDatabase(lessonId.value, {
+    //   'point1a': point1a.value,
+    //   'point1b': point1b.value,
+    //   ...
+    // });
+    
+    // Show success message
+    Get.snackbar(
+      'Success',
+      'Notes saved successfully',
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Colors.green[100],
+      colorText: Colors.green[800],
+      duration: Duration(seconds: 2),
+    );
   }
 
   void clearNotes() {
@@ -63,6 +143,16 @@ class LessonController extends GetxController {
     point2a.value = '';
     point2b.value = '';
     point2c.value = '';
+    
+    // Show success message
+    Get.snackbar(
+      'Success',
+      'Notes cleared',
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Colors.blue[100],
+      colorText: Colors.blue[800],
+      duration: Duration(seconds: 2),
+    );
   }
   
   @override
