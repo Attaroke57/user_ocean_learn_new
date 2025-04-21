@@ -8,13 +8,97 @@ class LoginController extends GetxController {
   // Controllers
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  
+
   // Observable variables
   var isLoading = false.obs;
   var loginStatus = "".obs;
   var token = "".obs;
   var errorMessage = "".obs;
   var rememberMe = false.obs;
+
+  @override
+  void onInit() {
+  super.onInit();
+  // Wait for loadSavedCredentials to complete before validating token
+  loadSavedCredentials().then((_) {
+    print("Credentials loaded, token value: ${token.value.isNotEmpty ? 'exists' : 'empty'}");
+    validateTokenAndAutoLogin();
+  });
+}
+
+ Future<void> loadSavedCredentials() async {
+  try {
+    final prefs = await SharedPreferences.getInstance();
+    
+    // Enhanced logging to debug
+    final savedToken = prefs.getString('token');
+    final savedEmail = prefs.getString('email');
+    final savedRememberMe = prefs.getBool('rememberMe');
+    
+    print("SharedPreferences contents:");
+    print("- token: ${savedToken ?? 'null'}");
+    print("- email: ${savedEmail ?? 'null'}");
+    print("- rememberMe: ${savedRememberMe ?? 'null'}");
+    
+    if (savedToken != null && savedToken.isNotEmpty) {
+      token.value = savedToken;
+      print("Token loaded successfully: ${token.value.substring(0, 5)}..."); // Show first 5 chars
+      
+      if (savedEmail != null && savedEmail.isNotEmpty) {
+        emailController.text = savedEmail;
+        print("Email loaded successfully: $savedEmail");
+      }
+      
+      if (savedRememberMe != null) {
+        rememberMe.value = savedRememberMe;
+        print("Remember me preference loaded: ${rememberMe.value}");
+      }
+    } else {
+      print("No token found in SharedPreferences");
+    }
+  } catch (e) {
+    print("Error loading preferences: $e");
+  }
+}
+  Future<void> validateTokenAndAutoLogin() async {
+  if (token.value.isNotEmpty) {
+    isLoading.value = true;
+    try {
+      print("Validating token: ${token.value}");
+      final response = await LoginService.validateToken(token.value);
+      print("Token validation response: $response");
+      
+      if (response["status"] == true) {
+        // Token valid, langsung ke halaman utama
+        print("Token valid, navigating to home");
+        Get.offAllNamed(OceanLearnRoutes.homePage);
+      } else {
+        // Token tidak valid, hapus dari SharedPreferences
+        print("Token invalid, clearing credentials");
+        clearSavedCredentials();
+      }
+    } catch (e) {
+      print("Token validation error: $e");
+      clearSavedCredentials();
+    } finally {
+      isLoading.value = false;
+    }
+  } else {
+    print("No token found");
+  }
+}
+  Future<void> clearSavedCredentials() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('token');
+      await prefs.remove('email');
+      await prefs.remove('rememberMe');
+      token.value = '';
+      rememberMe.value = false;
+    } catch (e) {
+      print("Error clearing preferences: $e");
+    }
+  }
 
   // Test function - call this first to see if basic navigation works
   void testNavigation() {
@@ -27,7 +111,7 @@ class LoginController extends GetxController {
     );
     
     Future.delayed(Duration(milliseconds: 500), () {
-      Get.toNamed(OceanLearnRoutes.homePage);
+      Get.offAllNamed(OceanLearnRoutes.homePage);
     });
   }
   
@@ -45,6 +129,11 @@ class LoginController extends GetxController {
         loginStatus.value = response["message"];
         token.value = response["token"];
         
+        // Save to SharedPreferences if remember me is checked
+        if (rememberMe.value) {
+          saveCredentials(token.value, emailController.text.trim());
+        }
+        
         Get.snackbar(
           "Success", 
           "Test login berhasil",
@@ -54,7 +143,7 @@ class LoginController extends GetxController {
         );
         
         Future.delayed(Duration(milliseconds: 500), () {
-          Get.offAll(OceanLearnRoutes.homePage);
+          Get.offAllNamed(OceanLearnRoutes.homePage);
         });
       } else {
         Get.snackbar(
@@ -109,13 +198,7 @@ class LoginController extends GetxController {
         
         // Save to SharedPreferences if remember me is checked
         if (rememberMe.value) {
-          try {
-            final prefs = await SharedPreferences.getInstance();
-            await prefs.setString('token', token.value);
-            await prefs.setString('email', emailController.text.trim());
-          } catch (e) {
-            print("Error saving preferences: $e");
-          }
+          saveCredentials(token.value, emailController.text.trim());
         }
         
         Get.snackbar(
@@ -127,7 +210,7 @@ class LoginController extends GetxController {
         );
         
         Future.delayed(Duration(milliseconds: 500), () {
-          Get.toNamed(OceanLearnRoutes.homePage);
+          Get.offAllNamed(OceanLearnRoutes.homePage);
         });
       } else {
         loginStatus.value = "Login failed";
@@ -154,5 +237,30 @@ class LoginController extends GetxController {
     }
   }
 
-  // Other methods remain the same...
+  // Helper function to save credentials consistently
+  Future<void> saveCredentials(String tokenValue, String emailValue) async {
+  try {
+    print("Attempting to save credentials:");
+    print("- token: ${tokenValue.substring(0, 5)}..."); // Show first 5 chars
+    print("- email: $emailValue");
+    print("- rememberMe: true");
+    
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('token', tokenValue);
+    await prefs.setString('email', emailValue);
+    await prefs.setBool('rememberMe', true);
+    
+    // Verify the data was saved by reading it back
+    final verifyToken = prefs.getString('token');
+    final verifyEmail = prefs.getString('email');
+    final verifyRememberMe = prefs.getBool('rememberMe');
+    
+    print("Verification after saving:");
+    print("- token: ${verifyToken != null ? 'saved successfully' : 'failed'}");
+    print("- email: ${verifyEmail != null ? 'saved successfully' : 'failed'}");
+    print("- rememberMe: ${verifyRememberMe != null ? 'saved successfully' : 'failed'}");
+  } catch (e) {
+    print("Error saving preferences: $e");
+  }
+}
 }

@@ -18,22 +18,6 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final LoginController loginController = Get.put(LoginController());
   
-  // Create TextEditingController instances to use in the MyTextField widgets
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  
-  @override
-  void initState() {
-    super.initState();
-    // Add listeners to update the LoginController values when text changes
-    _emailController.addListener(() {
-      loginController.emailController.text = _emailController.text;
-    });
-    _passwordController.addListener(() {
-      loginController.passwordController.text = _passwordController.text;
-    });
-  }
-  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -109,19 +93,19 @@ class _LoginScreenState extends State<LoginScreen> {
                 MyCard(
                   child: Column(
                     children: [
-                      // Use the local _emailController instead
+                      // Directly use controller from LoginController
                       MyTextField(
                         hintText: "Email",
                         suffixIcon: Icons.email_outlined,
-                        controller: _emailController,
+                        controller: loginController.emailController,
                       ),
                       const SizedBox(height: 12),
-                      // Use the local _passwordController instead
+                      // Directly use controller from LoginController
                       MyTextField(
                         hintText: "Password",
                         suffixIcon: Icons.lock_outline,
                         obscureText: true,
-                        controller: _passwordController,
+                        controller: loginController.passwordController,
                       ),
                       const SizedBox(height: 12),
 
@@ -245,12 +229,5 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
-  }
-  
-  @override
-  void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
-    super.dispose();
   }
 }
