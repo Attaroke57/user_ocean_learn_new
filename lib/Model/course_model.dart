@@ -1,0 +1,42 @@
+class CourseModel {
+  final String id;
+  final String title;
+  final String description;
+  final String videoUrl;
+  final DateTime date;
+  final DateTime? releaseDate;
+  final String? qrCode;
+  final DateTime? qrEndDate;
+  String note;
+
+  CourseModel({
+    required this.id,
+    required this.title,
+    required this.description,
+    required this.videoUrl,
+    required this.date,
+    this.releaseDate,
+    this.qrCode,
+    this.qrEndDate,
+    this.note = '',
+  });
+
+  factory CourseModel.fromApiJson(Map<String, dynamic> json) {
+    // Extract data from nested structure
+    final data = json['data'] ?? {};
+    final dateData = json['date'] ?? {};
+    final qrData = json['qr_data'] ?? {};
+    
+    return CourseModel(
+      id: json['id'].toString(),
+      title: data['title'] ?? '',
+      description: data['description'] ?? '',
+      videoUrl: data['video_url'] ?? '',
+      date: DateTime.tryParse(dateData['class_date'] ?? '') ?? DateTime.now(),
+      releaseDate: DateTime.tryParse(dateData['release_at'] ?? ''),
+      qrCode: qrData['qr_code'],
+      qrEndDate: DateTime.tryParse(qrData['end_at'] ?? ''),
+      note: data['note'] ?? '',
+    );
+  }
+}

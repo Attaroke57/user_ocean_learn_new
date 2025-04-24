@@ -15,7 +15,7 @@ class OceanLearnPages {
   static final List<GetPage> pages = [
     //GetPage(name: name, page: page)
     GetPage(name: OceanLearnRoutes.loginPage, page: () => LoginScreen()),
-    GetPage(name: OceanLearnRoutes.homePage, page: () => Homepage()),
+    GetPage(name: OceanLearnRoutes.homePage, page: () => HomePage()),
     GetPage(name: OceanLearnRoutes.dashboard, page: () => NavDrawer()),
     GetPage(name: OceanLearnRoutes.profilePage, page: () => ProfilePage()),
     GetPage(name: OceanLearnRoutes.schedulePage, page: () => SchedulePage()),
@@ -23,7 +23,6 @@ class OceanLearnPages {
     GetPage(name: OceanLearnRoutes.subscriptionPage, page: () => SubscriptionPage()),
     GetPage(name: OceanLearnRoutes.introPage, page: () => IntroPage()),
     GetPage(name: OceanLearnRoutes.splashScreen, page: () => SplashScreen()),
-    GetPage(name: OceanLearnRoutes.lessonTitle, page: () => LessonDetailPage()),
    
   ];
 }

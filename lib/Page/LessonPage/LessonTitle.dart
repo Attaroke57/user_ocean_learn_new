@@ -1,16 +1,84 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
-import 'package:user_ocean_learn/Page/LessonPage/LessonController.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:user_ocean_learn/Model/course_model.dart';
+import 'package:user_ocean_learn/Services/CourseService.dart';
 import 'package:user_ocean_learn/Widgets/ColorPallete.dart';
-import 'package:user_ocean_learn/Widgets/mybutton.dart';
-import 'package:user_ocean_learn/Widgets/mytext.dart';
-import 'package:get/get.dart';
-import 'package:user_ocean_learn/Widgets/mytextfield.dart';
+import 'package:user_ocean_learn/Widgets/CoursePage/LessonCard.dart';
+import 'package:user_ocean_learn/Widgets/CoursePage/NoteButton.dart';
+import 'package:user_ocean_learn/Widgets/CoursePage/NoteInput.dart';
+import 'package:user_ocean_learn/Widgets/CoursePage/NoteSection.dart';
 
-class LessonDetailPage extends StatelessWidget {
-  LessonDetailPage({Key? key}) : super(key: key);
+class CourseDetailPage extends StatefulWidget {
+  final CourseModel course;
+  final CourseService lessonService;
 
-  final LessonController controller = Get.put(LessonController());
+  const CourseDetailPage({
+    Key? key,
+    required this.course,
+    required this.lessonService,
+  }) : super(key: key);
+
+  @override
+  State<CourseDetailPage> createState() => _CourseDetailPageState();
+}
+
+class _CourseDetailPageState extends State<CourseDetailPage> {
+  bool _isNoteVisible = false;
+  bool _isLoading = false;
+  bool _isAdmin = false;
+  late TextEditingController _noteController;
+  late CourseModel _currentCourse;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentCourse = widget.course;
+    _noteController = TextEditingController(text: widget.course.note);
+    _checkAdminStatus();
+    _isAdmin = true;
+    _loadCourseDetail();
+  }
+
+ Future<void> _checkAdminStatus() async {
+  final prefs = await SharedPreferences.getInstance();
+  if (!prefs.containsKey('role')) {
+    debugPrint("Role belum diset di SharedPreferences");
+  }
+
+  final role = prefs.getString('role') ?? '';
+  debugPrint("Role didapat: $role");
+
+  setState(() {
+    _isAdmin = role.toLowerCase() == 'admin';
+  });
+}
+
+
+
+  Future<void> _loadCourseDetail() async {
+    setState(() {
+      _isLoading = true;
+    });
+    
+    final courseDetail = await widget.lessonService.getCourseDetail(_currentCourse.id);
+    
+    if (courseDetail != null) {
+      setState(() {
+        _currentCourse = courseDetail;
+        _noteController.text = courseDetail.note;
+      });
+    }
+    
+    setState(() {
+      _isLoading = false;
+    });
+  }
+
+  @override
+  void dispose() {
+    _noteController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,204 +88,64 @@ class LessonDetailPage extends StatelessWidget {
         backgroundColor: netralcolor,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () => Navigator.of(context).pop(),
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          onPressed: () => Navigator.pop(context),
         ),
-        title: Obx(() => MyText(
-          text: controller.lessonTitle.value,
-          fontSize: 18,
-          fontWeight: FontWeight.w600,
-        )),
+        title: Text(
+          _currentCourse.title,
+          style: const TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ),
-      body: Obx(() => SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  // Card containing lesson info and content
-                  Container(
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.1),
-                          blurRadius: 4,
-                          offset: Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        children: [
-                          // Incoming Class Info
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 12),
-                            decoration: BoxDecoration(
-                              color: Colors.transparent,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    MyText(
-                                      text: 'Incoming Class',
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                    MyText(
-                                      text: controller.lessonDate.value,
-                                      fontSize: 12,
-                                      color: Colors.grey,
-                                    ),
-                                  ],
-                                ),
-                                Container(
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal: 12, vertical: 6),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(8),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.grey.withOpacity(0.1),
-                                        blurRadius: 2,
-                                        offset: Offset(0, 1),
-                                      ),
-                                    ],
-                                  ),
-                                  child: MyButton(
-                                    backgroundColor: secondarycolor,
-                                    text: 'Attendance',
-                                    textColor: textcolor,
-                                    onTap: () {},
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-
-                          SizedBox(height: 24),
-
-                          // SVG Illustration
-                          SvgPicture.asset(
-                            'Assets/images/lesson.svg',
-                            height: 200,
-                            fit: BoxFit.contain,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-
-                  SizedBox(height: 24),
-
-                  // Note-Taking Section
-                  if (!controller.isNoteMode.value)
-                    Column(
-                      children: [
-                        // Let's check the lessons button
-                        MyButton(
-                          text: "Let's check the lessons!",
-                          backgroundColor: secondarycolor,
-                          textColor: Colors.black,
-                          fullWidth: true,
-                          onTap: () {
-                            // Implement lesson check functionality
-                          },
-                        ),
-
-                        SizedBox(height: 16),
-
-                        // I want to write a note button
-                        MyButton(
-                          text: "I want to write a note!",
-                          backgroundColor: secondarycolor,
-                          textColor: Colors.black,
-                          fullWidth: true,
-                          onTap: () {
-                            controller.toggleNoteMode(true);
-                          },
-                        ),
-                      ],
-                    )
-                  else
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.1),
-                            blurRadius: 4,
-                            offset: Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            // Save Note and Close button
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: MyButton(
-                                    text: "save note",
-                                    backgroundColor: secondarycolor,
-                                    textColor: Colors.black,
-                                    onTap: () {
-                                      controller.saveNotes();
-                                      controller.toggleNoteMode(false);
-                                    },
-                                  ),
-                                ),
-                                SizedBox(width: 8),
-                                IconButton(
-                                  icon: Icon(Icons.close),
-                                  onPressed: () {
-                                    controller.toggleNoteMode(false);
-                                  },
-                                ),
-                              ],
-                            ),
-
-                            SizedBox(height: 16),
-
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                SizedBox(width: 8),
-                                Expanded(
-                                  child: Container(
-                                    height: 100,
-                                    child: MyTextField(
-                                      hintText: 'Enter point a',
-                                      controller: controller.point1aController,
-                                      maxLines: null,
-                                      keyboardType: TextInputType.multiline, 
-                                      onChanged: (value) {
-                                        // Handle text change
-                                      },
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            )
-                          ],
-                        ),
-                      ),
-                    ),
+                  LessonCard(course: _currentCourse),
+                  const SizedBox(height: 20),
+                  if (_isAdmin)
+                    _isNoteVisible
+                        ? NoteInput(
+                            controller: _noteController,
+                            onSave: () async {
+                              setState(() {
+                                _isLoading = true;
+                              });
+                              
+                              bool success = await widget.lessonService.updateNote(
+                                _currentCourse.id,
+                                _noteController.text,
+                              );
+                              
+                              setState(() {
+                                _isLoading = false;
+                                _isNoteVisible = false;
+                                if (success) {
+                                  _currentCourse.note = _noteController.text;
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text("Note updated successfully"))
+                                  );
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text("Failed to update note"))
+                                  );
+                                }
+                              });
+                            },
+                            onCancel: () => setState(() => _isNoteVisible = false),
+                          )
+                        : NoteButton(onPressed: () {
+                            setState(() => _isNoteVisible = true);
+                          }),
+                  const SizedBox(height: 16),
+                  NotesSection(course: _currentCourse, isNoteVisible: _isNoteVisible),
                 ],
               ),
             ),
-          )),
     );
   }
 }

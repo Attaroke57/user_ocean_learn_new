@@ -9,5 +9,5 @@ class OceanLearnRoutes {
   static const introPage = "/intro";
   static const splashScreen = "/splashscreen";
   static const lessonTitle = "/lesson-detail";
-  static const lessonDetailPage = "/lessonDetail";
+  static const coursedetailpage = "/coursedetailpage";
 }
