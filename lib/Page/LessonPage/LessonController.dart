@@ -59,26 +59,7 @@ class LessonController extends GetxController {
     
     isLoading.value = true;
     Future.delayed(Duration(milliseconds: 500), () {
-      // For demo purposes, let's just initialize with some example text
-      // In a real app, you'd load notes associated with this lessonId
-      
-      // Uncomment below lines if you want to simulate pre-loaded notes
-      /*
-      point1a.value = 'Sample note 1a for ${lessonTitle.value}';
-      point1b.value = 'Sample note 1b for ${lessonTitle.value}';
-      point1c.value = 'Sample note 1c for ${lessonTitle.value}';
-      point2a.value = 'Sample note 2a for ${lessonTitle.value}';
-      point2b.value = 'Sample note 2b for ${lessonTitle.value}';
-      point2c.value = 'Sample note 2c for ${lessonTitle.value}';
-      
-      // Update controllers to match the loaded values
-      point1aController.text = point1a.value;
-      point1bController.text = point1b.value;
-      point1cController.text = point1c.value;
-      point2aController.text = point2a.value;
-      point2bController.text = point2b.value;
-      point2cController.text = point2c.value;
-      */
+
       
       isLoading.value = false;
     });

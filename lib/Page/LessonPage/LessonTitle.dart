@@ -39,36 +39,38 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
     _loadCourseDetail();
   }
 
- Future<void> _checkAdminStatus() async {
+  Future<void> _checkAdminStatus() async {
   final prefs = await SharedPreferences.getInstance();
-  if (!prefs.containsKey('role')) {
-    debugPrint("Role belum diset di SharedPreferences");
-  }
-
   final role = prefs.getString('role') ?? '';
-  debugPrint("Role didapat: $role");
+  debugPrint('[DEBUG] ROLE FROM PREFS: $role');
 
-  setState(() {
-    _isAdmin = role.toLowerCase() == 'admin';
+  // Ini triknya: paksa rebuild setelah 100ms
+  Future.delayed(Duration(milliseconds: 100), () {
+    if (mounted) {
+      setState(() {
+        _isAdmin = role.toLowerCase() == 'admin';
+        debugPrint('[DEBUG] _isAdmin di setState: $_isAdmin');
+      });
+    }
   });
 }
-
 
 
   Future<void> _loadCourseDetail() async {
     setState(() {
       _isLoading = true;
     });
-    
-    final courseDetail = await widget.lessonService.getCourseDetail(_currentCourse.id);
-    
+
+    final courseDetail =
+        await widget.lessonService.getCourseDetail(_currentCourse.id);
+
     if (courseDetail != null) {
       setState(() {
         _currentCourse = courseDetail;
         _noteController.text = courseDetail.note;
       });
     }
-    
+
     setState(() {
       _isLoading = false;
     });
@@ -82,6 +84,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
 
   @override
   Widget build(BuildContext context) {
+     print('[DEBUG] BUILD UI - _isAdmin: $_isAdmin');
     return Scaffold(
       backgroundColor: netralcolor,
       appBar: AppBar(
@@ -115,34 +118,41 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                               setState(() {
                                 _isLoading = true;
                               });
-                              
-                              bool success = await widget.lessonService.updateNote(
+
+                              bool success =
+                                  await widget.lessonService.updateNote(
                                 _currentCourse.id,
                                 _noteController.text,
                               );
-                              
+
                               setState(() {
                                 _isLoading = false;
                                 _isNoteVisible = false;
                                 if (success) {
                                   _currentCourse.note = _noteController.text;
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text("Note updated successfully"))
-                                  );
+                                      const SnackBar(
+                                          content: Text(
+                                              "Note updated successfully")));
                                 } else {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text("Failed to update note"))
-                                  );
+                                      const SnackBar(
+                                          content:
+                                              Text("Failed to update note")));
                                 }
                               });
                             },
-                            onCancel: () => setState(() => _isNoteVisible = false),
+                            onCancel: () =>
+                                setState(() => _isNoteVisible = false),
                           )
-                        : NoteButton(onPressed: () {
-                            setState(() => _isNoteVisible = true);
-                          }),
+                        : NoteButton(
+                            onPressed: () {
+                              setState(() => _isNoteVisible = true);
+                            },
+                          ),
                   const SizedBox(height: 16),
-                  NotesSection(course: _currentCourse, isNoteVisible: _isNoteVisible),
+                  NotesSection(
+                      course: _currentCourse, isNoteVisible: _isNoteVisible),
                 ],
               ),
             ),
