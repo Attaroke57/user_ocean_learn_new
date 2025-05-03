@@ -1,8 +1,7 @@
-// my_slider.dart
 import 'package:flutter/material.dart';
-import 'package:user_ocean_learn/Widgets/colorpallete.dart';
-import 'package:user_ocean_learn/Widgets/mytext.dart';
-
+import 'package:flutter_svg/svg.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:user_ocean_learn/Widgets/ColorPallete.dart';
 class MySlider extends StatelessWidget {
   final String img;
   final String title;
@@ -17,28 +16,35 @@ class MySlider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(24),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          SizedBox(height: 96),
-          MyText(
-              text: title,
-              fontSize: 24,
-              color: textcolor,
-              textAlign: TextAlign.center),
-          SizedBox(height: 24),
-          Image.asset(
+          SvgPicture.asset(
             img,
-            fit: BoxFit.cover,
+            height: 300,
+            fit: BoxFit.contain,
           ),
-          SizedBox(height: 24),
-          MyText(
-              text: description,
+          const SizedBox(height: 32),
+          Text(
+            title,
+            style: GoogleFonts.montserrat(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: textcolor,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            description,
+            style: GoogleFonts.montserrat(
               fontSize: 16,
               color: textcolor,
-              textAlign: TextAlign.center)
+            ),
+            textAlign: TextAlign.center,
+          ),
         ],
       ),
     );
