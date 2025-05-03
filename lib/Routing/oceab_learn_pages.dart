@@ -5,7 +5,7 @@ import 'package:user_ocean_learn/Page/IntroPage/IntroPage.dart';
 import 'package:user_ocean_learn/Page/LessonPage/LessonTitle.dart';
 import 'package:user_ocean_learn/Page/LoginPage/LoginPage.dart';
 import 'package:user_ocean_learn/Page/ProfilePage/ProfilePage.dart';
-import 'package:user_ocean_learn/Page/ProfilePage/SubscriptionPage.dart';
+import 'package:user_ocean_learn/Page/SubscriptionPage/SubscriptionPage.dart';
 import 'package:user_ocean_learn/Page/RegisterPage/RegisterPage.dart';
 import 'package:user_ocean_learn/Page/SchedulePage/SchedulePage.dart';
 import 'package:user_ocean_learn/Page/SplashScreen/SplashScreen.dart';

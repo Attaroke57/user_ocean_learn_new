@@ -1,7 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:http/http.dart' as http;
+import 'package:url_launcher/url_launcher.dart';
+import 'package:user_ocean_learn/Page/SubscriptionPage/SubscriptionController.dart';
 import 'package:user_ocean_learn/Widgets/mycard.dart';
+import 'package:user_ocean_learn/Widgets/mytext.dart'; // Import MyText widget
+
 class SubscriptionPage extends StatelessWidget {
+  final SubscriptionController _subscriptionController = SubscriptionController();
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -21,13 +28,7 @@ class SubscriptionPage extends StatelessWidget {
                     },
                     child: Icon(Icons.arrow_back),
                   ),
-                  Text(
-                    'Manage your subscription here!',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                  MyText.header('Manage your subscription here!'),
                   Icon(Icons.notifications_outlined),
                 ],
               ),
@@ -43,12 +44,10 @@ class SubscriptionPage extends StatelessWidget {
                       // Title
                       Padding(
                         padding: const EdgeInsets.only(bottom: 16.0),
-                        child: Text(
-                          'Oceans Divers!',
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
+                        child: MyText(
+                          text: 'Oceans Divers!',
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
 
@@ -67,12 +66,10 @@ class SubscriptionPage extends StatelessWidget {
                       SizedBox(height: 24),
 
                       // Features section
-                      Text(
-                        'Exclusive Features:',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      MyText(
+                        text: 'Exclusive Features:',
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
                       ),
 
                       SizedBox(height: 16),
@@ -115,26 +112,41 @@ class SubscriptionPage extends StatelessWidget {
 
                       // Price button wrapped in MyCard
                       MyCard(
-                        child: GestureDetector(
-                          onTap: () {
-                            // Subscription purchase functionality would go here
-                          },
-                          child: Container(
-                            width: double.infinity,
-                            height: 56,
-                            decoration: BoxDecoration(
-                              color: Color(0xFFD6EEFB),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            alignment: Alignment.center,
-                            child: Text(
-                              'Rp 150.000 per Month',
-                              style: TextStyle(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 12.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              MyText(
+                                text: 'Rp 150.000 per Month',
                                 fontSize: 18,
                                 fontWeight: FontWeight.w600,
-                                color: Colors.blue.shade800,
+                                textAlign: TextAlign.center,
                               ),
-                            ),
+                              SizedBox(height: 12),
+                              Container(
+                                width: double.infinity,
+                                child: ElevatedButton(
+                                  onPressed: () {
+                                     _subscriptionController.handleSubscribe(context);
+                                  },
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: Color(0xFFD6EEFB),
+                                    foregroundColor: Colors.blue.shade800,
+                                    padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                  child: MyText(
+                                    text: 'Subscribe Now',
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.blue.shade800,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
@@ -170,21 +182,9 @@ class SubscriptionPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                title,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
+              MyText.title(title),
               SizedBox(height: 4),
-              Text(
-                description,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey.shade700,
-                ),
-              ),
+              MyText.subtitle(description),
             ],
           ),
         ),
