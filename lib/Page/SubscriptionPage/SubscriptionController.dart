@@ -1,41 +1,27 @@
-// lib/controllers/subscription_controller.dart
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
+import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'dart:convert';
 
-import 'package:user_ocean_learn/Model/login_service_model.dart';
+class SubscriptionController extends GetxController {
+  Future<void> handleSubscribeButtonPressed(BuildContext context) async {
+    const invoiceUrl = 'https://checkout-staging.xendit.co/web/681701e31cfd0b6884670b88';
 
-class SubscriptionController {
-  Future<void> handleSubscribe(BuildContext context) async {
-    try {
-     final response = await http.post(
-  Uri.parse('https://ocean-learn-api.rplrus.com/api/v1/subscription'),
-  headers: {
-    'Authorization': 'Bearer $Token',
-    'Content-Type': 'application/json',
-  },
-);
-
-if (response.statusCode == 200) {
-  final data = json.decode(response.body);
-
-  final invoiceUrl = data['invoice_url']; // ← ambil langsung dari key 'invoice_url'
-
-  if (await canLaunchUrl(Uri.parse(invoiceUrl))) {
-    await launchUrl(Uri.parse(invoiceUrl), mode: LaunchMode.externalApplication);
-  } else {
-    throw 'Tidak bisa membuka link invoice: $invoiceUrl';
-  }
-} else {
-  throw 'Gagal membuat subscription. Status: ${response.statusCode}';
-}
-
-    } catch (e) {
-      print('Error: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Terjadi kesalahan saat melakukan subscribe')),
+    if (await canLaunchUrl(Uri.parse(invoiceUrl))) {
+      await launchUrl(
+        Uri.parse(invoiceUrl),
+        mode: LaunchMode.externalApplication,
       );
+    } else {
+      Get.dialog(AlertDialog(
+        title: const Text('Error'),
+        content: const Text('Could not open the subscription URL.'),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: const Text('OK'),
+          ),
+        ],
+      ));
     }
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:user_ocean_learn/Routing/ocean_learn_route.dart';
 import 'package:user_ocean_learn/Services/LoginService.dart';
 
 
@@ -56,7 +57,8 @@ class LoginController extends GetxController {
       await prefs.clear();
       if (result['success']) {
             print(prefs.getString('token'));
-        Get.offAllNamed('/home');
+        Get.offNamed(OceanLearnRoutes.homePage);
+
       } else {
         _showErrorDialog(result['message']);
       }

@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:http/http.dart' as http;
-import 'package:url_launcher/url_launcher.dart';
-import 'package:user_ocean_learn/Page/SubscriptionPage/SubscriptionController.dart';
 import 'package:user_ocean_learn/Widgets/mycard.dart';
-import 'package:user_ocean_learn/Widgets/mytext.dart'; // Import MyText widget
+import 'package:user_ocean_learn/Widgets/mytext.dart';
+import 'package:user_ocean_learn/Page/SubscriptionPage/SubscriptionController.dart';
 
 class SubscriptionPage extends StatelessWidget {
   final SubscriptionController _subscriptionController = SubscriptionController();
@@ -17,8 +15,7 @@ class SubscriptionPage extends StatelessWidget {
           children: [
             // App Bar
             Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -33,7 +30,6 @@ class SubscriptionPage extends StatelessWidget {
                 ],
               ),
             ),
-
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
@@ -50,8 +46,7 @@ class SubscriptionPage extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-
-                      // Using MyCard for the image section
+                      // Using MyCard for images
                       MyCard(
                         child: Center(
                           child: SvgPicture.asset(
@@ -62,19 +57,15 @@ class SubscriptionPage extends StatelessWidget {
                           ),
                         ),
                       ),
-
                       SizedBox(height: 24),
-
                       // Features section
                       MyText(
                         text: 'Exclusive Features:',
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                       ),
-
                       SizedBox(height: 16),
-
-                      // Feature 1 wrapped in MyCard
+                      // Feature 1
                       MyCard(
                         child: _buildFeatureItem(
                           icon: Icons.book_outlined,
@@ -83,10 +74,8 @@ class SubscriptionPage extends StatelessWidget {
                               'Get full access to all materials & save personal notes.',
                         ),
                       ),
-
                       SizedBox(height: 16),
-
-                      // Feature 2 wrapped in MyCard
+                      // Feature 2
                       MyCard(
                         child: _buildFeatureItem(
                           icon: Icons.alarm,
@@ -95,10 +84,8 @@ class SubscriptionPage extends StatelessWidget {
                               'Never miss a class, stay on track with friendly reminders!',
                         ),
                       ),
-
                       SizedBox(height: 16),
-
-                      // Feature 3 wrapped in MyCard
+                      // Feature 3
                       MyCard(
                         child: _buildFeatureItem(
                           icon: Icons.question_answer_outlined,
@@ -107,10 +94,8 @@ class SubscriptionPage extends StatelessWidget {
                               'Get exclusive Q&A sessions with mentors for deeper learning.',
                         ),
                       ),
-
                       SizedBox(height: 40),
-
-                      // Price button wrapped in MyCard
+                      // Price and subscription button
                       MyCard(
                         child: Padding(
                           padding: const EdgeInsets.symmetric(vertical: 12.0),
@@ -127,13 +112,16 @@ class SubscriptionPage extends StatelessWidget {
                               Container(
                                 width: double.infinity,
                                 child: ElevatedButton(
-                                  onPressed: () {
-                                     _subscriptionController.handleSubscribe(context);
+                                  onPressed: () async {
+                                    // Call the controller to handle the subscription
+                                   _subscriptionController.handleSubscribeButtonPressed(context);
+
                                   },
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Color(0xFFD6EEFB),
                                     foregroundColor: Colors.blue.shade800,
-                                    padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                                    padding: EdgeInsets.symmetric(
+                                        horizontal: 32, vertical: 16),
                                     shape: RoundedRectangleBorder(
                                       borderRadius: BorderRadius.circular(12),
                                     ),
