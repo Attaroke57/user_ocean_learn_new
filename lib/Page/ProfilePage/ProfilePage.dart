@@ -1,175 +1,195 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:user_ocean_learn/Dashboard/dashboard.dart';
-import 'package:user_ocean_learn/Page/ProfilePage/ProfileController.dart';
-import 'package:user_ocean_learn/Widgets/mycard.dart';
-import 'package:user_ocean_learn/Widgets/mytext.dart';
-import 'package:user_ocean_learn/Widgets/mybutton.dart';
+import 'package:user_ocean_learn/Page/LoginPage/LoginController.dart';
 import 'package:user_ocean_learn/Widgets/ColorPallete.dart';
+import 'package:user_ocean_learn/Widgets/user_storage.dart';
 
-class ProfilePage extends GetView<ProfileController> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  final ProfileController controller = Get.put(ProfileController());
+class ProfilePage extends StatelessWidget {
+  const ProfilePage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final userName = UserStorage.getName() ?? 'User';
+    final userEmail = UserStorage.getEmail() ?? 'email@example.com';
+    
     return Scaffold(
       backgroundColor: netralcolor,
-      key: _scaffoldKey,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: const Center(
+          child: Text(
+            'Manage your profile here!',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w500,
+              color: Colors.black,
+            ),
+          ),
+        ),
+         leading: Builder(
+              builder: (context) => IconButton(
+                icon: const Icon(Icons.menu, color: Colors.black),
+                onPressed: () => Scaffold.of(context).openDrawer(),
+              ),
+            ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.notifications_outlined, color: Colors.black),
+            onPressed: () {},
+          ),
+        ],
+      ),
       drawer: NavDrawer(),
-      body: SafeArea(
-        child: Obx(() => Stack(
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
           children: [
-            Column(
-              children: [
-                // App Bar
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      InkWell(
-                        onTap: () {
-                          _scaffoldKey.currentState?.openDrawer();
-                        },
-                        child: Icon(Icons.menu),
-                      ),
-                      MyText.header('Manage your profile here!'),
-                      Icon(Icons.notifications_outlined),
-                    ],
-                  ),
-                ),
-                
-                // Profile content
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      children: [
-                        // Profile Card
-                        MyCard(
-                          child: Column(
-                            children: [
-                              CircleAvatar(
-                                radius: 48,
-                                backgroundImage: AssetImage(controller.profileImagePath.value),
-                              ),
-                              SizedBox(height: 16),
-                              RichText(
-                                text: TextSpan(
-                                  style: TextStyle(
-                                    fontSize: 18,
-                                    color: Colors.black,
-                                  ),
-                                  children: [
-                                    TextSpan(text: 'Hello, '),
-                                    TextSpan(
-                                      text: controller.userTitle.value,
-                                      style: TextStyle(
-                                        color: Colors.blue,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    TextSpan(text: ' ${controller.userName.value}!'),
-                                  ],
-                                ),
-                              ),
-                              SizedBox(height: 20),
-                              // Subscription Button
-                              MyButton(
-                                text: 'My Subscription',
-                                backgroundColor: secondarycolor,
-                                textColor: primarycolor,
-                                fullWidth: true,
-                                onTap: controller.goToSubscriptionPage,
-                              ),
-                              SizedBox(height: 8),
-                              MyText.subtitle('manage your subscription right here'),
-                            ],
-                          ),
-                        ),
-                        
-                        SizedBox(height: 15),
-                        
-                        // Account Settings Section
-                        MyCard(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.only(left: 8.0, bottom: 16.0),
-                                child: MyText.title('Account Settings'),
-                              ),
-                              _buildSettingsItem(
-                                context,
-                                'Change my password',
-                                Icons.arrow_forward_ios,
-                                controller.goToChangePasswordPage,
-                              ),
-                              Divider(),
-                              _buildSettingsItem(
-                                context,
-                                'Edit personal details',
-                                Icons.arrow_forward_ios,
-                                controller.goToEditProfilePage,
-                              ),
-                            ],
-                          ),
-                        ),
-                        
-                        Spacer(),
-                        
-                        // Logout Button
-                        MyButton(
-                          text: 'Log out',
-                          backgroundColor: Colors.white,
-                          textColor: Colors.black87,
-                          fullWidth: true,
-                          hasBorder: true,
-                          onTap: controller.showLogoutConfirmation,
-                        ),
-                      ],
+            // Profile Card
+            Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  // Profile Image
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(60),
+                    child: Image.network(
+                      'https://i.pinimg.com/736x/9f/be/f5/9fbef5a4ae96b3498fad7873a8ff9d09.jpg', // Replace with your image path
+                      width: 120,
+                      height: 120,
+                      fit: BoxFit.cover,
                     ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 16),
+                  // Greeting Text
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text(
+                        'Hello, ',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Text(
+                        userName,
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.blue,
+                        ),
+                      ),
+                      const Text(
+                        '!',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    userEmail,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey,
+                    ),
+                  ),
+                ],
+              ),
             ),
             
-            // Loading overlay
-            if (controller.isLoading.value)
-              Container(
-                color: Colors.black.withOpacity(0.3),
-                child: Center(
-                  child: CircularProgressIndicator(),
+            const SizedBox(height: 16),
+            
+            Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Account Settings',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  // Change Password Option
+                  _buildSettingOption(
+                    title: 'Change my password',
+                    onTap: () {},
+                  ),
+                  const Divider(),
+                  // Edit Personal Details Option
+                  _buildSettingOption(
+                    title: 'Edit personal details',
+                    onTap: () {},
+                  ),
+                ],
+              ),
+            ),
+            
+            const Spacer(),
+            
+            Container(
+              width: double.infinity,
+              height: 50,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: TextButton(
+                onPressed: () {
+                  // Use the LoginController to handle logout
+                  Get.put(LoginController()).logout();
+                },
+                child: const Text(
+                  'Log out',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black,
+                  ),
                 ),
               ),
+            ),
           ],
-        )),
+        ),
       ),
     );
   }
   
-  Widget _buildSettingsItem(
-    BuildContext context,
-    String title,
-    IconData icon,
-    VoidCallback onTap,
-  ) {
+  Widget _buildSettingOption({required String title, required VoidCallback onTap}) {
     return InkWell(
       onTap: onTap,
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
+        padding: const EdgeInsets.symmetric(vertical: 12.0),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            MyText(
-              text: title,
-              fontSize: 16,
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w500,
+              ),
             ),
-            Icon(
-              icon,
-              size: 16,
-              color: Colors.grey,
+            const Icon(
+              Icons.chevron_right,
+              color: Colors.black54,
             ),
           ],
         ),

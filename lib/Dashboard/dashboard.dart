@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:user_ocean_learn/Dashboard/dashboardcontroller.dart';
 import 'package:user_ocean_learn/Routing/ocean_learn_route.dart';
+import 'package:user_ocean_learn/Widgets/ColorPallete.dart';
 
 class NavDrawer extends StatelessWidget {
   final DashboardController dashboardController =
@@ -51,39 +53,39 @@ class NavDrawer extends StatelessWidget {
           ),
           SizedBox(height: 10),
 
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            child: Row(
-              children: [
-                CircleAvatar(
-                  radius: 25,
-                  backgroundImage: AssetImage('Assets/images/profile.png'),
-                ),
-                const SizedBox(height: 15),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
-                      Text(
-                        'Samudra',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20,
+           Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 25,
+                        backgroundImage: NetworkImage(
+                          'https://i.pinimg.com/736x/9f/be/f5/9fbef5a4ae96b3498fad7873a8ff9d09.jpg',
                         ),
                       ),
-                      Text(
-                        'samudra@gmail.com',
-                        style: TextStyle(
-                          color: Colors.grey,
-                          fontSize: 15,
-                        ),
+                      const SizedBox(width: 15),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            dashboardController.name.value,
+                            style: GoogleFonts.montserrat(
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          Text(
+                            dashboardController.email.value,
+                            style: GoogleFonts.montserrat(
+                              fontSize: 12,
+                              color: textcolor,
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
                 ),
-              ],
-            ),
-          ),
 
           const Divider(height: 1),
 

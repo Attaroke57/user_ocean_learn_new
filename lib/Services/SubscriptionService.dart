@@ -5,9 +5,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// Alternative implementation without using flutter_secure_storage
 class SubscriptionService {
   final String _baseUrl = 'https://ocean-learn-api.rplrus.com';
+
   
   /// Makes the API call to create a subscription and returns the Xendit invoice URL
   Future<String?> createSubscription() async {
+    String invoiceUrl = "";
     final url = Uri.parse('$_baseUrl/api/v1/subscription');
     
     try {
@@ -35,7 +37,7 @@ class SubscriptionService {
       
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        final invoiceUrl = data['invoice_url'];
+        invoiceUrl = data['invoice_url'];
         return invoiceUrl;
       } else {
         print('Failed with status code: ${response.statusCode}');
@@ -69,11 +71,11 @@ class SubscriptionService {
       
       // If no token found, use your test token or prompt user to login
       // For testing purposes only! In production, handle this properly
-      return 'Qq4VZSRuCObeVZ0DbKmeCe2N7O1sLPImO65TgR59eeceded2';
+      return '';
     } catch (e) {
       print('Error getting token: $e');
       // Return a testing token as fallback
-      return 'Qq4VZSRuCObeVZ0DbKmeCe2N7O1sLPImO65TgR59eeceded2';
+      return '';
     }
   }
 }

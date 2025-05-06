@@ -10,4 +10,5 @@ class OceanLearnRoutes {
   static const splashScreen = "/splashscreen";
   static const lessonTitle = "/lesson-detail";
   static const coursedetailpage = "/coursedetailpage";
+  static const historypage = "/historypage";
 }

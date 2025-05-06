@@ -1,8 +1,8 @@
 import 'package:get/get.dart';
 import 'package:user_ocean_learn/Dashboard/dashboard.dart';
+import 'package:user_ocean_learn/Page/HistoryPage/HistoryPage.dart';
 import 'package:user_ocean_learn/Page/HomePage/Homepage.dart';
 import 'package:user_ocean_learn/Page/IntroPage/IntroPage.dart';
-import 'package:user_ocean_learn/Page/LessonPage/LessonTitle.dart';
 import 'package:user_ocean_learn/Page/LoginPage/LoginPage.dart';
 import 'package:user_ocean_learn/Page/ProfilePage/ProfilePage.dart';
 import 'package:user_ocean_learn/Page/SubscriptionPage/SubscriptionPage.dart';
@@ -23,6 +23,7 @@ class OceanLearnPages {
     GetPage(name: OceanLearnRoutes.subscriptionPage, page: () => SubscriptionPage()),
     GetPage(name: OceanLearnRoutes.introPage, page: () => IntroPage()),
     GetPage(name: OceanLearnRoutes.splashScreen, page: () => SplashScreen()),
+    GetPage(name: OceanLearnRoutes.historypage, page: () => Historypage()),
    
   ];
 }
