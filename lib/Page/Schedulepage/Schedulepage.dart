@@ -42,7 +42,7 @@ class _SchedulePageState extends State<SchedulePage> {
         backgroundColor: const Color(0xFFE8F4FB),
         elevation: 0,
         centerTitle: true,
-        title: const Text(
+        title: Text(
           "Here's your schedule Samudra!",
           style: TextStyle(
             color: Colors.black,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:user_ocean_learn/Page/SubscriptionPage/SubscriptionPage.dart';
 import 'package:user_ocean_learn/Routing/ocean_learn_route.dart';
 import 'package:user_ocean_learn/Services/LoginService.dart';
 import 'package:user_ocean_learn/Widgets/user_storage.dart';
@@ -48,6 +49,10 @@ class LoginController extends GetxController {
     } else {
       _showErrorDialog(response.message);
     }
+  }
+  void goToSubscriptionPage() {
+    // Navigate to the subscription page
+    Get.to(() => SubscriptionPage()); // Replace SubscriptionPage with the actual page widget
   }
 
   void logout() async {

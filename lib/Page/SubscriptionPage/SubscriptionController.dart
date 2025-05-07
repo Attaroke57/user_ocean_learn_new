@@ -7,22 +7,22 @@ class SubscriptionController extends GetxController {
   Future<void> handleSubscribeButtonPressed(BuildContext context) async {
     String invoiceUrl = await SubscriptionService().createSubscription() ?? '';
 
-    if (await canLaunchUrl(Uri.parse(invoiceUrl))) {
-      await launchUrl(
-        Uri.parse(invoiceUrl),
-        mode: LaunchMode.externalApplication,
-      );
-    } else {
-      Get.dialog(AlertDialog(
-        title: const Text('Error'),
-        content: const Text('Could not open the subscription URL.'),
-        actions: [
-          TextButton(
-            onPressed: () => Get.back(),
-            child: const Text('OK'),
-          ),
-        ],
-      ));
-    }
+    print('Opening URL: $invoiceUrl');
+if (await canLaunchUrl(Uri.parse(invoiceUrl))) {
+  await launchUrl(Uri.parse(invoiceUrl), mode: LaunchMode.externalApplication);
+} else {
+  print('Failed to launch URL');
+  Get.dialog(AlertDialog(
+    title: const Text('Error'),
+    content: const Text('Could not open the subscription URL.'),
+    actions: [
+      TextButton(
+        onPressed: () => Get.back(),
+        child: const Text('OK'),
+      ),
+    ],
+  ));
+}
+
   }
 }

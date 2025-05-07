@@ -3,6 +3,8 @@ import 'package:get/get.dart';
 import 'package:user_ocean_learn/Dashboard/dashboard.dart';
 import 'package:user_ocean_learn/Page/LoginPage/LoginController.dart';
 import 'package:user_ocean_learn/Widgets/ColorPallete.dart';
+import 'package:user_ocean_learn/Widgets/mybutton.dart';
+import 'package:user_ocean_learn/Widgets/mytext.dart';
 import 'package:user_ocean_learn/Widgets/user_storage.dart';
 
 class ProfilePage extends StatelessWidget {
@@ -10,9 +12,13 @@ class ProfilePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Mendapatkan nama dan email pengguna dari penyimpanan lokal
     final userName = UserStorage.getName() ?? 'User';
     final userEmail = UserStorage.getEmail() ?? 'email@example.com';
-    
+
+    // Menginisialisasi LoginController
+    final controller = Get.put(LoginController());
+
     return Scaffold(
       backgroundColor: netralcolor,
       appBar: AppBar(
@@ -28,12 +34,12 @@ class ProfilePage extends StatelessWidget {
             ),
           ),
         ),
-         leading: Builder(
-              builder: (context) => IconButton(
-                icon: const Icon(Icons.menu, color: Colors.black),
-                onPressed: () => Scaffold.of(context).openDrawer(),
-              ),
-            ),
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.menu, color: Colors.black),
+            onPressed: () => Scaffold.of(context).openDrawer(),
+          ),
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.notifications_outlined, color: Colors.black),
@@ -60,7 +66,7 @@ class ProfilePage extends StatelessWidget {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(60),
                     child: Image.network(
-                      'https://i.pinimg.com/736x/9f/be/f5/9fbef5a4ae96b3498fad7873a8ff9d09.jpg', // Replace with your image path
+                      'https://i.pinimg.com/736x/9f/be/f5/9fbef5a4ae96b3498fad7873a8ff9d09.jpg', // Ganti dengan URL gambar profil pengguna
                       width: 120,
                       height: 120,
                       fit: BoxFit.cover,
@@ -103,12 +109,24 @@ class ProfilePage extends StatelessWidget {
                       color: Colors.grey,
                     ),
                   ),
+                  SizedBox(height: 16),
+                  MyButton(
+                    text: 'My Subscription',
+                    backgroundColor: secondarycolor,
+                    textColor: primarycolor,
+                    fullWidth: true,
+                    onTap: controller
+                        .goToSubscriptionPage, // Memanggil metode dari controller
+                  ),
                 ],
               ),
             ),
-            
+
+            // My Subscription Button and Text
+
             const SizedBox(height: 16),
-            
+
+            // Account Settings Section
             Container(
               width: double.infinity,
               decoration: BoxDecoration(
@@ -141,9 +159,10 @@ class ProfilePage extends StatelessWidget {
                 ],
               ),
             ),
-            
+
             const Spacer(),
-            
+
+            // Log Out Button
             Container(
               width: double.infinity,
               height: 50,
@@ -153,8 +172,8 @@ class ProfilePage extends StatelessWidget {
               ),
               child: TextButton(
                 onPressed: () {
-                  // Use the LoginController to handle logout
-                  Get.put(LoginController()).logout();
+                  // Menggunakan LoginController untuk logout
+                  controller.logout();
                 },
                 child: const Text(
                   'Log out',
@@ -171,8 +190,10 @@ class ProfilePage extends StatelessWidget {
       ),
     );
   }
-  
-  Widget _buildSettingOption({required String title, required VoidCallback onTap}) {
+
+  // Widget untuk menampilkan opsi pengaturan
+  Widget _buildSettingOption(
+      {required String title, required VoidCallback onTap}) {
     return InkWell(
       onTap: onTap,
       child: Padding(

@@ -49,7 +49,8 @@ class UserStorage {
   
   // Check if user is logged in
   static bool isLoggedIn() {
-    return _storage.hasData(TOKEN_KEY) && _storage.read(TOKEN_KEY) != null;
+    // Check if token exists and is not null
+    return _storage.hasData(TOKEN_KEY) && getToken() != null;
   }
   
   // Clear all user data (logout)
@@ -57,7 +58,7 @@ class UserStorage {
     await _storage.erase();
   }
   
-  // For debugging
+  // For debugging (optional)
   static void printStorageData() {
     print('Token: ${getToken()}');
     print('Email: ${getEmail()}');

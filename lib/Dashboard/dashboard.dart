@@ -3,6 +3,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:user_ocean_learn/Dashboard/dashboardcontroller.dart';
+import 'package:user_ocean_learn/Page/LoginPage/LoginController.dart';
 import 'package:user_ocean_learn/Routing/ocean_learn_route.dart';
 import 'package:user_ocean_learn/Widgets/ColorPallete.dart';
 
@@ -116,13 +117,23 @@ class NavDrawer extends StatelessWidget {
                             Get.toNamed(OceanLearnRoutes.schedulePage);
                           },
                         ),
-                        _buildMenuItem(
-                          icon: Icons.person,
-                          title: 'Profile',
+                         _buildMenuItem(
+                          icon: Icons.payment_sharp,
+                          title: 'Payment History',
                           isActive:
                               dashboardController.selectedIndex.value == 2,
                           onTap: () {
                             dashboardController.changeMenu(2);
+                            Get.toNamed(OceanLearnRoutes.historypage);
+                          },
+                        ),
+                        _buildMenuItem(
+                          icon: Icons.person,
+                          title: 'Profile',
+                          isActive:
+                              dashboardController.selectedIndex.value == 3,
+                          onTap: () {
+                            dashboardController.changeMenu(3);
                             Get.toNamed(OceanLearnRoutes.profilePage);
                           },
                         ),
@@ -133,29 +144,27 @@ class NavDrawer extends StatelessWidget {
           ),
 
           // Logout Button
-          Padding(
-            padding: EdgeInsets.all(10.0),
-            child: Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: const Color(0xFFE8F4FB),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: ListTile(
-                leading: const Icon(Icons.logout, color: Colors.blue, size: 20),
-                title: const Text(
-                  'Log out',
-                  style: TextStyle(fontSize: 14),
+           const Spacer(),
+                Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: Colors.blue.shade50,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: TextButton.icon(
+                      icon: const Icon(Icons.logout, color: Colors.blue),
+                      label: const Text(
+                        'Log out',
+                        style: TextStyle(color: Colors.blue),
+                      ),
+                      onPressed: () {
+                        Get.find<LoginController>().logout();
+                      },
+                    ),
+                  ),
                 ),
-                dense: true,
-                minLeadingWidth: 20,
-                onTap: () {
-                  Navigator.pop(context);
-                  // Handle logout functionality
-                },
-              ),
-            ),
-          ),
         ],
       ),
     );

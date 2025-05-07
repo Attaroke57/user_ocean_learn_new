@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:user_ocean_learn/Widgets/user_storage.dart';  // Pastikan untuk mengimport UserStorage
 
 class DashboardController extends GetxController {
   RxString name = ''.obs;
@@ -11,10 +11,10 @@ class DashboardController extends GetxController {
     loadUserData();
   }
 
-  void loadUserData() async {
-    final prefs = await SharedPreferences.getInstance();
-    name.value = prefs.getString('name') ?? 'User';
-    email.value = prefs.getString('email') ?? 'user@example.com';
+  void loadUserData() {
+    // Mengambil data dari UserStorage
+    name.value = UserStorage.getName() ?? 'User';
+    email.value = UserStorage.getEmail() ?? 'email@example.com';
   }
 
   void changeMenu(int index) {
