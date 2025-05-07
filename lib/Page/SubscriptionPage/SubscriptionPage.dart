@@ -103,7 +103,7 @@ class SubscriptionPage extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               MyText(
-                                text: 'Rp 150.000 per Month',
+                                text: 'Rp 160.000 per Month',
                                 fontSize: 18,
                                 fontWeight: FontWeight.w600,
                                 textAlign: TextAlign.center,

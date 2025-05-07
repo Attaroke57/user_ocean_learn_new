@@ -1,92 +1,101 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:get/get.dart';
+import 'package:user_ocean_learn/Model/course_model.dart';
+import 'package:user_ocean_learn/Services/CourseService.dart';
+import 'package:user_ocean_learn/Widgets/user_storage.dart';
 
-class ScheduleController {
-  // State variables
-  DateTime _selectedMonth = DateTime(2025, 3); // Default to March 2025 as shown in the image
-  List<DateTime> _highlightedDates = [];
 
-  // Getters
-  DateTime get selectedMonth => _selectedMonth;
-  List<DateTime> get highlightedDates => _highlightedDates;
-  String get formattedMonth => DateFormat('MMMM yyyy').format(_selectedMonth);
+class ScheduleController extends GetxController {
+  final Rx<DateTime> currentMonth = DateTime.now().obs;
+  final RxList<DateTime> markedDates = <DateTime>[].obs;
+  final name = 'User'.obs;
+  final CourseService courseService = CourseService();
+  final RxList<CourseModel> courses = <CourseModel>[].obs;
+  final RxBool isLoading = true.obs;
 
-  // Calendar data methods
-  int get firstWeekdayOfMonth {
-    final firstDayOfMonth = DateTime(_selectedMonth.year, _selectedMonth.month, 1);
-    return firstDayOfMonth.weekday % 7;
+  @override
+  void onInit() {
+    super.onInit();
+    loadUserName();
+    loadCourses();
+  }
+  Future<void> loadUserName() async {
+    name.value = UserStorage.getName() ?? '';
   }
 
-  int get lastDayOfMonth {
-    final lastDay = DateTime(_selectedMonth.year, _selectedMonth.month + 1, 0);
-    return lastDay.day;
-  }
-
-  int get totalCalendarDays => lastDayOfMonth + firstWeekdayOfMonth;
-  
-  int get totalCalendarRows => (totalCalendarDays / 7).ceil();
-
-  // Actions
-  void previousMonth({required bool isVisitor, required VoidCallback onUpdate}) {
-    if (isVisitor) return; // Prevent navigation for visitors
+  Future<void> loadCourses() async {
+    isLoading.value = true;
+    await courseService.loadLessons(1);
+    courses.value = courseService.getLessons();
     
-    _selectedMonth = DateTime(_selectedMonth.year, _selectedMonth.month - 1, 1);
-    onUpdate();
-  }
-
-  void nextMonth({required bool isVisitor, required VoidCallback onUpdate}) {
-    if (isVisitor) return; // Prevent navigation for visitors
+    // Update marked dates based on course dates
+    updateMarkedDates();
     
-    _selectedMonth = DateTime(_selectedMonth.year, _selectedMonth.month + 1, 1);
-    onUpdate();
-  }
-
-  bool isDateHighlighted(DateTime date) {
-    return _highlightedDates.any((d) => 
-      d.year == date.year && d.month == date.month && d.day == date.day);
-  }
-
-  // Method to load or refresh data
-  Future<void> loadScheduleData() async {
-    // Initialize with the highlighted dates shown in the screenshot
-    _highlightedDates = [
-      DateTime(2025, 3, 8),  // March 8, 2025
-      DateTime(2025, 3, 19), // March 19, 2025
-      DateTime(2025, 3, 24), // March 24, 2025
-      DateTime(2025, 3, 30), // March 30, 2025
-    ];
+    isLoading.value = false;
   }
   
-  // Method to get schedule details for a specific date
-  Future<Map<String, dynamic>?> getScheduleDetails(DateTime date) async {
-    // Check if the date has a scheduled event
-    if (isDateHighlighted(date)) {
-      int weekNumber = 0;
-      
-      // Determine week number based on the date
-      if (date.day == 8) {
-        weekNumber = 1;
-      } else if (date.day == 19) {
-        weekNumber = 2;
-      } else if (date.day == 24) {
-        weekNumber = 3;
-      } else if (date.day == 30) {
-        weekNumber = 4;
-      }
-      
-      return {
-        'week': weekNumber,
-        'title': 'Lecture Title',
-        'date': DateFormat('MMMM d yyyy').format(date),
-      };
+  void updateMarkedDates() {
+    final newMarkedDates = <DateTime>[];
+    
+    for (final course in courses) {
+      // Add only the date part (no time) to marked dates
+      final courseDate = DateTime(course.date.year, course.date.month, course.date.day);
+      newMarkedDates.add(courseDate);
     }
+    
+    markedDates.assignAll(newMarkedDates);
+  }
+
+  void previousMonth() {
+    currentMonth.value = DateTime(currentMonth.value.year, currentMonth.value.month - 1);
+  }
+
+  void nextMonth() {
+    currentMonth.value = DateTime(currentMonth.value.year, currentMonth.value.month + 1);
+  }
+
+  bool isDateMarked(DateTime date) {
+    final normalizedDate = DateTime(date.year, date.month, date.day);
+    return markedDates.any((d) => 
+      d.year == normalizedDate.year && 
+      d.month == normalizedDate.month && 
+      d.day == normalizedDate.day
+    );
+  }
+
+  // Get course for a specific date (if exists)
+  CourseModel? getCourseForDate(DateTime date) {
+    final normalizedDate = DateTime(date.year, date.month, date.day);
+    
+    for (final course in courses) {
+      final courseDate = DateTime(course.date.year, course.date.month, course.date.day);
+      if (courseDate.isAtSameMomentAs(normalizedDate)) {
+        return course;
+      }
+    }
+    
     return null;
   }
-  
-  // Method to mark attendance for a lecture
-  Future<bool> markAttendance(int weekNumber) async {
-    // Implementation would connect to your backend service
-    // This is a placeholder that simulates a successful API call
-    return true;
+
+  bool isToday(DateTime date) {
+    final now = DateTime.now();
+    return now.year == date.year && 
+           now.month == date.month && 
+           now.day == date.day;
+  }
+
+  List<CourseModel> getCoursesForCurrentMonth() {
+    return courses
+      .where((course) => 
+        course.date.year == currentMonth.value.year && 
+        course.date.month == currentMonth.value.month
+      )
+      .toList()
+      ..sort((a, b) => a.date.compareTo(b.date));
+  }
+
+  bool isDatePast(DateTime date) {
+    final now = DateTime.now();
+    return date.isBefore(now);
   }
 }

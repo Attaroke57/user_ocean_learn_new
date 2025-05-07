@@ -1,285 +1,170 @@
 import 'package:flutter/material.dart';
-import 'package:user_ocean_learn/Page/SchedulePage/ScheduleController.dart';
-import 'package:user_ocean_learn/Dashboard/dashboard.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:user_ocean_learn/Dashboard/dashboard.dart';
+import 'package:user_ocean_learn/Page/LessonPage/LessonTitle.dart';
+import 'package:user_ocean_learn/Page/Schedulepage/Schedulecontroller.dart';
+import 'package:user_ocean_learn/Widgets/ColorPallete.dart';
+import 'package:user_ocean_learn/Widgets/SchedulePage/ScheduleCalendar.dart';
+import 'package:user_ocean_learn/Widgets/SchedulePage/ScheduleCard.dart';
 
-class SchedulePage extends StatefulWidget {
-  final bool isVisitor; // Add this property to determine if user is a visitor
-  
-  const SchedulePage({
-    Key? key,
-    this.isVisitor = false, // Default to regular user mode
-  }) : super(key: key);
-
-  @override
-  State<SchedulePage> createState() => _SchedulePageState();
-}
-
-class _SchedulePageState extends State<SchedulePage> {
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-  
-  // Create an instance of the controller
-  final ScheduleController _controller = ScheduleController();
-
-  @override
-  void initState() {
-    super.initState();
-    // Load initial data
-    _loadData();
-  }
-
-  Future<void> _loadData() async {
-    await _controller.loadScheduleData();
-    setState(() {});
-  }
+class SchedulePage extends StatelessWidget {
+  const SchedulePage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Initialize the controller
+    final controller = Get.put(ScheduleController());
+
     return Scaffold(
-      key: _scaffoldKey,
-      backgroundColor: const Color(0xFFE8F4FB),
+      backgroundColor: netralcolor,
       appBar: AppBar(
-        backgroundColor: const Color(0xFFE8F4FB),
+        backgroundColor: netralcolor,
         elevation: 0,
-        centerTitle: true,
-        title: Text(
-          "Here's your schedule Samudra!",
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 16,
-            fontWeight: FontWeight.w500,
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.menu, color: Colors.black),
+            onPressed: () => Scaffold.of(context).openDrawer(),
           ),
         ),
-        leading: IconButton(
-          icon: const Icon(Icons.menu, color: Colors.black),
-          onPressed: () {
-            _scaffoldKey.currentState?.openDrawer();
-          },
+        centerTitle: true,
+        title: Text(
+          "Here Is Your Schedule, ${controller.name.value}!",
+          style: const TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications_none, color: Colors.black),
-            onPressed: () {
-              // Implement notifications functionality
-            },
+            icon: const Icon(Icons.refresh, color: Colors.black),
+            onPressed: () => controller.loadCourses(),
           ),
         ],
       ),
       drawer: NavDrawer(),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
+      body: Obx(() {
+        if (controller.isLoading.value) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        return RefreshIndicator(
+          onRefresh: () => controller.loadCourses(),
+          child: SingleChildScrollView(
             padding: const EdgeInsets.all(16.0),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Calendar Card
-                _buildCalendar(),
-                
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        "Weekly Schedule Rules:",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                          color: primarycolor,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        "• Each week can have only one lesson or none\n"
+                        "• Lessons are shown on the calendar with blue circles\n"
+                        "• Tap on a lesson date in the calendar to view details",
+                        style: TextStyle(
+                          fontSize: 14,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
                 const SizedBox(height: 16),
-                
-                // Upcoming Lectures with attendance buttons
-                ..._buildLectureList(),
+                CalendarWidget(controller: controller),
+                const SizedBox(height: 16),
+                _buildLectureSection(controller, context),
               ],
             ),
           ),
-        ),
-      ),
-    );
-  }
-  
-  Widget _buildCalendar() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            // Month navigation
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // Previous month button
-                  IconButton(
-                    icon: const Icon(Icons.chevron_left, color: Colors.black),
-                    onPressed: () => _controller.previousMonth(
-                      isVisitor: widget.isVisitor,
-                      onUpdate: () => setState(() {}),
-                    ),
-                  ),
-                  Text(
-                    _controller.formattedMonth,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  // Next month button
-                  IconButton(
-                    icon: const Icon(Icons.chevron_right, color: Colors.black),
-                    onPressed: () => _controller.nextMonth(
-                      isVisitor: widget.isVisitor,
-                      onUpdate: () => setState(() {}),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            
-            const SizedBox(height: 8),
-            
-            // Weekday headers
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: const [
-                Text('SUN', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                Text('MON', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                Text('TUE', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                Text('WED', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                Text('THU', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                Text('FRI', style: TextStyle(fontSize: 12, color: Colors.grey)),
-                Text('SAT', style: TextStyle(fontSize: 12, color: Colors.grey)),
-              ],
-            ),
-            
-            const SizedBox(height: 16),
-            
-            // Calendar grid - READ ONLY
-            for (int row = 0; row < _controller.totalCalendarRows; row++) 
-              Padding(
-                padding: const EdgeInsets.only(bottom: 16.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: List.generate(7, (col) {
-                    final dayIndex = row * 7 + col - _controller.firstWeekdayOfMonth + 1;
-                    
-                    if (dayIndex < 1 || dayIndex > _controller.lastDayOfMonth) {
-                      return const SizedBox(width: 30, height: 30);
-                    }
-                    
-                    final date = DateTime(_controller.selectedMonth.year, _controller.selectedMonth.month, dayIndex);
-                    final isHighlighted = _controller.isDateHighlighted(date);
-                    
-                    // Read-only date cell - no GestureDetector or InkWell
-                    return Container(
-                      width: 30,
-                      height: 30,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: isHighlighted ? Colors.blue : Colors.transparent,
-                      ),
-                      child: Center(
-                        child: Text(
-                          '$dayIndex',
-                          style: TextStyle(
-                            color: isHighlighted ? Colors.white : Colors.black,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    );
-                  }),
-                ),
-              ),
-          ],
-        ),
-      ),
+        );
+      }),
     );
   }
 
-  List<Widget> _buildLectureList() {
-    // Fixed dates for the lectures based on the image
-    final lectureData = [
-      {
-        'week': '1',
-        'title': 'Lecture Title',
-        'date': DateTime(2025, 3, 8), // March 8, 2025
-      },
-      {
-        'week': '2',
-        'title': 'Lecture Title',
-        'date': DateTime(2025, 3, 19), // March 19, 2025
-      },
-      {
-        'week': '3',
-        'title': 'Lecture Title',
-        'date': DateTime(2025, 3, 24), // March 24, 2025
-      },
-      {
-        'week': '4',
-        'title': 'Lecture Title',
-        'date': DateTime(2025, 3, 30), // March 30, 2025
-      },
-    ];
+  Widget _buildLectureSection(
+      ScheduleController controller, BuildContext context) {
+    return Obx(() {
+      final courses = controller.getCoursesForCurrentMonth();
 
-    return lectureData.map((lecture) {
-      final formattedDate = DateFormat('MMMM d yyyy').format(lecture['date'] as DateTime);
-      return _buildLectureCard(
-        week: lecture['week'] as String,
-        title: lecture['title'] as String,
-        date: lecture['date'] as DateTime,
-      );
-    }).toList();
-  }
-
-  Widget _buildLectureCard({required String week, required String title, required DateTime date}) {
-    final formattedDate = DateFormat('MMMM d yyyy').format(date);
-    
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16.0),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Week $week: $title',
-              style: const TextStyle(
+      if (courses.isEmpty) {
+        return Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: const Center(
+            child: Text(
+              "No courses scheduled for this month.\nCourses you create will appear here.",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: Colors.black54,
                 fontSize: 16,
+              ),
+            ),
+          ),
+        );
+      }
+
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Padding(
+            padding: EdgeInsets.only(left: 8, bottom: 8),
+            child: Text(
+              "This Month's Courses",
+              style: TextStyle(
                 fontWeight: FontWeight.bold,
+                fontSize: 18,
               ),
             ),
-            const SizedBox(height: 4),
-            Text(
-              'Incoming on $formattedDate',
-              style: const TextStyle(
-                fontSize: 14,
-                color: Colors.black87,
-              ),
-            ),
-            const SizedBox(height: 12),
-            // Attendance button
-            Container(
-              width: double.infinity,
-              height: 40,
-              decoration: BoxDecoration(
-                color: const Color(0xFFE8F4FB),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: TextButton(
-                onPressed: () {
-                  // Mark attendance functionality
+          ),
+          ...courses.asMap().entries.map((entry) {
+            final index = entry.key;
+            final course = entry.value;
+            final isPast = controller.isDatePast(course.date);
+            final formattedDate = DateFormat('MMMM d yyyy').format(course.date);
+
+            return Padding(
+              padding:
+                  EdgeInsets.only(bottom: index < courses.length - 1 ? 16 : 0),
+              child: ScheduleCard(
+                weekNumber: index + 1,
+                date: formattedDate,
+                isPast: isPast,
+                title: course.title,
+                onViewDetails: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => CourseDetailPage(
+                        course: course,
+                        lessonService: controller.courseService,
+                      ),
+                    ),
+                  ).then((_) => controller.loadCourses());
                 },
-                child: const Text(
-                  'Mark your attendance',
-                  style: TextStyle(
-                    color: Colors.blue,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
               ),
-            ),
-          ],
-        ),
-      ),
-    );
+            );
+          }).toList(),
+        ],
+      );
+    });
   }
 }
