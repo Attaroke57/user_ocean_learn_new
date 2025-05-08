@@ -36,12 +36,14 @@ class SchedulePage extends StatelessWidget {
             fontSize: 18,
           ),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh, color: Colors.black),
-            onPressed: () => controller.loadCourses(),
-          ),
-        ],
+         actions: [
+              IconButton(
+                icon: const Icon(Icons.notifications_outlined,
+                    color: Colors.black),
+                onPressed: () {},
+              ),
+            ],
+       
       ),
       drawer: NavDrawer(),
       body: Obx(() {
@@ -56,35 +58,7 @@ class SchedulePage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        "Weekly Schedule Rules:",
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                          color: primarycolor,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      const Text(
-                        "• Each week can have only one lesson or none\n"
-                        "• Lessons are shown on the calendar with blue circles\n"
-                        "• Tap on a lesson date in the calendar to view details",
-                        style: TextStyle(
-                          fontSize: 14,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+              
                 const SizedBox(height: 16),
                 CalendarWidget(controller: controller),
                 const SizedBox(height: 16),
