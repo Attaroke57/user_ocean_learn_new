@@ -23,7 +23,7 @@ class OceanLearnPages {
     GetPage(name: OceanLearnRoutes.subscriptionPage, page: () => SubscriptionPage()),
     GetPage(name: OceanLearnRoutes.introPage, page: () => IntroPage()),
     GetPage(name: OceanLearnRoutes.splashScreen, page: () => SplashScreen()),
-    GetPage(name: OceanLearnRoutes.historypage, page: () => Historypage()),
+    GetPage(name: OceanLearnRoutes.historypage, page: () => PaymentPage()),
    
   ];
 }
