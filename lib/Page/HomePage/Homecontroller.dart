@@ -52,6 +52,7 @@ class HomeController extends GetxController {
   Future<void> loadInitialLessons() async {
     isLoading.value = true;
     await courseService.loadLessons(1);
+    isLoading.value = false;
 
     final sorted = courseService.getLessons()
       ..sort((a, b) => b.date.compareTo(a.date)); // sort by newest first

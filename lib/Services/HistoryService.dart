@@ -15,9 +15,9 @@ class Historyservice {
       }
       
       final response = await http.get(
-        Uri.parse('$baseUrl/subscription/index'),
+        Uri.parse('$baseUrl/subscription/history'),
         headers: {
-          'Authorization': 'Bearer $token',
+          'Authorization': 'Bearer $token', 
           'Content-Type': 'application/json',
         },
       );

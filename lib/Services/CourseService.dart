@@ -46,6 +46,7 @@ class CourseService {
           _currentPage = jsonData['meta']['current_page'] ?? page;
           _totalPages = jsonData['meta']['last_page'] ?? 1;
         }
+        print('Courses loaded successfully: ${_courses.length}');
       } else if (response.statusCode == 401) {
         print('Unauthorized access. Token may be expired.');
         LoginController().logout();

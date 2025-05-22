@@ -22,7 +22,7 @@ class SubscriptionService {
 
   /// ✅ Membuat subscription baru
   Future<String?> createSubscription() async {
-    final url = Uri.parse('$_baseUrl/api/v1/subscription');
+    final url = Uri.parse('$_baseUrl/api/v1/subscription/digital');
 
     try {
       final token = await _getUserToken();
