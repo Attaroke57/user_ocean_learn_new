@@ -23,9 +23,9 @@ class CourseDetailPage extends StatefulWidget {
 }
 
 class _CourseDetailPageState extends State<CourseDetailPage> {
-  bool _isNoteVisible = false;
+  bool _isNoteVisible = true;
   bool _isLoading = false;
-  bool _isAdmin = false;
+  bool _isStudent = false;
   late TextEditingController _noteController;
   late CourseModel _currentCourse;
 
@@ -35,7 +35,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
     _currentCourse = widget.course;
     _noteController = TextEditingController(text: widget.course.note);
     _checkAdminStatus();
-    _isAdmin = true;
+    _isStudent = true;
     _loadCourseDetail();
   }
 
@@ -48,8 +48,8 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
   Future.delayed(Duration(milliseconds: 100), () {
     if (mounted) {
       setState(() {
-        _isAdmin = role.toLowerCase() == 'admin';
-        debugPrint('[DEBUG] _isAdmin di setState: $_isAdmin');
+        _isStudent = role.toLowerCase() == 'admin';
+        debugPrint('[DEBUG] _isAdmin di setState: $_isStudent');
       });
     }
   });
@@ -84,7 +84,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-     print('[DEBUG] BUILD UI - _isAdmin: $_isAdmin');
+     print('[DEBUG] BUILD UI - _isStudent: $_isStudent');
     return Scaffold(
       backgroundColor: netralcolor,
       appBar: AppBar(
@@ -110,7 +110,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                 children: [
                   LessonCard(course: _currentCourse),
                   const SizedBox(height: 20),
-                  if (_isAdmin)
+                  if (_isStudent)
                     _isNoteVisible
                         ? NoteInput(
                             controller: _noteController,

@@ -50,7 +50,7 @@ class LessonCard extends StatelessWidget {
                 ),
                 child: InkWell(
                   onTap: () {
-                    QRScannerPage.openQRScanner(context);
+                    QRScannerPage();
                   },
                   child: Text(
                     "Attendance",

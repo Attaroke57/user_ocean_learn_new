@@ -8,8 +8,14 @@ import 'package:user_ocean_learn/Routing/ocean_learn_route.dart';
 import 'package:user_ocean_learn/Widgets/user_storage.dart';
 
 void main() async {
-  await GetStorage.init();
+    WidgetsFlutterBinding.ensureInitialized();
   await UserStorage.init();
+
+  // Hapus data user jika rememberMe false
+  if (!UserStorage.isRememberMeEnabled()) {
+    await UserStorage.clearUserData();
+  }
+  await GetStorage.init();
   Get.put(LoginController());
   Get.put(DashboardController());
   runApp(MyApp());

@@ -4,9 +4,7 @@ import 'package:get/get.dart';
 import 'package:user_ocean_learn/Dashboard/dashboard.dart';
 import 'package:user_ocean_learn/Page/HistoryPage/HistoryController.dart';
 import 'package:user_ocean_learn/Widgets/ColorPallete.dart';
-import 'package:user_ocean_learn/Widgets/PaymentPage/PaymentDashboard.dart';
 import 'package:user_ocean_learn/Widgets/PaymentPage/PaymentHistory.dart';
-import 'package:user_ocean_learn/Widgets/PaymentPage/PaymentSearchFIlter.dart';
 
 
 class PaymentPage extends StatelessWidget {
@@ -22,10 +20,10 @@ class PaymentPage extends StatelessWidget {
       backgroundColor: netralcolor,
       appBar: AppBar(
         title: const Text(
-          'Payment Management',
+          'Payment History',
           style: TextStyle(color: textcolor, fontWeight: FontWeight.bold),
         ),
-        backgroundColor: secondarycolor,
+        backgroundColor: netralcolor,
         elevation: 0,
         leading: Builder(
               builder: (context) => IconButton(

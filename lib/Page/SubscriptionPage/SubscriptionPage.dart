@@ -1,11 +1,14 @@
+// SubscriptionPage.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart';
 import 'package:user_ocean_learn/Widgets/mycard.dart';
 import 'package:user_ocean_learn/Widgets/mytext.dart';
 import 'package:user_ocean_learn/Page/SubscriptionPage/SubscriptionController.dart';
 
 class SubscriptionPage extends StatelessWidget {
-  final SubscriptionController _subscriptionController = SubscriptionController();
+  final SubscriptionController _subscriptionController =
+      Get.put(SubscriptionController());
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +18,8 @@ class SubscriptionPage extends StatelessWidget {
           children: [
             // App Bar
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -109,13 +113,14 @@ class SubscriptionPage extends StatelessWidget {
                                 textAlign: TextAlign.center,
                               ),
                               SizedBox(height: 12),
+
+                              // Subscribe Now Button
                               Container(
                                 width: double.infinity,
                                 child: ElevatedButton(
-                                  onPressed: () async {
-                                    // Call the controller to handle the subscription
-                                   _subscriptionController.handleSubscribeButtonPressed(context);
-
+                                  onPressed: () {
+                                    _subscriptionController
+                                        .showPaymentOptions();
                                   },
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: Color(0xFFD6EEFB),
@@ -134,6 +139,80 @@ class SubscriptionPage extends StatelessWidget {
                                   ),
                                 ),
                               ),
+
+                              // Payment Options (Cash & Transfer)
+                              Obx(() {
+                                if (_subscriptionController
+                                    .showPaymentButtons.value) {
+                                  return Column(
+                                    children: [
+                                      SizedBox(height: 16),
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: ElevatedButton(
+                                              onPressed: () {
+                                                _subscriptionController
+                                                    .handleCashPayment(context);
+                                              },
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor:
+                                                    Colors.green.shade100,
+                                                foregroundColor:
+                                                    Colors.green.shade800,
+                                                padding: EdgeInsets.symmetric(
+                                                    horizontal: 24,
+                                                    vertical: 12),
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(12),
+                                                ),
+                                              ),
+                                              child: MyText(
+                                                text: 'Cash',
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w600,
+                                                color: Colors.green.shade800,
+                                              ),
+                                            ),
+                                          ),
+                                          SizedBox(width: 12),
+                                          Expanded(
+                                            child: ElevatedButton(
+                                              onPressed: () {
+                                                _subscriptionController
+                                                    .handleTransferPayment(
+                                                        context);
+                                              },
+                                              style: ElevatedButton.styleFrom(
+                                                backgroundColor:
+                                                    Colors.orange.shade100,
+                                                foregroundColor:
+                                                    Colors.orange.shade800,
+                                                padding: EdgeInsets.symmetric(
+                                                    horizontal: 24,
+                                                    vertical: 12),
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.circular(12),
+                                                ),
+                                              ),
+                                              child: MyText(
+                                                text: 'Transfer',
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w600,
+                                                color: Colors.orange.shade800,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  );
+                                } else {
+                                  return SizedBox.shrink();
+                                }
+                              }),
                             ],
                           ),
                         ),

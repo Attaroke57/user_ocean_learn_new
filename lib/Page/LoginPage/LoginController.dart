@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:user_ocean_learn/Dashboard/dashboardcontroller.dart';
 import 'package:user_ocean_learn/Page/SubscriptionPage/SubscriptionPage.dart';
 import 'package:user_ocean_learn/Routing/ocean_learn_route.dart';
 import 'package:user_ocean_learn/Services/LoginService.dart';
@@ -31,18 +32,31 @@ class LoginController extends GetxController {
           ? response.accountInfo!.tokens[0].token
           : '';
 
-      if (token.isNotEmpty) {
-        if (rememberMe.value) {
-          await UserStorage.saveUserData(
-            token: token,
-            email: response.accountInfo!.email,
-            name: response.accountInfo!.name,
-            role: response.accountInfo!.role,
-          );
-        }
-        
+     if (token.isNotEmpty) {
+  // Simpan rememberMe status
+  await UserStorage.saveRememberMe(rememberMe.value);
+
+  if (rememberMe.value) {
+    await UserStorage.saveUserData(
+      token: token,
+      email: response.accountInfo!.email,
+      name: response.accountInfo!.name,
+      role: response.accountInfo!.role,
+    );
+  } else {
+    // Hanya simpan data selama sesi (tidak permanen)
+    await UserStorage.saveUserData(
+      token: token,
+      email: response.accountInfo!.email,
+      name: response.accountInfo!.name,
+      role: response.accountInfo!.role,
+    );
+    // Data ini akan terhapus di main() saat aplikasi restart
+  }  
+        final dashboardController = Get.find<DashboardController>();
+        dashboardController.loadUserData();
         print('Token saved: ${UserStorage.getToken()}');
-        Get.offNamed('/home');
+        Get.offNamed(OceanLearnRoutes.homePage);
       } else {
         _showErrorDialog('Token not found in response');
       }
@@ -77,6 +91,7 @@ class LoginController extends GetxController {
     print('Token is empty, navigating to login');
     Get.offAllNamed(OceanLearnRoutes.loginPage);
   }
+  Get.offNamed(OceanLearnRoutes.loginPage);
 }
 
 

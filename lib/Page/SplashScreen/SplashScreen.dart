@@ -48,7 +48,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     await Future.delayed(const Duration(seconds: 1));
 
     if (token != null && token.isNotEmpty) {
-      if (userRole != null && userRole.toLowerCase() == 'admin') {
+      if (userRole != null && userRole.toLowerCase() == 'student') {
         Get.offNamed(OceanLearnRoutes.homePage);
       } else {
         await UserStorage.clearUserData();

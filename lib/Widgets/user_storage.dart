@@ -2,7 +2,7 @@ import 'package:get_storage/get_storage.dart';
 
 class UserStorage {
   static final _storage = GetStorage('user_data');
-  
+  static const String REMEMBER_ME_KEY = 'remember_me';
   // Keys
   static const String TOKEN_KEY = 'token';
   static const String EMAIL_KEY = 'email';
@@ -57,7 +57,15 @@ class UserStorage {
   static Future<void> clearUserData() async {
     await _storage.erase();
   }
-  
+// Save rememberMe
+static Future<void> saveRememberMe(bool value) async {
+  await _storage.write(REMEMBER_ME_KEY, value);
+}
+
+// Get rememberMe
+static bool isRememberMeEnabled() {
+  return _storage.read(REMEMBER_ME_KEY) ?? false;
+}
   // For debugging (optional)
   static void printStorageData() {
     print('Token: ${getToken()}');

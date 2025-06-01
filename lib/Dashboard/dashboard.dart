@@ -70,13 +70,13 @@ class NavDrawer extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            dashboardController.name.value,
+                            "${dashboardController.name.value}",
                             style: GoogleFonts.montserrat(
                               fontWeight: FontWeight.w600,
                             ),
                           ),
                           Text(
-                            dashboardController.email.value,
+                            "${dashboardController.email.value}",
                             style: GoogleFonts.montserrat(
                               fontSize: 12,
                               color: textcolor,
