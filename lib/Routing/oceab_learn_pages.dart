@@ -4,6 +4,7 @@ import 'package:user_ocean_learn/Page/HistoryPage/HistoryPage.dart';
 import 'package:user_ocean_learn/Page/HomePage/Homepage.dart';
 import 'package:user_ocean_learn/Page/IntroPage/IntroPage.dart';
 import 'package:user_ocean_learn/Page/LoginPage/LoginPage.dart';
+import 'package:user_ocean_learn/Page/OtpVerification/OtpVerificationPage.dart';
 import 'package:user_ocean_learn/Page/ProfilePage/ProfilePage.dart';
 import 'package:user_ocean_learn/Page/SubscriptionPage/SubscriptionPage.dart';
 import 'package:user_ocean_learn/Page/RegisterPage/RegisterPage.dart';
@@ -24,6 +25,7 @@ class OceanLearnPages {
     GetPage(name: OceanLearnRoutes.introPage, page: () => IntroPage()),
     GetPage(name: OceanLearnRoutes.splashScreen, page: () => SplashScreen()),
     GetPage(name: OceanLearnRoutes.historypage, page: () => PaymentPage()),
+    GetPage(name: OceanLearnRoutes.verificationpage, page: () => OtpVerificationScreen()),
    
   ];
 }

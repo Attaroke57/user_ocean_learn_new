@@ -39,11 +39,14 @@ dependencies:
   intl: ^0.20.2
   http: ^1.1.0
   shared_preferences: ^2.2.0
-  mobile_scanner: ^3.2.0
+  mobile_scanner: ^3.5.4
   url_launcher: ^6.2.5
   get_storage: ^2.1.1
   google_fonts: ^6.2.1
   webview_flutter: ^4.2.2
+  firebase_core: any
+  firebase_messaging: any
+  flutter_local_notifications: any
 
 dev_dependencies:
   flutter_test:

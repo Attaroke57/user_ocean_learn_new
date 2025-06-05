@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:user_ocean_learn/Routing/ocean_learn_route.dart';
 import 'package:user_ocean_learn/Services/RegisterService.dart';
 
 class RegisterController extends GetxController {
@@ -83,22 +84,14 @@ class RegisterController extends GetxController {
         email.value,
       );
       
-      if (result['success']) {
-        // Registration successful
-        clearForm();
-        
-        // Show success message
-        Get.snackbar(
-          'Success',
-          result['message'] ?? 'Registration successful! Please login.',
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-          snackPosition: SnackPosition.BOTTOM,
-        );
-        
-        // Navigate to login page
-        Get.offNamed('/login');
-      } else {
+      if (result != null && result['success'] == true) {
+ 
+
+  Get.offNamed(OceanLearnRoutes.verificationpage, arguments: {
+    'email': email.value,
+      });
+}
+else {
         // Registration failed
         errorMessage.value = result['message'];
       }

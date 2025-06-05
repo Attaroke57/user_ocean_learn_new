@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:user_ocean_learn/Dashboard/dashboardcontroller.dart';
 import 'package:user_ocean_learn/Page/SubscriptionPage/SubscriptionPage.dart';
 import 'package:user_ocean_learn/Routing/ocean_learn_route.dart';
+import 'package:user_ocean_learn/Services/FirebaseService.dart';
 import 'package:user_ocean_learn/Services/LoginService.dart';
 import 'package:user_ocean_learn/Widgets/user_storage.dart';
 
@@ -56,6 +57,7 @@ class LoginController extends GetxController {
         final dashboardController = Get.find<DashboardController>();
         dashboardController.loadUserData();
         print('Token saved: ${UserStorage.getToken()}');
+        FirebaseService  .saveFcmTokenToServer(); // Simpan FCM token ke server
         Get.offNamed(OceanLearnRoutes.homePage);
       } else {
         _showErrorDialog('Token not found in response');

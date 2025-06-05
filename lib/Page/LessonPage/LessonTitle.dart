@@ -147,7 +147,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                           )
                         : NoteButton(
                             onPressed: () {
-                              setState(() => _isNoteVisible = true);
+                              setState(() => _isNoteVisible = false);
                             },
                           ),
                   const SizedBox(height: 16),

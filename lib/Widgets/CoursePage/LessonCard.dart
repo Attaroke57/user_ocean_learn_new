@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:user_ocean_learn/Model/course_model.dart';
-import 'package:user_ocean_learn/Services/QRScanService.dart';
+import 'package:user_ocean_learn/QrScannerPage/QrScannerPage.dart';
 import 'package:user_ocean_learn/Widgets/ColorPallete.dart';
 
 class LessonCard extends StatelessWidget {
@@ -50,7 +50,7 @@ class LessonCard extends StatelessWidget {
                 ),
                 child: InkWell(
                   onTap: () {
-                    QRScannerPage();
+                    ScanQRPage();
                   },
                   child: Text(
                     "Attendance",

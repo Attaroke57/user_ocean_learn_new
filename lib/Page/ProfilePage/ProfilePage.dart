@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:user_ocean_learn/Dashboard/dashboard.dart';
 import 'package:user_ocean_learn/Page/LoginPage/LoginController.dart';
+import 'package:user_ocean_learn/Page/OtpVerification/OtpVerificationPage.dart';
+import 'package:user_ocean_learn/QrScannerPage/QrScannerPage.dart';
 import 'package:user_ocean_learn/Widgets/ColorPallete.dart';
 import 'package:user_ocean_learn/Widgets/mybutton.dart';
 import 'package:user_ocean_learn/Widgets/mytext.dart';
@@ -43,7 +45,8 @@ class ProfilePage extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.notifications_outlined, color: Colors.black),
-            onPressed: () {},
+            onPressed: () {
+            },
           ),
         ],
       ),

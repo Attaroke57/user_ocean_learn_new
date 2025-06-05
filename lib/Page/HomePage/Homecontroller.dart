@@ -6,9 +6,10 @@ import 'package:user_ocean_learn/Widgets/user_storage.dart';
 class HomeController extends GetxController {
   final CourseService courseService = CourseService();
 
-  var name = ''.obs;
+  
   var isLoading = true.obs;
   var isLoadingMore = false.obs;
+  var name = ''.obs;
   var lessons = <CourseModel>[].obs;
   var searchQuery = ''.obs;
   var sortByNewest = true.obs;
@@ -55,7 +56,7 @@ class HomeController extends GetxController {
     isLoading.value = false;
 
     final sorted = courseService.getLessons()
-      ..sort((a, b) => b.date.compareTo(a.date)); // sort by newest first
+      ..sort((a, b) => b.date.compareTo(a.date)); 
 
     lessons.assignAll(sorted);
     isLoading.value = false;

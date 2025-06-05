@@ -9,8 +9,6 @@ class RegisterService {
         'name': username,        // Make sure it's 'name', not 'username'
         'password': password,
         'email': email,
-        'role': 'student',
-        'subscription': 'free'
       };
       
       // Print the request details for debugging
