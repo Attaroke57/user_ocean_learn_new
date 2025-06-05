@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:user_ocean_learn/Model/subscribtion_model.dart';
 import 'package:user_ocean_learn/Services/HistoryService.dart';
+import 'package:user_ocean_learn/Widgets/user_storage.dart';
 
 class PaymentController extends GetxController {
   final isLoading = true.obs;
@@ -13,6 +15,7 @@ class PaymentController extends GetxController {
 
   // Subscriptions grouped by month
   final subscriptionsByMonth = <String, List<SubscriptionModel>>{}.obs;
+  var name = ''.obs;
 
   // For filtering
   final selectedMonth = ''.obs;
@@ -21,7 +24,11 @@ class PaymentController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    loadUserName();
     fetchSubscriptions();
+  }
+   Future<void> loadUserName() async {
+    name.value = UserStorage.getName() ?? '';
   }
 
   Future<void> fetchSubscriptions() async {

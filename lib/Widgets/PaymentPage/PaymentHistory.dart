@@ -11,105 +11,239 @@ class PaymentHistory extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color statusColor;
-    switch (subscription.status) {
-      case 'Paid':
-        statusColor = Colors.green;
-        break;
-      case 'Pending':
-        statusColor = Colors.orange;
-        break;
-      case 'Canceled':
-        statusColor = Colors.red;
-        break;
-      default:
-        statusColor = Colors.grey;
-    }
+    final (statusColor, statusBgColor) = _getStatusColors();
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      decoration: BoxDecoration(
-        color: purewhite,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: netralcolor),
-        boxShadow: [
-          BoxShadow(
-            color: secondarycolor.withOpacity(0.8),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
-          ),
-        ],
+    return Card(
+      margin: const EdgeInsets.only(bottom: 16),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: netralcolor.withOpacity(0.15),
+          width: 1,
+        ),
       ),
-      child: Column(
-        children: [
-          ListTile(
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            leading: CircleAvatar(
-              backgroundColor: primarycolor,
-              child: Text(
-                'ID:${subscription.id}',
-                style: const TextStyle(color: purewhite, fontWeight: FontWeight.bold, fontSize: 10),
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          color: purewhite,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildHeader(),
+            const SizedBox(height: 16),
+            _buildPaymentDetails(),
+            if (subscription.detail.invoiceUrl.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              _buildInvoiceButton(),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Row(
+      children: [
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                controller.name.value,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 18,
+                  color: textcolor,
+                  letterSpacing: -0.5,
+                ),
               ),
-            ),
-            title: Text(
-              'User ID: ${subscription.userId}',
-              style: const TextStyle(fontWeight: FontWeight.bold, color: textcolor),
-            ),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 4),
-                Text(
-                  'Payment Method: ${subscription.detail.paymentMethod}',
-                  style: TextStyle(color: textcolor.withOpacity(0.7), fontSize: 12),
+              const SizedBox(height: 4),
+              Text(
+                'Rp ${_formatAmount(subscription.detail.amount)}',
+                style: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 20,
+                  color: primarycolor,
+                  letterSpacing: -0.5,
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  'Paid at: ${subscription.detail.paidAt}',
-                  style: TextStyle(color: textcolor.withOpacity(0.7), fontSize: 12),
-                ),
-              ],
-            ),
-            trailing: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  'Rp ${subscription.detail.amount}',
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: textcolor),
-                ),
-                const SizedBox(height: 4),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: statusColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: statusColor.withOpacity(0.3)),
-                  ),
-                  child: Text(
-                    subscription.status,
-                    style: TextStyle(color: statusColor, fontSize: 12, fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ],
+              ),
+            ],
+          ),
+        ),
+        _buildStatusBadge(),
+      ],
+    );
+  }
+
+  Widget _buildStatusBadge() {
+    final (statusColor, statusBgColor) = _getStatusColors();
+    
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: statusBgColor,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 6,
+            height: 6,
+            decoration: BoxDecoration(
+              color: statusColor,
+              shape: BoxShape.circle,
             ),
           ),
-          if (subscription.detail.invoiceUrl.isNotEmpty)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: TextButton.icon(
-                icon: const Icon(Icons.receipt_long, color: primarycolor),
-                label: const Text('View Invoice', style: TextStyle(color: primarycolor)),
-                onPressed: () => controller.viewInvoice(subscription.detail.invoiceUrl),
-                style: TextButton.styleFrom(
-                  backgroundColor: secondarycolor.withOpacity(0.3),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                ),
-              ),
+          const SizedBox(width: 6),
+          Text(
+            subscription.status,
+            style: TextStyle(
+              color: statusColor,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
             ),
+          ),
         ],
       ),
     );
+  }
+
+  Widget _buildPaymentDetails() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: netralcolor.withOpacity(0.05),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        children: [
+          _buildDetailRow(
+            icon: Icons.payment_rounded,
+            label: 'Payment Method',
+            value: subscription.detail.paymentMethod,
+          ),
+          const SizedBox(height: 12),
+          _buildDetailRow(
+            icon: Icons.schedule_rounded,
+            label: 'Paid At',
+            value: _formatDate(subscription.detail.paidAt),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetailRow({
+    required IconData icon,
+    required String label,
+    required String value,
+  }) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: primarycolor.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Icon(
+            icon,
+            size: 16,
+            color: primarycolor,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: textcolor.withOpacity(0.6),
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                value,
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: textcolor,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildInvoiceButton() {
+    return SizedBox(
+      width: double.infinity,
+      child: OutlinedButton.icon(
+        icon: const Icon(
+          Icons.receipt_long_rounded,
+          size: 18,
+        ),
+        label: const Text(
+          'View Invoice',
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 14,
+          ),
+        ),
+        onPressed: () => controller.viewInvoice(subscription.detail.invoiceUrl),
+        style: OutlinedButton.styleFrom(
+          foregroundColor: primarycolor,
+          side: BorderSide(color: primarycolor.withOpacity(0.3)),
+          backgroundColor: primarycolor.withOpacity(0.05),
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      ),
+    );
+  }
+
+  (Color, Color) _getStatusColors() {
+    switch (subscription.status) {
+      case 'Paid':
+        return (Colors.green.shade600, Colors.green.shade50);
+      case 'Pending':
+        return (Colors.orange.shade600, Colors.orange.shade50);
+      case 'Canceled':
+        return (Colors.red.shade600, Colors.red.shade50);
+      default:
+        return (Colors.grey.shade600, Colors.grey.shade50);
+    }
+  }
+
+  String _formatAmount(String amount) {
+    // Format angka dengan separator ribuan
+    final numStr = amount.replaceAll(RegExp(r'[^\d]'), '');
+    if (numStr.isEmpty) return amount;
+    
+    final num = int.tryParse(numStr);
+    if (num == null) return amount;
+    
+    return num.toString().replaceAllMapped(
+      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
+      (Match m) => '${m[1]}.',
+    );
+  }
+
+  String _formatDate(String date) {
+    // Bisa ditambahkan logika formatting date yang lebih baik
+    return date;
   }
 }
