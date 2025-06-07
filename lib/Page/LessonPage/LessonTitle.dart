@@ -48,7 +48,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
   Future.delayed(Duration(milliseconds: 100), () {
     if (mounted) {
       setState(() {
-        _isStudent = role.toLowerCase() == 'admin';
+        _isStudent = role.toLowerCase() == 'student';
         debugPrint('[DEBUG] _isAdmin di setState: $_isStudent');
       });
     }

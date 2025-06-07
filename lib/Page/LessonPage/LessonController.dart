@@ -83,16 +83,7 @@ class LessonController extends GetxController {
     
     print('Notes Saved for lesson "${lessonTitle.value}":');
     print('Point 1a: ${point1a.value}');
-    
-    // Here you can add logic to save notes to a database or local storage
-    // For example:
-    // saveNotesToDatabase(lessonId.value, {
-    //   'point1a': point1a.value,
-    //   'point1b': point1b.value,
-    //   ...
-    // });
-    
-    // Show success message
+  
     Get.snackbar(
       'Success',
       'Notes saved successfully',

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:user_ocean_learn/Model/course_model.dart';
-import 'package:user_ocean_learn/QrScannerPage/QrScannerPage.dart';
+import 'package:user_ocean_learn/Page/QrScannerPage/QrScannerPage.dart';
 import 'package:user_ocean_learn/Widgets/ColorPallete.dart';
 
 class LessonCard extends StatelessWidget {
@@ -50,7 +51,7 @@ class LessonCard extends StatelessWidget {
                 ),
                 child: InkWell(
                   onTap: () {
-                    ScanQRPage();
+                    Get.to(() => ScanQRPage());
                   },
                   child: Text(
                     "Attendance",
