@@ -23,7 +23,7 @@ class CourseDetailPage extends StatefulWidget {
 }
 
 class _CourseDetailPageState extends State<CourseDetailPage> {
-  bool _isNoteVisible = true;
+  bool _isNoteVisible = false;
   bool _isLoading = false;
   bool _isStudent = false;
   late TextEditingController _noteController;
@@ -40,41 +40,61 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
   }
 
   Future<void> _checkAdminStatus() async {
-  final prefs = await SharedPreferences.getInstance();
-  final role = prefs.getString('role') ?? '';
-  debugPrint('[DEBUG] ROLE FROM PREFS: $role');
+    final prefs = await SharedPreferences.getInstance();
+    final role = prefs.getString('role') ?? '';
+    debugPrint('[DEBUG] ROLE FROM PREFS: $role');
 
-  // Ini triknya: paksa rebuild setelah 100ms
-  Future.delayed(Duration(milliseconds: 100), () {
-    if (mounted) {
+    // Ini triknya: paksa rebuild setelah 100ms
+    Future.delayed(Duration(milliseconds: 100), () {
+      if (mounted) {
+        setState(() {
+          _isStudent = role.toLowerCase() == 'student';
+          debugPrint('[DEBUG] _isAdmin di setState: $_isStudent');
+        });
+      }
+    });
+  }
+
+  Future<void> _loadCourseDetail() async {
+  setState(() {
+    _isLoading = true;
+  });
+
+  final courseDetail =
+      await widget.lessonService.getCourseDetail(_currentCourse.id);
+
+  if (courseDetail != null) {
+    final prefs = await SharedPreferences.getInstance();
+    final role = prefs.getString('role') ?? 'visitor';
+
+    if (courseDetail.isLocked && role.toLowerCase() == 'visitor') {
+      // ❌ Pengguna visitor tidak boleh akses
       setState(() {
-        _isStudent = role.toLowerCase() == 'student';
-        debugPrint('[DEBUG] _isAdmin di setState: $_isStudent');
+        _isLoading = false;
       });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Kamu belum premium!'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+
+      Navigator.pop(context); // kembali ke halaman sebelumnya
+      return;
     }
+
+    setState(() {
+      _currentCourse = courseDetail;
+      _noteController.text = courseDetail.note;
+    });
+  }
+
+  setState(() {
+    _isLoading = false;
   });
 }
 
-
-  Future<void> _loadCourseDetail() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    final courseDetail =
-        await widget.lessonService.getCourseDetail(_currentCourse.id);
-
-    if (courseDetail != null) {
-      setState(() {
-        _currentCourse = courseDetail;
-        _noteController.text = courseDetail.note;
-      });
-    }
-
-    setState(() {
-      _isLoading = false;
-    });
-  }
 
   @override
   void dispose() {
@@ -84,7 +104,7 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-     print('[DEBUG] BUILD UI - _isStudent: $_isStudent');
+    print('[DEBUG] BUILD UI - _isStudent: $_isStudent');
     return Scaffold(
       backgroundColor: netralcolor,
       appBar: AppBar(
@@ -111,48 +131,40 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                   LessonCard(course: _currentCourse),
                   const SizedBox(height: 20),
                   if (_isStudent)
-                    _isNoteVisible
-                        ? NoteInput(
-                            controller: _noteController,
-                            onSave: () async {
-                              setState(() {
-                                _isLoading = true;
-                              });
+                    // NoteInput(
+                    //   controller: _noteController,
+                    //   onSave: () async {
+                    //     setState(() {
+                    //       _isLoading = true;
+                    //     });
 
-                              bool success =
-                                  await widget.lessonService.updateNote(
-                                _currentCourse.id,
-                                _noteController.text,
-                              );
+                    //     bool success = await widget.lessonService.updateNote(
+                    //       _currentCourse.id,
+                    //       _noteController.text,
+                    //     );
 
-                              setState(() {
-                                _isLoading = false;
-                                _isNoteVisible = false;
-                                if (success) {
-                                  _currentCourse.note = _noteController.text;
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                          content: Text(
-                                              "Note updated successfully")));
-                                } else {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                          content:
-                                              Text("Failed to update note")));
-                                }
-                              });
-                            },
-                            onCancel: () =>
-                                setState(() => _isNoteVisible = false),
-                          )
-                        : NoteButton(
-                            onPressed: () {
-                              setState(() => _isNoteVisible = false);
-                            },
-                          ),
+                    //     setState(() {
+                    //       _isLoading = false;
+                    //       _isNoteVisible = false;
+                    //       if (success) {
+                    //         _currentCourse.note = _noteController.text;
+                    //         ScaffoldMessenger.of(context).showSnackBar(
+                    //           const SnackBar(
+                    //               content: Text("Note updated successfully")),
+                    //         );
+                    //       } else {
+                    //         ScaffoldMessenger.of(context).showSnackBar(
+                    //           const SnackBar(
+                    //               content: Text("Failed to update note")),
+                    //         );
+                    //       }
+                    //     });
+                    //   },
+                    //   onCancel: () => setState(() => _isNoteVisible = false),
+                    // ),
                   const SizedBox(height: 16),
-                  NotesSection(
-                      course: _currentCourse, isNoteVisible: _isNoteVisible),
+                  // NotesSection(
+                  //     course: _currentCourse, isNoteVisible: _isNoteVisible),
                 ],
               ),
             ),

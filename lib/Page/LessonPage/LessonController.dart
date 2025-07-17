@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:user_ocean_learn/Model/course_model.dart';
+import 'package:user_ocean_learn/Services/CourseService.dart';
 import 'package:user_ocean_learn/Services/LessonService.dart';
 
 class LessonController extends GetxController {
@@ -9,6 +11,14 @@ class LessonController extends GetxController {
   final lessonDate = ''.obs;
   final isLoading = false.obs;
   var lessonVideoUrl = ''.obs;
+  var courses = <CourseModel>[].obs;
+
+  Future<void> loadCourses(String userRole) async {
+  final service = CourseService(); // buat instance-nya
+  await service.loadLessons(1); // panggil method untuk ambil data dari API
+  courses.value = service.getLessons(); // ambil hasilnya
+}
+
 
   Future<void> fetchLessonDetail() async {
     final data = await LessonService.fetchLessonDetail(1);

@@ -54,117 +54,110 @@ class NavDrawer extends StatelessWidget {
           ),
           SizedBox(height: 10),
 
-           Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                  child: Row(
-                    children: [
-                      CircleAvatar(
-                        radius: 25,
-                        backgroundImage: NetworkImage(
-                          'https://i.pinimg.com/736x/9f/be/f5/9fbef5a4ae96b3498fad7873a8ff9d09.jpg',
-                        ),
-                      ),
-                      const SizedBox(width: 15),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "${dashboardController.name.value}",
-                            style: GoogleFonts.montserrat(
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          Text(
-                            "${dashboardController.email.value}",
-                            style: GoogleFonts.montserrat(
-                              fontSize: 12,
-                              color: textcolor,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+            child: Row(
+              children: [
+                CircleAvatar(
+                  radius: 25,
+                  backgroundImage: NetworkImage(
+                    'https://i.pinimg.com/736x/9f/be/f5/9fbef5a4ae96b3498fad7873a8ff9d09.jpg',
                   ),
                 ),
+                const SizedBox(width: 15),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "${dashboardController.name.value}",
+                      style: GoogleFonts.montserrat(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    Text(
+                      "${dashboardController.email.value}",
+                      style: GoogleFonts.montserrat(
+                        fontSize: 12,
+                        color: textcolor,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
 
           const Divider(height: 1),
 
           // Menu Items
-          Expanded(
-            child: SingleChildScrollView(
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 5),
-                child: Obx(() => Column(
-                      children: [
-                        _buildMenuItem(
-                          icon: Icons.home,
-                          title: 'Home',
-                          isActive:
-                              dashboardController.selectedIndex.value == 0,
-                          onTap: () {
-                            dashboardController.changeMenu(0);
-                            Get.toNamed(OceanLearnRoutes.homePage);
-                          },
-                        ),
-                        _buildMenuItem(
-                          icon: Icons.calendar_today,
-                          title: 'Jadwal',
-                          isActive:
-                              dashboardController.selectedIndex.value == 1,
-                          onTap: () {
-                            dashboardController.changeMenu(1);
-                            Get.toNamed(OceanLearnRoutes.schedulePage);
-                          },
-                        ),
-                         _buildMenuItem(
-                          icon: Icons.payment_sharp,
-                          title: 'Payment History',
-                          isActive:
-                              dashboardController.selectedIndex.value == 2,
-                          onTap: () {
-                            dashboardController.changeMenu(2);
-                            Get.toNamed(OceanLearnRoutes.historypage);
-                          },
-                        ),
-                        _buildMenuItem(
-                          icon: Icons.person,
-                          title: 'Profile',
-                          isActive:
-                              dashboardController.selectedIndex.value == 3,
-                          onTap: () {
-                            dashboardController.changeMenu(3);
-                            Get.toNamed(OceanLearnRoutes.profilePage);
-                          },
-                        ),
-                      ],
-                    )),
+          Obx(() {
+            final isPremium = dashboardController.isPremium.value;
+
+            return Column(
+              children: [
+                _buildMenuItem(
+                  icon: Icons.home,
+                  title: 'Home',
+                  isActive: dashboardController.selectedIndex.value == 0,
+                  onTap: () {
+                    dashboardController.changeMenu(0);
+                    Get.toNamed(OceanLearnRoutes.homePage);
+                  },
+                ),
+                _buildMenuItem(
+                  icon: Icons.calendar_today,
+                  title: 'Jadwal',
+                  isActive: dashboardController.selectedIndex.value == 1,
+                  onTap: () {
+                    dashboardController.changeMenu(1);
+                    Get.toNamed(OceanLearnRoutes.schedulePage);
+                  },
+                ),
+                if (isPremium) // ✅ Muncul hanya jika premium
+                  _buildMenuItem(
+                    icon: Icons.payment_sharp,
+                    title: 'Payment History',
+                    isActive: dashboardController.selectedIndex.value == 2,
+                    onTap: () {
+                      dashboardController.changeMenu(2);
+                      Get.toNamed(OceanLearnRoutes.historypage);
+                    },
+                  ),
+                _buildMenuItem(
+                  icon: Icons.person,
+                  title: 'Profile',
+                  isActive: dashboardController.selectedIndex.value == 3,
+                  onTap: () {
+                    dashboardController.changeMenu(3);
+                    Get.toNamed(OceanLearnRoutes.profilePage);
+                  },
+                ),
+              ],
+            );
+          }),
+
+          // Logout Button
+          const Spacer(),
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Colors.blue.shade50,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: TextButton.icon(
+                icon: const Icon(Icons.logout, color: Colors.blue),
+                label: const Text(
+                  'Log out',
+                  style: TextStyle(color: Colors.blue),
+                ),
+                onPressed: () {
+                  Get.find<LoginController>().logout();
+                },
               ),
             ),
           ),
-
-          // Logout Button
-           const Spacer(),
-                Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Container(
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: Colors.blue.shade50,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: TextButton.icon(
-                      icon: const Icon(Icons.logout, color: Colors.blue),
-                      label: const Text(
-                        'Log out',
-                        style: TextStyle(color: Colors.blue),
-                      ),
-                      onPressed: () {
-                        Get.find<LoginController>().logout();
-                      },
-                    ),
-                  ),
-                ),
         ],
       ),
     );

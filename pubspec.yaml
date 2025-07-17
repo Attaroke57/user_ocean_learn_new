@@ -47,6 +47,7 @@ dependencies:
   firebase_core: any
   firebase_messaging: any
   flutter_local_notifications: any
+  image_picker: ^1.0.4
 
 dev_dependencies:
   flutter_test:

@@ -151,62 +151,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 16),
+                     
 
-                      // Sign in with text
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Divider(color: Colors.grey[300]),
-                          ),
-                          Padding(
-                            padding:
-                                const EdgeInsets.symmetric(horizontal: 8.0),
-                            child: MyText(
-                              text: "Sign in with",
-                              fontSize: 12,
-                              color: Colors.grey[600]!,
-                            ),
-                          ),
-                          Expanded(
-                            child: Divider(color: Colors.grey[300]),
-                          ),
-                        ],
-                      ),
-
-                      SizedBox(height: 10),
-
-                      // Sign in with social media icons
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          MyImage(
-                            height: 40,
-                            width: 40,                         
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Image.asset(
-                                'Assets/images/google.png',
-                                fit: BoxFit.contain,
-                              ),
-                            ),
-                          ),
-                          SizedBox(width: 20),
-                          MyImage(
-                            height: 40,
-                            width: 40,
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Image.asset(
-                                'Assets/images/facebook.png',
-                                fit: BoxFit.contain,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 10),
+                      const SizedBox(height: 20),
                       
                       // Sign In Button - Connected to API login
                       Obx(() => loginController.isLoading.value

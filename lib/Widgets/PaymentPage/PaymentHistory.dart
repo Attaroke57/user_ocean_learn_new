@@ -2,248 +2,201 @@ import 'package:flutter/material.dart';
 import 'package:user_ocean_learn/Model/subscribtion_model.dart';
 import 'package:user_ocean_learn/Page/HistoryPage/HistoryController.dart';
 import 'package:user_ocean_learn/Widgets/ColorPallete.dart';
+import 'package:user_ocean_learn/Widgets/user_storage.dart';
 
 class PaymentHistory extends StatelessWidget {
   final SubscriptionModel subscription;
   final PaymentController controller;
 
-  const PaymentHistory({super.key, required this.subscription, required this.controller});
+  const PaymentHistory({
+    Key? key,
+    required this.subscription,
+    required this.controller,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    final (statusColor, statusBgColor) = _getStatusColors();
+    final username = UserStorage.getName() ?? 'User';
+    final userEmail = UserStorage.getEmail() ?? 'email@example.com';
+    final userRole = controller.getUserRoleFromId(subscription.userId);
 
     return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(
-          color: netralcolor.withOpacity(0.15),
-          width: 1,
-        ),
-      ),
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          color: purewhite,
-        ),
+      margin: const EdgeInsets.only(bottom: 12),
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildHeader(),
-            const SizedBox(height: 16),
-            _buildPaymentDetails(),
-            if (subscription.detail.invoiceUrl.isNotEmpty) ...[
-              const SizedBox(height: 16),
-              _buildInvoiceButton(),
-            ],
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        username,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: textcolor,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        userEmail,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
+                      ),
+                      
+                    ],
+                  ),
+                ),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: _getStatusColor(subscription.status),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    subscription.status,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildDetailItem(
+                    'Amount',
+                    'Rp ${subscription.detail.amount}',
+                    Icons.attach_money,
+                  ),
+                ),
+                Expanded(
+                  child: _buildDetailItem(
+                    'Method',
+                    subscription.detail.paymentMethod,
+                    Icons.payment,
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 8),
+
+            Row(
+              children: [
+                Expanded(
+                  child: _buildDetailItem(
+                    'Date',
+                    subscription.detail.paidAt,
+                    Icons.calendar_today,
+                  ),
+                ),
+                
+              ],
+            ),
+
+            const SizedBox(height: 12),
+
+            // Action buttons
+            Row(
+              children: [
+                if (subscription.detail.paymentMethod == 'cash' &&
+                    subscription.status.toLowerCase() == 'pending')
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: () =>
+                          controller.confirmCashPayment(subscription),
+                      icon: const Icon(Icons.check, color: Colors.white),
+                      label: const Text('Confirm',
+                          style: TextStyle(color: Colors.white)),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    ),
+                  ),
+                if (subscription.detail.paymentMethod == 'cash' &&
+                    subscription.status.toLowerCase() == 'pending')
+                  const SizedBox(width: 8),
+                Expanded(
+                  child: OutlinedButton.icon(
+                    onPressed: () =>
+                        controller.viewInvoice(subscription), // Updated: pass subscription object
+                    icon: const Icon(Icons.receipt, color: primarycolor),
+                    label: const Text('View Invoice',
+                        style: TextStyle(color: primarycolor)),
+                    style: OutlinedButton.styleFrom(
+                      side: const BorderSide(color: primarycolor),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildDetailItem(String label, String value, IconData icon) {
     return Row(
       children: [
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                controller.name.value,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 18,
-                  color: textcolor,
-                  letterSpacing: -0.5,
-                ),
+        Icon(icon, size: 16, color: Colors.grey),
+        const SizedBox(width: 8),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: const TextStyle(
+                fontSize: 12,
+                color: Colors.grey,
               ),
-              const SizedBox(height: 4),
-              Text(
-                'Rp ${_formatAmount(subscription.detail.amount)}',
-                style: const TextStyle(
-                  fontWeight: FontWeight.w700,
-                  fontSize: 20,
-                  color: primarycolor,
-                  letterSpacing: -0.5,
-                ),
-              ),
-            ],
-          ),
-        ),
-        _buildStatusBadge(),
-      ],
-    );
-  }
-
-  Widget _buildStatusBadge() {
-    final (statusColor, statusBgColor) = _getStatusColors();
-    
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: statusBgColor,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 6,
-            height: 6,
-            decoration: BoxDecoration(
-              color: statusColor,
-              shape: BoxShape.circle,
             ),
-          ),
-          const SizedBox(width: 6),
-          Text(
-            subscription.status,
-            style: TextStyle(
-              color: statusColor,
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
+            Text(
+              value,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: textcolor,
+              ),
             ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildPaymentDetails() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: netralcolor.withOpacity(0.05),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        children: [
-          _buildDetailRow(
-            icon: Icons.payment_rounded,
-            label: 'Payment Method',
-            value: subscription.detail.paymentMethod,
-          ),
-          const SizedBox(height: 12),
-          _buildDetailRow(
-            icon: Icons.schedule_rounded,
-            label: 'Paid At',
-            value: _formatDate(subscription.detail.paidAt),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDetailRow({
-    required IconData icon,
-    required String label,
-    required String value,
-  }) {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(6),
-          decoration: BoxDecoration(
-            color: primarycolor.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Icon(
-            icon,
-            size: 16,
-            color: primarycolor,
-          ),
-        ),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: textcolor.withOpacity(0.6),
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                value,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: textcolor,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ],
-          ),
+          ],
         ),
       ],
     );
   }
 
-  Widget _buildInvoiceButton() {
-    return SizedBox(
-      width: double.infinity,
-      child: OutlinedButton.icon(
-        icon: const Icon(
-          Icons.receipt_long_rounded,
-          size: 18,
-        ),
-        label: const Text(
-          'View Invoice',
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 14,
-          ),
-        ),
-        onPressed: () => controller.viewInvoice(subscription.detail.invoiceUrl),
-        style: OutlinedButton.styleFrom(
-          foregroundColor: primarycolor,
-          side: BorderSide(color: primarycolor.withOpacity(0.3)),
-          backgroundColor: primarycolor.withOpacity(0.05),
-          padding: const EdgeInsets.symmetric(vertical: 12),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
-      ),
-    );
-  }
-
-  (Color, Color) _getStatusColors() {
-    switch (subscription.status) {
-      case 'Paid':
-        return (Colors.green.shade600, Colors.green.shade50);
-      case 'Pending':
-        return (Colors.orange.shade600, Colors.orange.shade50);
-      case 'Canceled':
-        return (Colors.red.shade600, Colors.red.shade50);
+  Color _getStatusColor(String status) {
+    switch (status.toLowerCase()) {
+      case 'paid':
+        return Colors.green;
+      case 'pending':
+        return Colors.orange;
+      case 'failed':
+        return Colors.red;
       default:
-        return (Colors.grey.shade600, Colors.grey.shade50);
+        return Colors.grey;
     }
-  }
-
-  String _formatAmount(String amount) {
-    // Format angka dengan separator ribuan
-    final numStr = amount.replaceAll(RegExp(r'[^\d]'), '');
-    if (numStr.isEmpty) return amount;
-    
-    final num = int.tryParse(numStr);
-    if (num == null) return amount;
-    
-    return num.toString().replaceAllMapped(
-      RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'),
-      (Match m) => '${m[1]}.',
-    );
-  }
-
-  String _formatDate(String date) {
-    // Bisa ditambahkan logika formatting date yang lebih baik
-    return date;
   }
 }

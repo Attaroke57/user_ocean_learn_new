@@ -1,16 +1,25 @@
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'dart:async';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:user_ocean_learn/Model/login_service_model.dart';
+import 'package:user_ocean_learn/Widgets/user_storage.dart';
 
 class LoginService {
+  static const String _baseUrl = 'https://ocean-learn-api.rplrus.com';
+
   static Future<LoginResponseModel> login(String email, String password) async {
     try {
       final response = await http.post(
-        Uri.parse('https://ocean-learn-api.rplrus.com/api/v1/user/auth'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({'email': email, 'password': password}),
-      ).timeout(const Duration(seconds: 10));
+        Uri.parse('$_baseUrl/api/v1/user/auth'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode({
+          'email': email,
+          'password': password,
+        }),
+      );
 
       return LoginResponseModel.fromJson(jsonDecode(response.body));
     } on TimeoutException {
@@ -18,18 +27,46 @@ class LoginService {
         status: false,
         message: 'Connection timeout. Please check your internet connection.',
       );
-    } catch (_) {
+    } catch (e) {
+      print('Login error: $e');
       return LoginResponseModel(
         status: false,
-        message: 'An unexpected error occurred.',
+        message: 'Incorrect email or password.',
       );
     }
+  }
+
+  static Future<LoginResponseModel> getAccountInfoWithToken() async {
+    final token = await UserStorage.getToken();
+    final response = await http.post(
+      Uri.parse('$_baseUrl/api/v1/user/auth'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+      },
+    );
+
+    return LoginResponseModel.fromJson(jsonDecode(response.body));
+  }
+   Future<Map<String, dynamic>> getUserDataFromAuth() async {
+    final token = await UserStorage.getToken();
+
+    final response = await http.post(
+      Uri.parse('$_baseUrl/api/v1/user/auth'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Accept': 'application/json',
+      },
+    );
+
+    final data = jsonDecode(response.body);
+    return data['data']; // pastikan ini sesuai struktur API kamu
   }
 
   static Future<Map<String, dynamic>> logout(String token) async {
     try {
       final response = await http.post(
-        Uri.parse('https://ocean-learn-api.rplrus.com/api/v1/user/logout'),
+        Uri.parse('$_baseUrl/api/v1/user/logout'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',

@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get_storage/get_storage.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:user_ocean_learn/Model/Member_model.dart';
 import 'package:user_ocean_learn/Model/subscribtion_model.dart';
+import 'package:user_ocean_learn/Page/HistoryPage/InvoicePage.dart';
 import 'package:user_ocean_learn/Services/HistoryService.dart';
+import 'package:user_ocean_learn/Services/SubscriptionService.dart';
 import 'package:user_ocean_learn/Widgets/user_storage.dart';
 
 class PaymentController extends GetxController {
   final isLoading = true.obs;
   final error = ''.obs;
-
-  // All subscriptions
-  final subscriptions = <SubscriptionModel>[].obs;
-
-  // Subscriptions grouped by month
-  final subscriptionsByMonth = <String, List<SubscriptionModel>>{}.obs;
+  final isConfirming = false.obs;
   var name = ''.obs;
+  final subscriptions = <SubscriptionModel>[].obs;
+  final subscriptionsByMonth = <String, List<SubscriptionModel>>{}.obs;
+  final members = <MemberModel>[].obs; 
+  
 
-  // For filtering
   final selectedMonth = ''.obs;
   final months = <String>[].obs;
 
@@ -25,37 +25,89 @@ class PaymentController extends GetxController {
   void onInit() {
     super.onInit();
     loadUserName();
-    fetchSubscriptions();
-  }
-   Future<void> loadUserName() async {
-    name.value = UserStorage.getName() ?? '';
+    fetchData();
   }
 
-  Future<void> fetchSubscriptions() async {
+  Future<void> fetchData() async {
     try {
       isLoading.value = true;
       error.value = '';
 
-      // Get all subscriptions
-      final allSubscriptions = await Historyservice.getSubscriptions();
-      subscriptions.value = allSubscriptions;
-
-      // Get subscriptions by month
-      final groupedSubscriptions =
-          await Historyservice.getSubscriptionsByMonth();
-      subscriptionsByMonth.value = groupedSubscriptions;
-
-      // Extract available months
-      months.value = groupedSubscriptions.keys.toList();
-
-      // Set selected month to the most recent one if available
-      if (months.isNotEmpty) {
-        selectedMonth.value = months.first;
-      }
+      await Future.wait([
+        fetchSubscriptions(),
+        
+      ]);
     } catch (e) {
       error.value = e.toString();
     } finally {
       isLoading.value = false;
+    }
+  }
+  Future<void> loadUserName() async {
+    name.value = UserStorage.getName() ?? '';
+  }
+  
+
+  Future<void> fetchSubscriptions() async {
+    try {
+      final allSubscriptions = await Historyservice.getSubscriptions();
+      subscriptions.value = allSubscriptions;
+
+      final groupedSubscriptions = await Historyservice.getSubscriptionsByMonth();
+      subscriptionsByMonth.value = groupedSubscriptions;
+
+      months.value = groupedSubscriptions.keys.toList();
+
+      if (months.isNotEmpty) {
+        selectedMonth.value = months.first;
+      }
+    } catch (e) {
+      throw Exception('Error fetching subscriptions: $e');
+    }
+  }
+
+  
+
+  String getUsernameFromId(int userId) {
+    try {
+      final member = members.firstWhere(
+        (member) => member.id.personalId == userId,
+      );
+      return member.accountInfo.name;
+    } catch (e) {
+      return 'Unknown User'; 
+    }
+  }
+
+  String getUserEmailFromId(int userId) {
+    try {
+      final member = members.firstWhere(
+        (member) => member.id.personalId == userId,
+      );
+      return member.accountInfo.email;
+    } catch (e) {
+      return 'Unknown Email';
+    }
+  }
+
+  String getUserRoleFromId(int userId) {
+    try {
+      final member = members.firstWhere(
+        (member) => member.id.personalId == userId,
+      );
+      return member.accountInfo.role;
+    } catch (e) {
+      return 'Unknown Role';
+    }
+  }
+
+  MemberModel? getMemberFromId(int userId) {
+    try {
+      return members.firstWhere(
+        (member) => member.id.personalId == userId,
+      );
+    } catch (e) {
+      return null;
     }
   }
 
@@ -71,12 +123,27 @@ class PaymentController extends GetxController {
     return subscriptionsByMonth[selectedMonth.value] ?? [];
   }
 
-  void viewInvoice(String invoiceUrl) async {
-    if (invoiceUrl.isEmpty) {
+  void viewInvoice(SubscriptionModel subscription) async {
+    // Jika payment method adalah cash, buka halaman invoice baru
+    if (subscription.detail.paymentMethod.toLowerCase() == 'cash') {
+      Get.to(
+        () => InvoicePage(
+          subscription: subscription,
+          controller: this,
+        ),
+        transition: Transition.rightToLeft,
+        duration: const Duration(milliseconds: 300),
+      );
+      return;
+    }
+
+    // Untuk payment method lainnya, buka URL invoice seperti sebelumnya
+    String invoiceUrl = subscription.detail.invoiceUrl;
+    if (invoiceUrl.isEmpty || invoiceUrl == "offline payment") {
       Get.snackbar(
-        'Error',
-        'Invoice URL is not available',
-        backgroundColor: Colors.orange,
+        'Info',
+        'This is an offline payment - no invoice URL available',
+        backgroundColor: Colors.blue,
         colorText: Colors.white,
       );
       return;
@@ -92,5 +159,52 @@ class PaymentController extends GetxController {
         colorText: Colors.white,
       );
     }
+  }
+
+  Future<void> confirmCashPayment(SubscriptionModel subscription) async {
+  try {
+    final username = getUsernameFromId(subscription.userId);
+
+    bool? shouldConfirm = await Get.dialog<bool>(
+      AlertDialog(
+        title: const Text('Confirm Payment'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Are you sure you want to confirm this ${subscription.detail.paymentMethod} payment?'),
+            const SizedBox(height: 8),
+            Text('Username: $username', style: const TextStyle(fontWeight: FontWeight.bold)),
+            Text('Amount: Rp ${subscription.detail.amount}', style: const TextStyle(fontWeight: FontWeight.bold)),
+            Text('Payment Method: ${subscription.detail.paymentMethod}'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(result: false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Get.back(result: true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+            child: const Text('Confirm', style: TextStyle(color: Colors.white)),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldConfirm != true) return;
+
+    isConfirming.value = true;
+
+    
+
+    
+  } catch (e) {
+    
+  }
+}
+  Future<void> refreshData() async {
+    await fetchData();
   }
 }

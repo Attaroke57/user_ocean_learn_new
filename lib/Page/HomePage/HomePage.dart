@@ -54,7 +54,6 @@ class _HomePageState extends State<HomePage> {
                 : RefreshIndicator(
                     onRefresh: () => controller.loadInitialLessons(),
                     child: CustomScrollView(
-                      
                       physics: const AlwaysScrollableScrollPhysics(),
                       slivers: [
                         SliverPadding(
@@ -64,10 +63,10 @@ class _HomePageState extends State<HomePage> {
                               const SizedBox(height: 20),
                               FeaturedLessonCard(
                                 lessons: controller.lessons,
-                                controller: controller,
                                 courseService: controller.courseService,
                                 onRefresh: (_) =>
                                     controller.loadInitialLessons(),
+                                controller: controller,
                               ),
                               const SizedBox(height: 20),
                               Obx(() => SearchBarWidget(
@@ -76,12 +75,13 @@ class _HomePageState extends State<HomePage> {
                                     isNewest: controller.sortByNewest.value,
                                   )),
                               const SizedBox(height: 20),
-                              LessonList(
-                                lessons: controller.filteredLessons,
-                                courseService: controller.courseService,
-                                onRefresh: (_) =>
-                                    controller.loadInitialLessons(),
-                              ),
+                              Obx(() => LessonList(
+                                    lessons: controller.filteredLessons,
+                                    courseService: controller.courseService,
+                                    onRefresh: (_) =>
+                                        controller.loadInitialLessons(),
+                                    controller: controller,
+                                  )),
                               if (controller.isLoadingMore.value)
                                 const Padding(
                                   padding: EdgeInsets.symmetric(vertical: 16.0),
@@ -99,4 +99,3 @@ class _HomePageState extends State<HomePage> {
         ));
   }
 }
-

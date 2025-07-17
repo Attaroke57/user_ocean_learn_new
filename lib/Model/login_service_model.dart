@@ -2,6 +2,7 @@ class LoginResponseModel {
   final bool status;
   final String message;
   final AccountInfo? accountInfo;
+  
 
   LoginResponseModel({
     required this.status,
@@ -25,12 +26,14 @@ class AccountInfo {
   final String email;
   final String role;
   final List<Token> tokens;
+  final Map<String, dynamic>? subscription;
 
   AccountInfo({
     required this.name,
     required this.email,
     required this.role,
     required this.tokens,
+    this.subscription,
   });
 
   factory AccountInfo.fromJson(Map<String, dynamic> json) {
@@ -39,6 +42,7 @@ class AccountInfo {
       email: json['email'],
       role: json['role'],
       tokens: List<Token>.from(json['token'].map((t) => Token.fromJson(t))),
+      subscription: json['subscription'],
     );
   }
 }

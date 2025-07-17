@@ -12,4 +12,5 @@ class OceanLearnRoutes {
   static const coursedetailpage = "/coursedetailpage";
   static const historypage = "/historypage";
   static const verificationpage = "/verificationpage";
+  static const roleselectionpage = "/roleselectionpage";
 }

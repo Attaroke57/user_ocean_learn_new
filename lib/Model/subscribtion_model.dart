@@ -31,7 +31,18 @@ class SubscriptionModel {
       year: year,
     );
   }
+  
 }
+extension SubscriptionModelExtension on SubscriptionModel {
+  DateTime get date {
+    try {
+      return DateTime.parse(detail.paidAt);
+    } catch (_) {
+      return DateTime(2000); // default kalau gagal
+    }
+  }
+}
+
 
 class SubscriptionDetail {
   final String amount;

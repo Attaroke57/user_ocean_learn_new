@@ -12,21 +12,30 @@ class NotesSection extends StatelessWidget {
   }) : super(key: key);
 
   @override
-  Widget build(BuildContext context) {
-    if (course.note.isEmpty || isNoteVisible) return const SizedBox.shrink();
+  @override
+Widget build(BuildContext context) {
+  print('[DEBUG] course.note: "${course.note}"');
+  if (course.note.isEmpty) return const SizedBox.shrink(); // hilangkan `|| isNoteVisible`
 
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(12)),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text("Note", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-          const SizedBox(height: 8),
-          Text(course.note),
-        ],
-      ),
-    );
-  }
+  return Container(
+    width: double.infinity,
+    padding: const EdgeInsets.all(16),
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(12),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          "Note",
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 8),
+        Text(course.note),
+      ],
+    ),
+  );
+}
+
 }

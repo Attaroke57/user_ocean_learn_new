@@ -12,18 +12,16 @@ class PaymentPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    
-
     final PaymentController controller = Get.put(PaymentController());
 
     return Scaffold(
       backgroundColor: netralcolor,
       appBar: AppBar(
         title: const Text(
-          'Payment History',
+          'Payment Management',
           style: TextStyle(color: textcolor, fontWeight: FontWeight.bold),
         ),
-        backgroundColor: netralcolor,
+        backgroundColor: secondarycolor,
         elevation: 0,
         leading: Builder(
               builder: (context) => IconButton(
@@ -34,7 +32,7 @@ class PaymentPage extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh, color: Colors.black),
-            onPressed: () => controller.fetchSubscriptions(),
+            onPressed: () => controller.refreshData(), // Updated method call
           ),
         ],
       ),
@@ -61,6 +59,11 @@ class PaymentPage extends StatelessWidget {
               const Icon(Icons.error_outline, color: Colors.red, size: 48),
               const SizedBox(height: 16),
               Text('Error: ${controller.error.value}', style: const TextStyle(color: textcolor)),
+              const SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () => controller.refreshData(), // Updated method call
+                child: const Text('Retry'),
+              ),
             ],
           ),
         );
@@ -81,16 +84,19 @@ class PaymentPage extends StatelessWidget {
 
       return NestedScrollView(
         headerSliverBuilder: (context, innerBoxIsScrolled) => [
-          
-          
+         
+         
         ],
-        body: ListView.builder(
-          padding: const EdgeInsets.all(16),
-          itemCount: controller.getSubscriptionsForSelectedMonth().length,
-          itemBuilder: (context, index) {
-            final sub = controller.getSubscriptionsForSelectedMonth()[index];
-            return PaymentHistory(subscription: sub, controller: controller);
-          },
+        body: RefreshIndicator(
+          onRefresh: () => controller.refreshData(), // Updated method call
+          child: ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: controller.getSubscriptionsForSelectedMonth().length,
+            itemBuilder: (context, index) {
+              final sub = controller.getSubscriptionsForSelectedMonth()[index];
+              return PaymentHistory(subscription: sub, controller: controller);
+            },
+          ),
         ),
       );
     });

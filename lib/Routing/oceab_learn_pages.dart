@@ -5,6 +5,7 @@ import 'package:user_ocean_learn/Page/HistoryPage/HistoryPage.dart';
 import 'package:user_ocean_learn/Page/HomePage/Homepage.dart';
 import 'package:user_ocean_learn/Page/IntroPage/IntroPage.dart';
 import 'package:user_ocean_learn/Page/LessonPage/LessonTitle.dart';
+import 'package:user_ocean_learn/Page/LessonPage/RoleSelectionPage.dart';
 import 'package:user_ocean_learn/Page/LoginPage/LoginPage.dart';
 import 'package:user_ocean_learn/Page/OtpVerification/OtpVerificationPage.dart';
 import 'package:user_ocean_learn/Page/ProfilePage/ProfilePage.dart';
@@ -39,6 +40,7 @@ class OceanLearnPages {
     );
   },
 ),
+GetPage(name: '/', page: () => RoleSelectionPage()),
 
 
       
