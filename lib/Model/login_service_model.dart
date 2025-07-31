@@ -12,7 +12,7 @@ class LoginResponseModel {
 
   factory LoginResponseModel.fromJson(Map<String, dynamic> json) {
     return LoginResponseModel(
-      status: json['status'],
+      status: json['status'] ?? false,
       message: json['message'] ?? '',
       accountInfo: json['data'] != null
           ? AccountInfo.fromJson(json['data']['account_info'])

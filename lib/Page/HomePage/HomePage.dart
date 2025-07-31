@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:user_ocean_learn/Dashboard/dashboard.dart';
-import 'package:user_ocean_learn/Page/HomePage/Homecontroller.dart';
+import 'package:user_ocean_learn/Page/HomePage/HomeController.dart';
 import 'package:user_ocean_learn/Widgets/ColorPallete.dart';
 import 'package:user_ocean_learn/Widgets/HomePage/FeaturedLessonCard.dart';
 import 'package:user_ocean_learn/Widgets/HomePage/LessonList.dart';
@@ -15,7 +15,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final HomeController controller = Get.put(HomeController());
+  final HomeController controller = Get.find<HomeController>();
 
   @override
   Widget build(BuildContext context) {
@@ -51,50 +51,52 @@ class _HomePageState extends State<HomePage> {
           body: SafeArea(
             child: controller.isLoading.value
                 ? const Center(child: CircularProgressIndicator())
-                : RefreshIndicator(
-                    onRefresh: () => controller.loadInitialLessons(),
-                    child: CustomScrollView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      slivers: [
-                        SliverPadding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          sliver: SliverList(
-                            delegate: SliverChildListDelegate([
-                              const SizedBox(height: 20),
-                              FeaturedLessonCard(
-                                lessons: controller.lessons,
-                                courseService: controller.courseService,
-                                onRefresh: (_) =>
-                                    controller.loadInitialLessons(),
-                                controller: controller,
-                              ),
-                              const SizedBox(height: 20),
-                              Obx(() => SearchBarWidget(
-                                    onChanged: controller.updateSearchQuery,
-                                    onTunePressed: controller.toggleSortOrder,
-                                    isNewest: controller.sortByNewest.value,
-                                  )),
-                              const SizedBox(height: 20),
-                              Obx(() => LessonList(
-                                    lessons: controller.filteredLessons,
+                : controller.isMembershipLoaded.value == false
+                    ? const Center(child: CircularProgressIndicator())
+                    : RefreshIndicator(
+                        onRefresh: () => controller.loadInitialLessons(),
+                        child: CustomScrollView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          slivers: [
+                            SliverPadding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              sliver: SliverList(
+                                delegate: SliverChildListDelegate([
+                                  const SizedBox(height: 20),
+                                  FeaturedLessonCard(
+                                    lessons: controller.lessons,
                                     courseService: controller.courseService,
                                     onRefresh: (_) =>
                                         controller.loadInitialLessons(),
                                     controller: controller,
-                                  )),
-                              if (controller.isLoadingMore.value)
-                                const Padding(
-                                  padding: EdgeInsets.symmetric(vertical: 16.0),
-                                  child: Center(
-                                      child: CircularProgressIndicator()),
-                                ),
-                              const SizedBox(height: 80),
-                            ]),
-                          ),
+                                  ),
+                                  const SizedBox(height: 20),
+                                  Obx(() => SearchBarWidget(
+                                        onChanged: controller.updateSearchQuery,
+                                        onTunePressed: controller.toggleSortOrder,
+                                        isNewest: controller.sortByNewest.value,
+                                      )),
+                                  const SizedBox(height: 20),
+                                  Obx(() => LessonList(
+                                        lessons: controller.filteredLessons,
+                                        courseService: controller.courseService,
+                                        onRefresh: (_) =>
+                                            controller.loadInitialLessons(),
+                                        controller: controller,
+                                      )),
+                                  if (controller.isLoadingMore.value)
+                                    const Padding(
+                                      padding: EdgeInsets.symmetric(vertical: 16.0),
+                                      child: Center(
+                                          child: CircularProgressIndicator()),
+                                    ),
+                                  const SizedBox(height: 80),
+                                ]),
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
-                  ),
+                      ),
           ),
         ));
   }

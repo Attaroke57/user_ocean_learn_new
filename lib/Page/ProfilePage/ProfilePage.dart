@@ -23,18 +23,20 @@ class ProfilePage extends StatelessWidget {
   onRefresh: profileController.refreshSubscriptionStatus,
   child: SingleChildScrollView(
     physics: const AlwaysScrollableScrollPhysics(),
-    child: Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        children: [
-          _buildProfileCard(profileController),
-          const SizedBox(height: 16),
-          _buildAccountSettingsCard(profileController),
-          const SizedBox(height: 16),
-          _buildLogoutButton(profileController),
-        ],
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            _buildProfileCard(profileController),
+            const SizedBox(height: 16),
+            //_buildAccountSettingsCard(profileController),
+            const SizedBox(height: 16),
+            _buildAccountSettingsCard(profileController),
+            const SizedBox(height: 16),
+            _buildLogoutButton(profileController),
+          ],
+        ),
       ),
-    ),
   ),
 ),
 

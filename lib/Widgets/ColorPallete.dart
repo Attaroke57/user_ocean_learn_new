@@ -8,3 +8,4 @@ import 'dart:ui';
   const Color textcolor = Color(0xFF383D43);
   const Color purewhite = Color(0xFFFFFFFF); 
   const Color accent2 = Color(0x5BBEE5); 
+  const pureBlack = Color(0xFF000000);

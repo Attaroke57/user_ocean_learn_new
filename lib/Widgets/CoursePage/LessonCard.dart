@@ -1,17 +1,67 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:open_file/open_file.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:user_ocean_learn/Model/course_model.dart';
 import 'package:user_ocean_learn/Page/QrScannerPage/QrScannerPage.dart';
 import 'package:user_ocean_learn/Widgets/ColorPallete.dart';
+import 'package:user_ocean_learn/Widgets/user_storage.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:http/http.dart' as http;
 
 class LessonCard extends StatelessWidget {
   final CourseModel course;
 
   const LessonCard({Key? key, required this.course}) : super(key: key);
+
+  Future<void> _downloadAndOpenPdf(BuildContext context) async {
+    final token = await UserStorage
+        .getToken(); // sesuaikan dengan tempat kamu simpan token
+    final url =
+        'https://ocean-learn-api.rplrus.com/api/v1/courses/${course.id}/download';
+
+      try {
+        final response = await http.get(
+          Uri.parse(url),
+          headers: {'Authorization': 'Bearer $token'},
+        );
+
+        if (response.statusCode == 200) {
+          final bytes = response.bodyBytes;
+          final dir = await getTemporaryDirectory();
+          final file = File('${dir.path}/lesson_${course.id}.pdf');
+          await file.writeAsBytes(bytes);
+
+          // Check if file exists and is accessible before opening
+          if (await file.exists()) {
+            final result = await OpenFile.open(file.path);
+            if (result.type != ResultType.done) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text('Failed to open file: ${result.message}')),
+              );
+            }
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('File does not exist after download')),
+            );
+          }
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content: Text('Failed to download PDF: ${response.statusCode}')),
+          );
+        }
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error opening file: $e')),
+        );
+      }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -85,20 +135,8 @@ class LessonCard extends StatelessWidget {
             child: Material(
               color: Colors.transparent,
               child: InkWell(
+                onTap: () => _downloadAndOpenPdf(context),
                 borderRadius: BorderRadius.circular(24),
-                onTap: () async {
-                  if (course.videoUrl.isNotEmpty) {
-                    final Uri url = Uri.parse(course.videoUrl);
-                    if (!await launchUrl(url,
-                        mode: LaunchMode.externalApplication)) {
-                      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                          content: Text('Could not open the URL')));
-                    }
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                        content: Text('No URL available for this lesson')));
-                  }
-                },
                 child: Center(
                   child: Text(
                     "Let's check the lessons!",

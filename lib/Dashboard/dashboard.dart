@@ -9,15 +9,20 @@ import 'package:user_ocean_learn/Widgets/ColorPallete.dart';
 
 class NavDrawer extends StatelessWidget {
   final DashboardController dashboardController =
-      Get.put(DashboardController());
+      Get.find<DashboardController>();
 
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
+    final orientation = MediaQuery.of(context).orientation;
+
+    double drawerWidth = orientation == Orientation.portrait
+        ? screenWidth * 0.7
+        : screenWidth * 0.4;
 
     return Drawer(
       backgroundColor: Colors.white,
-      width: screenWidth * 0.7,
+      width: drawerWidth,
       child: Column(
         children: [
           Container(
@@ -28,14 +33,14 @@ class NavDrawer extends StatelessWidget {
               children: [
                 Image.asset(
                   'Assets/images/sidebar.png',
-                  width: 180,
-                  height: 100,
+                  width: orientation == Orientation.portrait ? 180 : 120,
+                  height: orientation == Orientation.portrait ? 100 : 80,
                 ),
                 SizedBox(height: 5),
                 Text(
                   'Ocean Learn',
                   style: TextStyle(
-                    fontSize: 20,
+                    fontSize: orientation == Orientation.portrait ? 20 : 16,
                     fontWeight: FontWeight.bold,
                     color: Colors.black,
                   ),
@@ -44,7 +49,7 @@ class NavDrawer extends StatelessWidget {
                 Text(
                   'Dive into learning, as deep as the sea.',
                   style: TextStyle(
-                    fontSize: 13,
+                    fontSize: orientation == Orientation.portrait ? 13 : 11,
                     color: Colors.grey,
                   ),
                   textAlign: TextAlign.center,
@@ -59,7 +64,7 @@ class NavDrawer extends StatelessWidget {
             child: Row(
               children: [
                 CircleAvatar(
-                  radius: 25,
+                  radius: orientation == Orientation.portrait ? 25 : 20,
                   backgroundImage: NetworkImage(
                     'https://i.pinimg.com/736x/9f/be/f5/9fbef5a4ae96b3498fad7873a8ff9d09.jpg',
                   ),
@@ -72,12 +77,13 @@ class NavDrawer extends StatelessWidget {
                       "${dashboardController.name.value}",
                       style: GoogleFonts.montserrat(
                         fontWeight: FontWeight.w600,
+                        fontSize: orientation == Orientation.portrait ? null : 14,
                       ),
                     ),
                     Text(
                       "${dashboardController.email.value}",
                       style: GoogleFonts.montserrat(
-                        fontSize: 12,
+                        fontSize: orientation == Orientation.portrait ? 12 : 10,
                         color: textcolor,
                       ),
                     ),
@@ -106,7 +112,7 @@ class NavDrawer extends StatelessWidget {
                 ),
                 _buildMenuItem(
                   icon: Icons.calendar_today,
-                  title: 'Jadwal',
+                  title: 'Schedule',
                   isActive: dashboardController.selectedIndex.value == 1,
                   onTap: () {
                     dashboardController.changeMenu(1);

@@ -118,11 +118,14 @@ class CalendarWidget extends StatelessWidget {
       final isMarked = controller.isDateMarked(date);
       final isToday = controller.isToday(date);
       
+      // Determine if user is free user to disable access
+      final isFreeUser = controller.isVisitor.value || !controller.isPremium.value;
+      
       return SizedBox(
         width: 36,
         height: 36,
         child: InkWell(
-          onTap: isMarked ? () {
+          onTap: isMarked && !isFreeUser ? () {
             final course = controller.getCourseForDate(date);
             if (course != null) {
               Navigator.push(
@@ -158,9 +161,9 @@ class CalendarWidget extends StatelessWidget {
                     child: Container(
                       width: 6,
                       height: 6,
-                      decoration: const BoxDecoration(
+                      decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: primarycolor,
+                        color: isFreeUser ? Colors.grey : primarycolor,
                       ),
                     ),
                   ),

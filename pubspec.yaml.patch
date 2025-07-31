@@ -1,0 +1,41 @@
+flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.6
+  get: ^4.7.2
+  flutter_svg: ^2.0.10+1
+  intl: ^0.20.2
+  http: ^1.1.0
+  shared_preferences: ^2.2.0
+  mobile_scanner: ^3.5.2
+  url_launcher: ^6.2.5
+  get_storage: ^2.1.1
+  google_fonts: ^6.2.1
+  webview_flutter: ^4.2.2
+  firebase_core: any
+  firebase_messaging: any
+  flutter_local_notifications: any
+  image_picker: ^1.0.4
+  open_file: any
+=======
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.6
+  get: ^4.7.2
+  flutter_svg: ^2.0.10+1
+  intl: ^0.20.2
+  http: ^1.1.0
+  shared_preferences: ^2.2.0
+  mobile_scanner: ^3.5.2
+  url_launcher: ^6.2.5
+  get_storage: ^2.1.1
+  google_fonts: ^6.2.1
+  webview_flutter: ^4.2.2
+  firebase_core: any
+  firebase_messaging: any
+  flutter_local_notifications: any
+  image_picker: ^1.0.4
+  open_file: any
+  path_provider: ^2.0.11

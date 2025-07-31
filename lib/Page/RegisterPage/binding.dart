@@ -1,7 +1,7 @@
 import 'package:get/get.dart';
 import 'package:user_ocean_learn/Page/RegisterPage/controller.dart'; // Adjust import path based on your project structure
 
-class ProfileBinding extends Bindings {
+class RegisterBinding extends Bindings {
   @override
   void dependencies() {
     // Register the ProfileController

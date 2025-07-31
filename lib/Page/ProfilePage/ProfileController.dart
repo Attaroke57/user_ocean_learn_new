@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:user_ocean_learn/Dashboard/dashboardcontroller.dart';
 import 'package:user_ocean_learn/Model/subscribtion_model.dart';
 import 'package:user_ocean_learn/Page/LoginPage/LoginController.dart';
 import 'package:user_ocean_learn/Page/SubscriptionPage/SubscriptionPage.dart';
 import 'package:user_ocean_learn/Services/HistoryService.dart';
 import 'package:user_ocean_learn/Widgets/ColorPallete.dart';
 import 'package:user_ocean_learn/Widgets/user_storage.dart';
+import 'package:user_ocean_learn/Services/LoginService.dart';
 
 class ProfileController extends GetxController {
   final _subscriptionButtonText = 'My Subscription'.obs;
@@ -50,6 +52,10 @@ class ProfileController extends GetxController {
         // ✅ Simpan ke storage
         await UserStorage.setMembershipExpiry(expiryDate);
         await UserStorage.saveMembershipStatus(status);
+
+        // Refresh DashboardController subscription status
+        final dashboardController = Get.find<DashboardController>();
+        await dashboardController.refreshSubscriptionStatus();
 
         final now = DateTime.now();
         if (now.isBefore(expiryDate)) {
@@ -101,8 +107,9 @@ class ProfileController extends GetxController {
       final subscriptions = await Historyservice.getSubscriptions();
 
       if (subscriptions.isNotEmpty) {
+        // Include offline payment subscriptions as active
         final activeSubscriptions = subscriptions
-            .where((sub) => sub.detail.paymentMethod != 'offline payment')
+            //.where((sub) => sub.detail.paymentMethod != 'offline payment')
             .toList();
 
         if (activeSubscriptions.isNotEmpty) {
@@ -200,23 +207,77 @@ class ProfileController extends GetxController {
     loginController.logout();
   }
 
-  Future<void> refreshSubscriptionStatus() async {
-    _isLoading.value = true;
+ Future<void> refreshSubscriptionStatus() async {
+  print('ProfileController: refreshSubscriptionStatus called');
+  _isLoading.value = true;
 
+  const int maxRetries = 5;
+  const Duration retryDelay = Duration(seconds: 3);
+  int retryCount = 0;
+
+  while (retryCount < maxRetries) {
     try {
-      final subscription = UserStorage.getSubscription();
+      // Fetch fresh user data from backend
+      final response = await LoginService.getAccountInfoWithToken();
+      print('ProfileController: full backend response: $response');
+      final user = response.accountInfo;
+      final subscription = user?.subscription;
 
-      if (subscription != null && subscription.isNotEmpty) {
-        await _processSubscriptionFromAPI(subscription);
+      print('ProfileController: subscription data from backend: $subscription');
+
+      if (user != null && subscription != null) {
+        final expirationDateRaw = subscription['expiration_date'];
+        final expirationDate = expirationDateRaw != null ? DateTime.tryParse(expirationDateRaw) : null;
+        final accessLevel = subscription['status'] ?? 'free';
+
+        print('ProfileController: parsed expirationDate: $expirationDate, accessLevel: $accessLevel');
+
+        if (expirationDate != null) {
+          // Update UserStorage with fresh data
+          await UserStorage.saveUserData(
+            token: user.tokens.first.token,
+            email: user.email,
+            name: user.name,
+            role: user.role,
+          );
+          await UserStorage.saveMembershipStatus(accessLevel);
+          await UserStorage.setMembershipExpiry(expirationDate);
+
+          // Process subscription to update UI
+          await _processSubscriptionFromAPI(subscription);
+
+          break; // Exit loop on success
+        } else {
+          print('ProfileController: expiration_date is null or invalid');
+          _subscriptionButtonText.value = 'Get Premium Membership';
+          _subscriptionButtonColor.value = secondarycolor;
+          _subscriptionTextColor.value = primarycolor;
+          break;
+        }
       } else {
-        await _loadSubscriptionStatusFromHistory();
+        // Fallback to local storage or history
+        final subscriptionLocal = UserStorage.getSubscription();
+        if (subscriptionLocal != null && subscriptionLocal.isNotEmpty) {
+          await _processSubscriptionFromAPI(subscriptionLocal);
+        } else {
+          await _loadSubscriptionStatusFromHistory();
+        }
+        break;
       }
     } catch (e) {
-      _subscriptionButtonText.value = 'Failed to load status';
-      _subscriptionButtonColor.value = Colors.grey.shade300;
-      _subscriptionTextColor.value = Colors.black;
+      print('ProfileController: error in refreshSubscriptionStatus: $e');
+      if (retryCount == maxRetries - 1) {
+        _subscriptionButtonText.value = 'Failed to load status';
+        _subscriptionButtonColor.value = Colors.grey.shade300;
+        _subscriptionTextColor.value = Colors.black;
+      } else {
+        print('ProfileController: retrying refreshSubscriptionStatus in $retryDelay');
+        await Future.delayed(retryDelay);
+      }
     }
-
-    _isLoading.value = false;
+    retryCount++;
   }
+
+  _isLoading.value = false;
+}
 }

@@ -123,7 +123,23 @@ class SchedulePage extends StatelessWidget {
                 date: formattedDate,
                 isPast: isPast,
                 title: course.title,
+                isFreeUser: controller.isVisitor.value || !controller.isPremium.value,
                 onViewDetails: () {
+                  if (controller.isVisitor.value || !controller.isPremium.value) {
+                    Get.dialog(
+                      AlertDialog(
+                        title: const Text('Access Denied'),
+                        content: const Text('Please upgrade to premium to view course details.'),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Get.back(),
+                            child: const Text('OK'),
+                          ),
+                        ],
+                      ),
+                    );
+                    return;
+                  }
                   Navigator.push(
                     context,
                     MaterialPageRoute(

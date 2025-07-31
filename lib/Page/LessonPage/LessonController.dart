@@ -35,12 +35,7 @@ class LessonController extends GetxController {
   var point1a = ''.obs;
 
   // Text controllers for the text fields
-  final TextEditingController point1aController = TextEditingController();
-  final TextEditingController point1bController = TextEditingController();
-  final TextEditingController point1cController = TextEditingController();
-  final TextEditingController point2aController = TextEditingController();
-  final TextEditingController point2bController = TextEditingController();
-  final TextEditingController point2cController = TextEditingController();
+  
 
   @override
   void onInit() {
@@ -74,60 +69,9 @@ class LessonController extends GetxController {
       isLoading.value = false;
     });
   }
-
-  void toggleNoteMode(bool value) {
-    isNoteMode.value = value;
-    
-    // Clear text fields if closing note mode without saving
-    if (!value) {
-      // Revert text controllers to current saved values
-      point1aController.text = point1a.value;
-    
-    }
-  }
-
-  void saveNotes() {
-    // Save notes from controllers to observable variables
-    point1a.value = point1aController.text;
-   
-    
-    print('Notes Saved for lesson "${lessonTitle.value}":');
-    print('Point 1a: ${point1a.value}');
-  
-    Get.snackbar(
-      'Success',
-      'Notes saved successfully',
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.green[100],
-      colorText: Colors.green[800],
-      duration: Duration(seconds: 2),
-    );
-  }
-
-  void clearNotes() {
-    // Clear controllers
-    point1aController.clear();
-    
-    // Clear observable variables
-    point1a.value = '';
-   
-    
-    // Show success message
-    Get.snackbar(
-      'Success',
-      'Notes cleared',
-      snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.blue[100],
-      colorText: Colors.blue[800],
-      duration: Duration(seconds: 2),
-    );
-  }
   
   @override
   void onClose() {
-    // Dispose controllers when the controller is closed
-    point1aController.dispose();
-  
     super.onClose();
   }
 }

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:get/get.dart';
+
 import 'package:user_ocean_learn/Model/course_model.dart';
-import 'package:user_ocean_learn/Page/HomePage/Homecontroller.dart';
+import 'package:user_ocean_learn/Page/HomePage/HomeController.dart';
 import 'package:user_ocean_learn/Page/LessonPage/LessonTitle.dart';
 import 'package:user_ocean_learn/Services/CourseService.dart';
 
@@ -20,7 +21,7 @@ class LessonList extends StatelessWidget {
     required this.controller,
   });
 
-  void _showMembershipDialog(BuildContext context, CourseModel lesson) {
+  void _showMembershipDialog(BuildContext context) {
     Get.dialog(
       AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -28,34 +29,52 @@ class LessonList extends StatelessWidget {
           children: [
             Icon(Icons.lock_outline, color: Colors.orange.shade600, size: 28),
             const SizedBox(width: 8),
-            const Text("Premium Required"),
+            const Text("Premium Access Required"),
           ],
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              "\"${lesson.title}\" is a premium lesson.",
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-            ),
-            const SizedBox(height: 12),
             const Text(
-              "Upgrade to premium to unlock:",
-              style: TextStyle(fontSize: 14, color: Colors.black87),
+              "This lesson is available for premium members only.",
+              style: TextStyle(fontSize: 16),
             ),
-            const SizedBox(height: 8),
-            _buildFeatureItem("🔓 All premium lessons"),
-            _buildFeatureItem("📱 Download for offline viewing"),
-            _buildFeatureItem("📝 Lesson notes & materials"),
-            _buildFeatureItem("🎯 Progress tracking"),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.blue.shade50,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.blue.shade200),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "Premium Benefits:",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.blue.shade800,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  _buildBenefitItem("🔓 Access to all lessons"),
+                  _buildBenefitItem("📚 Unlimited course materials"),
+                  _buildBenefitItem("💬 Priority support"),
+                  _buildBenefitItem("📱 Offline access"),
+                ],
+              ),
+            ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Get.back(),
-            child:
-                Text("Not Now", style: TextStyle(color: Colors.grey.shade600)),
+            child: Text(
+              "Maybe Later",
+              style: TextStyle(color: Colors.grey.shade600),
+            ),
           ),
           ElevatedButton(
             onPressed: () {
@@ -65,72 +84,85 @@ class LessonList extends StatelessWidget {
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.orange.shade600,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8)),
+                borderRadius: BorderRadius.circular(8),
+              ),
             ),
-            child: const Text("Get Premium",
-                style: TextStyle(color: Colors.white)),
+            child: const Text(
+              "Upgrade Now",
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildFeatureItem(String text) {
+  Widget _buildBenefitItem(String text) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
-      child: Text(text, style: const TextStyle(fontSize: 14)),
+      child: Text(
+        text,
+        style: const TextStyle(fontSize: 14),
+      ),
     );
   }
 
   void _navigateToMembershipPage() {
     Get.snackbar(
-      "Premium Upgrade",
-      "Redirecting to premium membership...",
+      "Coming Soon",
+      "Membership upgrade page will be available soon!",
       snackPosition: SnackPosition.BOTTOM,
       backgroundColor: Colors.orange.shade100,
       colorText: Colors.orange.shade800,
-      duration: const Duration(seconds: 2),
     );
   }
 
-  void _handleLessonTap(BuildContext context, CourseModel lesson) {
-    print('Tapped lesson: ${lesson.title}');
-    print('Locked: ${lesson.isLocked}');
-    print('Visitor: ${controller.isVisitor.value}');
-    print('Premium: ${controller.isPremium.value}');
-    print('Can access: ${controller.canAccessLesson(lesson)}');
-    if (!controller.canAccessLesson(lesson)) {
-      _showMembershipDialog(context, lesson);
+  Future<void> _handleLessonAccess(BuildContext context, CourseModel lesson) async {
+    // Use synchronous check based on observables instead of async canAccessLesson
+    final isVisitor = controller.isVisitor.value;
+    final isPremium = controller.isPremium.value;
+    final isMembershipExpired = controller.isMembershipExpired.value;
+
+    if (isVisitor) {
+      _showMembershipDialog(context);
       return;
     }
 
-    if (lesson.isLocked) {
-      Get.snackbar(
-        "Coming Soon",
-        "This lesson will be available soon!",
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.blue.shade100,
-        colorText: Colors.blue.shade800,
-      );
+    if (lesson.isLocked && (!isPremium || isMembershipExpired)) {
+      _showMembershipDialog(context);
       return;
     }
 
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => CourseDetailPage(
+    // Jika bisa akses, navigate ke lesson detail
+    await Get.to(() => CourseDetailPage(
           course: lesson,
           lessonService: courseService,
-        ),
-      ),
-    );
+        ));
+
     onRefresh(courseService.currentPage);
   }
 
   @override
   Widget build(BuildContext context) {
+    if (lessons.isEmpty) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(20),
+          child: Text(
+            "No lessons found",
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey,
+            ),
+          ),
+        ),
+      );
+    }
+
     return Obx(() {
       final isVisitor = controller.isVisitor.value;
+      final isPremium = controller.isPremium.value;
+      final isMembershipExpired = controller.isMembershipExpired.value;
 
       return ListView.builder(
         shrinkWrap: true,
@@ -138,129 +170,145 @@ class LessonList extends StatelessWidget {
         itemCount: lessons.length,
         itemBuilder: (context, index) {
           final lesson = lessons[index];
-          final formattedDate = DateFormat('MMMM d yyyy').format(lesson.date);
-          final isLocked = !controller.canAccessLesson(lesson);
+          final dateFormatted = DateFormat('MMMM d, yyyy').format(lesson.date);
 
-          return GestureDetector(
-            onTap: isLocked ? null : () => _handleLessonTap(context, lesson),
-            child: Container(
-              margin: const EdgeInsets.only(bottom: 16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                border: isVisitor
-                    ? Border.all(color: Colors.orange.shade200, width: 1.5)
-                    : null,
-              ),
-              child: Stack(
+          final canAccess = !isVisitor && (!lesson.isLocked || (isPremium && !isMembershipExpired));
+
+          // Enforce locked UI for free users regardless of API locked flag
+          final isFreeUser = !isPremium && !isVisitor;
+          final showLockedUI = isFreeUser;
+
+          return Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(12),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.shade200,
+                  blurRadius: 6,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: InkWell(
+              onTap: !showLockedUI ? () => _handleLessonAccess(context, lesson) : null,
+              borderRadius: BorderRadius.circular(12),
+              child: Row(
                 children: [
-                  ListTile(
-                    contentPadding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    leading: Stack(
+                  // Lesson Image/Icon dengan lock overlay
+                  Container(
+                    width: 60,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade100,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Stack(
                       alignment: Alignment.center,
                       children: [
-                        Container(
-                          width: 50,
-                          height: 50,
-                          decoration: BoxDecoration(
-                            color: isLocked
-                                ? Colors.grey.shade200
-                                : Colors.lightBlue.shade100,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
+                        // Background icon dengan opacity jika locked
+                        Opacity(
+                          opacity: showLockedUI ? 0.3 : 1.0,
                           child: Icon(
-                            isLocked
-                                ? Icons.play_circle_outline
-                                : Icons.play_circle_filled,
-                            color: isLocked
+                            Icons.play_circle_outline,
+                            size: 30,
+                            color: showLockedUI
                                 ? Colors.grey.shade400
-                                : Colors.lightBlue.shade600,
-                            size: 24,
+                                : Colors.blue.shade600,
                           ),
                         ),
-                        if (isVisitor)
-                          Positioned(
-                            right: -2,
-                            top: -2,
-                            child: Container(
-                              padding: const EdgeInsets.all(2),
-                              decoration: BoxDecoration(
-                                color: Colors.orange.shade600,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: const Icon(Icons.lock,
-                                  color: Colors.white, size: 12),
-                            ),
-                          ),
-                      ],
-                    ),
-                    title: Text(
-                      lesson.title,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: isLocked ? Colors.grey.shade600 : Colors.black,
-                      ),
-                    ),
-                    subtitle: Row(
-                      children: [
-                        Text(
-                          formattedDate,
-                          style: TextStyle(
-                            color: isLocked
-                                ? Colors.grey.shade400
-                                : Colors.black54,
-                          ),
-                        ),
-                        if (isVisitor) ...[
-                          const SizedBox(width: 8),
+                        // Lock overlay
+                        if (showLockedUI)
                           Container(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 6, vertical: 2),
+                            width: 24,
+                            height: 24,
                             decoration: BoxDecoration(
-                              color: Colors.orange.shade100,
+                              color: Colors.blue.shade400,
                               borderRadius: BorderRadius.circular(4),
                             ),
-                            child: Text(
-                              "PREMIUM",
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.orange.shade700,
-                              ),
+                            child: const Icon(
+                              Icons.lock,
+                              color: Colors.white,
+                              size: 16,
                             ),
                           ),
-                        ],
                       ],
                     ),
-                    trailing: isVisitor
-                        ? Container(
-                            padding: const EdgeInsets.all(8),
-                            decoration: BoxDecoration(
-                              color: Colors.orange.shade100,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Icon(Icons.workspace_premium,
-                                color: Colors.orange.shade600, size: 20),
-                          )
-                        : lesson.isLocked
-                            ? Icon(Icons.schedule, color: Colors.grey.shade400)
-                            : Icon(Icons.arrow_forward_ios,
-                                color: Colors.grey.shade400, size: 16),
                   ),
-                  if (isLocked)
-                    Positioned.fill(
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: Colors.white.withOpacity(0.6),
-                          borderRadius: BorderRadius.circular(12),
+                  const SizedBox(width: 16),
+                  // Lesson Details
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Title
+                        Text(
+                          lesson.title,
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: showLockedUI ? Colors.grey.shade600 : Colors.black,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
                         ),
-                        child: const Center(
-                          child: Icon(Icons.lock_outline,
-                              size: 36, color: Colors.grey),
+                        const SizedBox(height: 4),
+                        // Date
+                        Text(
+                          dateFormatted,
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey.shade500,
+                          ),
                         ),
-                      ),
+                        const SizedBox(height: 8),
+                        // Status Badge
+                        Row(
+                          children: [
+                            if (showLockedUI) ...[
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 8,
+                                  vertical: 4,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.orange.shade100,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      Icons.lock_outline,
+                                      size: 12,
+                                      color: Colors.orange.shade600,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      'Premium',
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        color: Colors.orange.shade600,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ] 
+                          ],
+                        ),
+                      ],
                     ),
+                  ),
+                  // Arrow Icon
+                  Icon(
+                    Icons.arrow_forward_ios,
+                    size: 16,
+                    color: showLockedUI ? Colors.grey.shade300 : Colors.grey.shade400,
+                  ),
                 ],
               ),
             ),

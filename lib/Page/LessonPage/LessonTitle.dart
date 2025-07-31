@@ -4,9 +4,6 @@ import 'package:user_ocean_learn/Model/course_model.dart';
 import 'package:user_ocean_learn/Services/CourseService.dart';
 import 'package:user_ocean_learn/Widgets/ColorPallete.dart';
 import 'package:user_ocean_learn/Widgets/CoursePage/LessonCard.dart';
-import 'package:user_ocean_learn/Widgets/CoursePage/NoteButton.dart';
-import 'package:user_ocean_learn/Widgets/CoursePage/NoteInput.dart';
-import 'package:user_ocean_learn/Widgets/CoursePage/NoteSection.dart';
 
 class CourseDetailPage extends StatefulWidget {
   final CourseModel course;
@@ -131,37 +128,6 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
                   LessonCard(course: _currentCourse),
                   const SizedBox(height: 20),
                   if (_isStudent)
-                    // NoteInput(
-                    //   controller: _noteController,
-                    //   onSave: () async {
-                    //     setState(() {
-                    //       _isLoading = true;
-                    //     });
-
-                    //     bool success = await widget.lessonService.updateNote(
-                    //       _currentCourse.id,
-                    //       _noteController.text,
-                    //     );
-
-                    //     setState(() {
-                    //       _isLoading = false;
-                    //       _isNoteVisible = false;
-                    //       if (success) {
-                    //         _currentCourse.note = _noteController.text;
-                    //         ScaffoldMessenger.of(context).showSnackBar(
-                    //           const SnackBar(
-                    //               content: Text("Note updated successfully")),
-                    //         );
-                    //       } else {
-                    //         ScaffoldMessenger.of(context).showSnackBar(
-                    //           const SnackBar(
-                    //               content: Text("Failed to update note")),
-                    //         );
-                    //       }
-                    //     });
-                    //   },
-                    //   onCancel: () => setState(() => _isNoteVisible = false),
-                    // ),
                   const SizedBox(height: 16),
                   // NotesSection(
                   //     course: _currentCourse, isNoteVisible: _isNoteVisible),

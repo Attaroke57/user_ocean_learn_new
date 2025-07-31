@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:get/get.dart';
 
 import 'package:user_ocean_learn/Model/course_model.dart';
-import 'package:user_ocean_learn/Page/HomePage/Homecontroller.dart';
+import 'package:user_ocean_learn/Page/HomePage/HomeController.dart';
 import 'package:user_ocean_learn/Page/LessonPage/LessonTitle.dart';
 import 'package:user_ocean_learn/Services/CourseService.dart';
 
@@ -118,25 +118,23 @@ class FeaturedLessonCard extends StatelessWidget {
     );
   }
 
-  void _handleLessonAccess(BuildContext context, CourseModel lesson) async {
-    final canAccess = controller.canAccessLesson(lesson);
+  Future<void> _handleLessonAccess(BuildContext context, CourseModel lesson) async {
+    // Use synchronous check based on observables instead of async canAccessLesson
+    final isVisitor = controller.isVisitor.value;
+    final isPremium = controller.isPremium.value;
+    final isMembershipExpired = controller.isMembershipExpired.value;
 
-    if (!canAccess) {
+    if (isVisitor) {
       _showMembershipDialog(context);
       return;
     }
 
-    if (lesson.isLocked && !controller.isPremium.value) {
-      Get.snackbar(
-        "Coming Soon",
-        "This lesson is locked and requires a premium account.",
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.blue.shade100,
-        colorText: Colors.blue.shade800,
-      );
+    if (lesson.isLocked && (!isPremium || isMembershipExpired)) {
+      _showMembershipDialog(context);
       return;
     }
 
+    // Jika bisa akses, navigate ke lesson detail
     await Get.to(() => CourseDetailPage(
           course: lesson,
           lessonService: courseService,
@@ -154,103 +152,146 @@ class FeaturedLessonCard extends StatelessWidget {
 
       final lesson = lessons.first;
       final isVisitor = controller.isVisitor.value;
-      final canAccess = controller.canAccessLesson(lesson);
+      final isPremium = controller.isPremium.value;
+      final isMembershipExpired = controller.isMembershipExpired.value;
       final dateFormatted = DateFormat('MMMM d, yyyy').format(lesson.date);
-      
-      // Debug print
-      print('FeaturedCard - isVisitor: $isVisitor, canAccess: $canAccess, membershipStatus: ${controller.membershipStatus.value}');
 
-      return GestureDetector(
-        onTap: () => _handleLessonAccess(context, lesson),
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.shade200,
-                blurRadius: 8,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Column(
-            children: [
-              // Title
-              Text(
-                lesson.title,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 4),
-              // Date
-              Text(
-                dateFormatted,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey.shade600,
-                ),
-                textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 20),
-              // Image with lock overlay for visitors
-              Stack(
-                alignment: Alignment.center,
-                children: [
-                  SvgPicture.asset(
-                    'Assets/images/home.svg',
-                    height: 150,
+      final canAccess = !isVisitor && (!lesson.isLocked || (isPremium && !isMembershipExpired));
+
+      // Enforce locked UI for free users regardless of API locked flag
+      final isFreeUser = !isPremium && !isVisitor;
+      final showLockedUI = isFreeUser;
+
+      return Stack(
+        children: [
+          GestureDetector(
+            onTap: !showLockedUI ? () => _handleLessonAccess(context, lesson) : null,
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.shade200,
+                    blurRadius: 8,
+                    offset: const Offset(0, 4),
                   ),
-                  // Lock overlay - tampilkan jika visitor ATAU tidak bisa akses
-                  if (isVisitor || !canAccess)
-                    Container(
-                      width: 80,
-                      height: 80,
-                      decoration: BoxDecoration(
-                        color: Colors.blue.shade400,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: const Icon(
-                        Icons.lock,
-                        color: Colors.white,
-                        size: 40,
-                      ),
-                    ),
                 ],
               ),
-              const SizedBox(height: 20),
-              // Button
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: () => _handleLessonAccess(context, lesson),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.lightBlue.shade100,
-                    foregroundColor: Colors.black87,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(25),
-                    ),
-                  ),
-                  child: const Text(
-                    'More Detail..',
+              child: Column(
+                children: [
+                  // Title
+                  Text(
+                    lesson.title,
                     style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: showLockedUI ? Colors.grey.shade600 : Colors.black,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 4),
+                  // Date
+                  Text(
+                    dateFormatted,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey.shade600,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 20),
+                  // Image with lock overlay
+                  Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Opacity(
+                        opacity: showLockedUI ? 0.3 : 1.0,
+                        child: SvgPicture.asset(
+                          'Assets/images/home.svg',
+                          height: 150,
+                        ),
+                      ),
+                      if (showLockedUI)
+                        Container(
+                          width: 80,
+                          height: 80,
+                          decoration: BoxDecoration(
+                            color: Colors.blue.shade400,
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.blue.shade200,
+                                blurRadius: 8,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: const Icon(
+                            Icons.lock,
+                            color: Colors.white,
+                            size: 40,
+                          ),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  // Button
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: ElevatedButton(
+                      onPressed: !showLockedUI ? () => _handleLessonAccess(context, lesson) : null,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: showLockedUI
+                            ? Colors.grey.shade300
+                            : Colors.lightBlue.shade100,
+                        foregroundColor: showLockedUI
+                            ? Colors.grey.shade600
+                            : Colors.black87,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(25),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          if (showLockedUI) ...[
+                            Icon(
+                              Icons.lock_outline,
+                              size: 18,
+                              color: Colors.grey.shade600,
+                            ),
+                            const SizedBox(width: 8),
+                          ],
+                          Text(
+                            showLockedUI ? 'Premium Required' : 'More Detail..',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
+                ],
+              ),
+            ),
+          ),
+          if (showLockedUI)
+            Positioned.fill(
+              child: Container(
+                color: Colors.white.withOpacity(0.7),
+                child: Center(
+                  child: Icon(Icons.lock, size: 48, color: Colors.blue),
                 ),
               ),
-            ],
-          ),
-        ),
+            ),
+        ],
       );
     });
   }

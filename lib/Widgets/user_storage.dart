@@ -93,16 +93,24 @@ class UserStorage {
     if (expiryString == null) return null;
 
     try {
-      return DateTime.parse(expiryString);
+      final expiryDate = DateTime.parse(expiryString);
+      print('UserStorage: Parsed membership expiry date: $expiryDate');
+      return expiryDate;
     } catch (e) {
+      print('UserStorage: Error parsing membership expiry date: $e');
       return null;
     }
   }
 
   static Future<bool> isMembershipExpired() async {
     final expiry = await getMembershipExpiry();
-    if (expiry == null) return true;
-    return DateTime.now().isAfter(expiry);
+    if (expiry == null) {
+      print('UserStorage: Membership expiry is null, considered expired');
+      return true;
+    }
+    final now = DateTime.now();
+    print('UserStorage: Checking membership expiry. Now: $now, Expiry: $expiry');
+    return now.isAfter(expiry);
   }
 
   static Future<bool> hasValidMembership() async {

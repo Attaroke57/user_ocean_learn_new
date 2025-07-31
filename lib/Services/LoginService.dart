@@ -39,12 +39,14 @@ class LoginService {
   static Future<LoginResponseModel> getAccountInfoWithToken() async {
     final token = await UserStorage.getToken();
     final response = await http.post(
-      Uri.parse('$_baseUrl/api/v1/user/auth'),
+      Uri.parse('$_baseUrl/api/v1/user/show'),
       headers: {
         'Authorization': 'Bearer $token',
         'Accept': 'application/json',
       },
     );
+
+    print('LoginService: raw response data: ${response.body}');
 
     return LoginResponseModel.fromJson(jsonDecode(response.body));
   }

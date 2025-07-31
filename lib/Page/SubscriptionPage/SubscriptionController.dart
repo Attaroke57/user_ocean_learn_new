@@ -4,6 +4,8 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:user_ocean_learn/Dashboard/dashboardcontroller.dart';
 import 'package:user_ocean_learn/Model/subscribtion_model.dart';
+import 'package:user_ocean_learn/Page/HomePage/HomeController.dart';
+import 'package:user_ocean_learn/Page/ProfilePage/ProfileController.dart';
 import 'package:user_ocean_learn/Services/HistoryService.dart';
 import 'package:user_ocean_learn/Services/LoginService.dart';
 import 'package:user_ocean_learn/Services/SubscriptionService.dart';
@@ -70,7 +72,14 @@ class SubscriptionController extends GetxController {
                 (result['status']?.toString().startsWith('paid at') ??
                     false))) {
           await UserStorage.saveUserAccessLevel(UserAccessLevel.premium);
-          Get.find<DashboardController>().loadUserData();
+          await Get.find<DashboardController>().refreshSubscriptionStatus();
+          // Refresh ProfileController subscription status
+          final profileController = Get.find<ProfileController>();
+          await profileController.refreshSubscriptionStatus();
+
+          // Refresh user data from backend to get latest subscription info
+          await refreshUserAfterPayment();
+
           hidePaymentOptions();
 
           Get.snackbar('Payment Successful', 'Your cash payment is successful',
@@ -172,7 +181,14 @@ class SubscriptionController extends GetxController {
 
       if (result != null && result['status'] == 'success') {
         await UserStorage.saveUserAccessLevel(UserAccessLevel.premium);
-        Get.find<DashboardController>().loadUserData();
+        await Get.find<DashboardController>().refreshSubscriptionStatus();
+        // Refresh ProfileController subscription status
+        final profileController = Get.find<ProfileController>();
+        await profileController.refreshSubscriptionStatus();
+
+        // Refresh user data from backend to get latest subscription info
+        await refreshUserAfterPayment();
+
         hideTransferPaymentDialog();
         hidePaymentOptions();
 
@@ -246,6 +262,18 @@ class SubscriptionController extends GetxController {
       // Panggil ProfileController atau DashboardController untuk refresh
       final dashboard = Get.find<DashboardController>();
       await dashboard.loadUserData();
+
+      // Refresh HomeController membership status and lessons
+      if (Get.isRegistered<HomeController>()) {
+        final homeController = Get.find<HomeController>();
+        await homeController.refreshMembershipStatus();
+      }
+
+      // Refresh ProfileController subscription status
+      if (Get.isRegistered<ProfileController>()) {
+        final profileController = Get.find<ProfileController>();
+        await profileController.refreshSubscriptionStatus();
+      }
     }
   } catch (e) {
     print('❌ Gagal refresh user setelah payment: $e');

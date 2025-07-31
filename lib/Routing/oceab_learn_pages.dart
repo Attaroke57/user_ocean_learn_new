@@ -3,9 +3,9 @@ import 'package:user_ocean_learn/Dashboard/dashboard.dart';
 import 'package:user_ocean_learn/Model/course_model.dart';
 import 'package:user_ocean_learn/Page/HistoryPage/HistoryPage.dart';
 import 'package:user_ocean_learn/Page/HomePage/Homepage.dart';
+import 'package:user_ocean_learn/Page/HomePage/binding.dart';
 import 'package:user_ocean_learn/Page/IntroPage/IntroPage.dart';
 import 'package:user_ocean_learn/Page/LessonPage/LessonTitle.dart';
-import 'package:user_ocean_learn/Page/LessonPage/RoleSelectionPage.dart';
 import 'package:user_ocean_learn/Page/LoginPage/LoginPage.dart';
 import 'package:user_ocean_learn/Page/OtpVerification/OtpVerificationPage.dart';
 import 'package:user_ocean_learn/Page/ProfilePage/ProfilePage.dart';
@@ -20,7 +20,7 @@ class OceanLearnPages {
   static final List<GetPage> pages = [
     //GetPage(name: name, page: page)
     GetPage(name: OceanLearnRoutes.loginPage, page: () => LoginScreen()),
-    GetPage(name: OceanLearnRoutes.homePage, page: () => HomePage()),
+    GetPage(name: OceanLearnRoutes.homePage, page: () => HomePage(),binding: HomeBinding()),
     GetPage(name: OceanLearnRoutes.dashboard, page: () => NavDrawer()),
     GetPage(name: OceanLearnRoutes.profilePage, page: () => ProfilePage()),
     GetPage(name: OceanLearnRoutes.schedulePage, page: () => SchedulePage()),
@@ -40,7 +40,8 @@ class OceanLearnPages {
     );
   },
 ),
-GetPage(name: '/', page: () => RoleSelectionPage()),
+
+
 
 
       

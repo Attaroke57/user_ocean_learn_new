@@ -124,8 +124,12 @@ class PaymentController extends GetxController {
   }
 
   void viewInvoice(SubscriptionModel subscription) async {
-    // Jika payment method adalah cash, buka halaman invoice baru
-    if (subscription.detail.paymentMethod.toLowerCase() == 'cash') {
+    String invoiceUrl = subscription.detail.invoiceUrl;
+
+    // Show invoice page if payment method is cash or invoiceUrl is empty or "offline payment"
+    if (subscription.detail.paymentMethod.toLowerCase() == 'cash' ||
+        invoiceUrl.isEmpty ||
+        invoiceUrl.toLowerCase() == "offline payment") {
       Get.to(
         () => InvoicePage(
           subscription: subscription,
@@ -137,18 +141,7 @@ class PaymentController extends GetxController {
       return;
     }
 
-    // Untuk payment method lainnya, buka URL invoice seperti sebelumnya
-    String invoiceUrl = subscription.detail.invoiceUrl;
-    if (invoiceUrl.isEmpty || invoiceUrl == "offline payment") {
-      Get.snackbar(
-        'Info',
-        'This is an offline payment - no invoice URL available',
-        backgroundColor: Colors.blue,
-        colorText: Colors.white,
-      );
-      return;
-    }
-
+    // For other payment methods, open the invoice URL externally
     final Uri url = Uri.parse(invoiceUrl);
     final success = await launchUrl(url, mode: LaunchMode.externalApplication);
     if (!success) {

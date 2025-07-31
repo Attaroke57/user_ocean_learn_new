@@ -57,51 +57,7 @@ class CourseService {
 
   List<CourseModel> getLessons() => _courses;
 
-  Future<CourseModel?> createLesson(
-      String title, String description, String url, DateTime classDate) async {
-    final token = getToken();
-    if (token == null) return null;
-
-    if (isLessonExistInWeek(classDate)) {
-      print('A lesson already exists in this week. Cannot create another.');
-      return null;
-    }
-
-    final requestBody = {
-      'title': title,
-      'description': description,
-      'video_url': url,
-      'date': DateFormat('yyyy-MM-dd HH:mm').format(classDate),
-    };
-
-    try {
-      final response = await http.post(
-        Uri.parse('$baseUrl/course'),
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Content-Type': 'application/json',
-          'Accept': 'application/json',
-        },
-        body: jsonEncode(requestBody),
-      );
-
-      if (response.statusCode == 201 || response.statusCode == 200) {
-        final jsonData = jsonDecode(response.body);
-        final courseData = jsonData['data'];
-        if (courseData != null) {
-          final newCourse = CourseModel.fromApiJson(courseData, getUserRole());
-          _courses.add(newCourse);
-          return newCourse;
-        }
-      } else {
-        print('Failed to create: ${response.statusCode} - ${response.body}');
-      }
-    } catch (e) {
-      print('Error creating course: $e');
-    }
-
-    return null;
-  }
+  
 
   
 

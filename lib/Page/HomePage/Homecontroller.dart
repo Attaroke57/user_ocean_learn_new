@@ -15,8 +15,10 @@ class HomeController extends GetxController {
   var searchQuery = ''.obs;
   var sortByNewest = true.obs;
   var membershipStatus = 'visitor'.obs;
-  var isPremium = false.obs;
-  
+  var isPremium = false.obs; // Pastikan default false!
+  var isLoadingUser = true.obs;
+  var isMembershipExpired = false.obs;
+  var isMembershipLoaded = false.obs; // New observable to indicate membership loaded
 
   List<CourseModel> get filteredLessons {
     var filtered = lessons.where((lesson) =>
@@ -50,19 +52,40 @@ class HomeController extends GetxController {
   }
 
   Future<void> loadUserData() async {
+    // Reload user data from UserStorage to get latest info
     await loadUserName();
     await loadMembershipStatus();
+
+    // Additional: clear and reload lessons to reflect any changes
+    lessons.clear();
+    await loadInitialLessons();
   }
 
   Future<void> loadMembershipStatus() async {
     final status = UserStorage.getMembershipStatus();
     membershipStatus.value = status;
     isVisitor.value = status == 'visitor';
-    isPremium.value = UserStorage.isPremiumUser();
-    
+    final isPremiumUser = UserStorage.isPremiumUser();
+    final expired = await UserStorage.isMembershipExpired();
+
+    // Set isPremium hanya jika user premium dan tidak expired
+    isPremium.value = isPremiumUser && !expired;
+    isMembershipExpired.value = expired;
+
     print('Membership Status: $status');
     print('Is Visitor: ${isVisitor.value}');
     print('Is Premium: ${isPremium.value}');
+    print('Is Membership Expired: ${isMembershipExpired.value}');
+
+    // Debug: print UserStorage data
+    UserStorage.printStorageData();
+
+    // Reload lessons only if membership is active (not expired)
+    if (isPremium.value && !isMembershipExpired.value) {
+      await loadInitialLessons();
+    }
+
+    isMembershipLoaded.value = true; // Set loaded true after status set
   }
 
   Future<void> loadUserName() async {
@@ -121,12 +144,6 @@ class HomeController extends GetxController {
     }
   }
 
-  // Check if user can access premium content
-  // bool canAccessPremiumContent() {
-    
-  //   return isPremium.value && !UserStorage.isMembershipExpired();
-  // }
-
   // Get user access level for display
   String getUserAccessLevelDisplay() {
     if (isVisitor.value) return 'Visitor';
@@ -134,22 +151,59 @@ class HomeController extends GetxController {
     return 'Basic Member';
   }
 
-  // Method to handle lesson access
-  bool canAccessLesson(CourseModel lesson) {
-  if (isVisitor.value) return false;
-
-  if (lesson.isLocked) {
-    return isPremium.value; // Premium user boleh akses yang dikunci
+  // Method to handle lesson access - PERBAIKAN UTAMA
+  Future<bool> canAccessLesson(CourseModel lesson) async {
+    if (isVisitor.value) return false;
+    // Enforce locking for free users regardless of API flag
+    if (!isPremium.value && lesson.isLocked == false) {
+      // Treat lesson as locked for free users
+      return false;
+    }
+    if (!lesson.isLocked) return true;
+    return isPremium.value; // Tidak perlu cek expired lagi
   }
 
-  return true; // Jika tidak locked, semua kecuali visitor boleh
-}
+  // Method untuk cek apakah user bisa akses premium content
+  Future<bool> canAccessPremiumContent() async {
+    // Use observable instead of async call
+    return isPremium.value && !isMembershipExpired.value;
+  }
 
+  // Method untuk cek apakah membership expired
+  Future<bool> checkMembershipExpired() async {
+    return isMembershipExpired.value;
+  }
 
+  // Method untuk mendapatkan informasi status akses
+  Future<String> getAccessStatusMessage(CourseModel lesson) async {
+    if (isVisitor.value) {
+      return 'Please register to access lessons';
+    }
+
+    if (lesson.isLocked && !isPremium.value) {
+      return 'Premium membership required';
+    }
+
+    if (lesson.isLocked && isPremium.value && isMembershipExpired.value) {
+      return 'Premium membership expired';
+    }
+
+    return 'Access granted';
+  }
 
   // Refresh membership status (call this after payment success)
   Future<void> refreshMembershipStatus() async {
     await loadMembershipStatus();
     await loadInitialLessons();
   }
+
+  void checkMembership() async {
+  isLoadingUser.value = true;
+  try {
+    await loadMembershipStatus();
+  } catch (e) {
+    print('Error checkMembership: $e');
+  }
+  isLoadingUser.value = false;
+}
 }

@@ -13,14 +13,31 @@ class ScheduleController extends GetxController {
   final RxList<CourseModel> courses = <CourseModel>[].obs;
   final RxBool isLoading = true.obs;
 
+  var membershipStatus = 'visitor'.obs;
+  var isVisitor = false.obs;
+  var isPremium = false.obs;
+  var isMembershipExpired = false.obs;
+
   @override
   void onInit() {
     super.onInit();
     loadUserName();
+    loadMembershipStatus();
     loadCourses();
   }
   Future<void> loadUserName() async {
     name.value = UserStorage.getName() ?? '';
+  }
+
+  Future<void> loadMembershipStatus() async {
+    final status = UserStorage.getMembershipStatus();
+    membershipStatus.value = status;
+    isVisitor.value = status == 'visitor';
+    final isPremiumUser = UserStorage.isPremiumUser();
+    final expired = await UserStorage.isMembershipExpired();
+
+    isPremium.value = isPremiumUser && !expired;
+    isMembershipExpired.value = expired;
   }
 
   Future<void> loadCourses() async {

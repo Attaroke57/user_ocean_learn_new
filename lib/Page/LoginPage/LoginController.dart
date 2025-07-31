@@ -3,11 +3,14 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:user_ocean_learn/Dashboard/dashboardcontroller.dart';
+import 'package:user_ocean_learn/Page/HomePage/HomeController.dart';
+import 'package:user_ocean_learn/Page/ProfilePage/ProfileController.dart';
 import 'package:user_ocean_learn/Page/SubscriptionPage/SubscriptionPage.dart';
 import 'package:user_ocean_learn/Routing/ocean_learn_route.dart';
 import 'package:user_ocean_learn/Services/FirebaseService.dart';
 import 'package:user_ocean_learn/Services/LoginService.dart';
 import 'package:user_ocean_learn/Widgets/user_storage.dart';
+
 
 class LoginController extends GetxController {
   final TextEditingController emailController = TextEditingController();
@@ -54,13 +57,14 @@ class LoginController extends GetxController {
         if (subscription != null) {
           await UserStorage.saveSubscription(subscription);
 
-          // expired_at
-          if (subscription['expired_at'] != null) {
-            final expiry = DateTime.tryParse(subscription['expired_at']);
-            if (expiry != null) {
-              await UserStorage.setMembershipExpiry(expiry);
-            }
+        // expired_at
+        if (subscription['expired_at'] != null) {
+          final expiry = DateTime.tryParse(subscription['expired_at']);
+          if (expiry != null) {
+            print('Setting membership expiry to: $expiry');
+            await UserStorage.setMembershipExpiry(expiry);
           }
+        }
 
           // status membership dari API
           if (subscription['status'] != null) {
@@ -85,7 +89,21 @@ class LoginController extends GetxController {
 
         // Load user ke dashboard
         final dashboardController = Get.find<DashboardController>();
-        dashboardController.loadUserData();
+        await dashboardController.loadUserData();
+
+        // Refresh membership status and lessons immediately after login
+        if (!Get.isRegistered<HomeController>()) {
+          Get.lazyPut(() => HomeController());
+        }
+        final homeController = Get.find<HomeController>();
+        await homeController.refreshMembershipStatus();
+
+        // Refresh ProfileController subscription status to update UI immediately
+        if (!Get.isRegistered<ProfileController>()) {
+          Get.lazyPut(() => ProfileController());
+        }
+        final profileController = Get.find<ProfileController>();
+        await profileController.refreshSubscriptionStatus();
 
         print('Token saved: ${UserStorage.getToken()}');
         FirebaseService.saveFcmTokenToServer();

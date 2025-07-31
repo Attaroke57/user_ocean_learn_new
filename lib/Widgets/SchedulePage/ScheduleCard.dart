@@ -6,6 +6,7 @@ class ScheduleCard extends StatelessWidget {
   final bool isPast;
   final String? title;
   final VoidCallback? onViewDetails;
+  final bool isFreeUser; // New parameter to indicate free user
 
   const ScheduleCard({
     Key? key,
@@ -14,6 +15,7 @@ class ScheduleCard extends StatelessWidget {
     required this.isPast, 
     this.title,
     this.onViewDetails,
+    this.isFreeUser = false,
   }) : super(key: key);
 
   @override
@@ -51,24 +53,24 @@ class ScheduleCard extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           InkWell(
-            onTap: onViewDetails,
+            onTap: isFreeUser ? null : onViewDetails,
             child: Container(
               padding: const EdgeInsets.symmetric(vertical: 12),
               width: double.infinity,
               decoration: BoxDecoration(
-                color: const Color(0xFFE1F5FE),
+                color: isFreeUser ? Colors.grey.shade300 : const Color(0xFFE1F5FE),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: const [
-                  Icon(Icons.info_outline, size: 18, color: Colors.blue),
-                  SizedBox(width: 8),
+                children: [
+                  Icon(Icons.info_outline, size: 18, color: isFreeUser ? Colors.grey : Colors.blue),
+                  const SizedBox(width: 8),
                   Text(
                     "View Course Details",
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: Colors.blue,
+                      color: isFreeUser ? Colors.grey : Colors.blue,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
