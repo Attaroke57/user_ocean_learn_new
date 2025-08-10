@@ -203,8 +203,26 @@ class ProfileController extends GetxController {
   }
 
   void logout() {
-    final loginController = Get.find<LoginController>();
-    loginController.logout();
+    Get.dialog(
+      AlertDialog(
+        title: const Text('Confirm Logout'),
+        content: const Text('Are you sure you want to log out?'),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Get.back(); // Close dialog
+              final loginController = Get.find<LoginController>();
+              loginController.logout();
+            },
+            child: const Text('Log out'),
+          ),
+        ],
+      ),
+    );
   }
 
  Future<void> refreshSubscriptionStatus() async {

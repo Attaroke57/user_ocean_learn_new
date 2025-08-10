@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:user_ocean_learn/Page/HomePage/HomePage.dart';
 import 'package:user_ocean_learn/Page/LessonPage/LessonTitle.dart';
+import 'package:user_ocean_learn/Routing/ocean_learn_route.dart';
 import 'package:user_ocean_learn/Services/CourseService.dart';
 import 'package:user_ocean_learn/Services/QrService.dart';
 import 'package:user_ocean_learn/Widgets/user_storage.dart';
@@ -74,6 +76,7 @@ class QRController extends GetxController {
       forwardAnimationCurve: Curves.easeOutBack,
       reverseAnimationCurve: Curves.easeInBack,
     );
+    Get.offNamed(OceanLearnRoutes.homePage);
   }
 
   void _showErrorSnackbar(String message) {

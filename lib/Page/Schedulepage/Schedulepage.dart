@@ -36,14 +36,7 @@ class SchedulePage extends StatelessWidget {
             fontSize: 18,
           ),
         ),
-         actions: [
-              IconButton(
-                icon: const Icon(Icons.notifications_outlined,
-                    color: Colors.black),
-                onPressed: () {},
-              ),
-            ],
-       
+         
       ),
       drawer: NavDrawer(),
       body: Obx(() {

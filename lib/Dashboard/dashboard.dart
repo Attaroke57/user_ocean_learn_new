@@ -158,9 +158,27 @@ class NavDrawer extends StatelessWidget {
                   'Log out',
                   style: TextStyle(color: Colors.blue),
                 ),
-                onPressed: () {
-                  Get.find<LoginController>().logout();
-                },
+              onPressed: () {
+                Get.dialog(
+                  AlertDialog(
+                    title: const Text('Confirm Logout'),
+                    content: const Text('Are you sure you want to log out?'),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Get.back(),
+                        child: const Text('Cancel'),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Get.back(); // Close dialog
+                          Get.find<LoginController>().logout();
+                        },
+                        child: const Text('Log out'),
+                      ),
+                    ],
+                  ),
+                );
+              },
               ),
             ),
           ),

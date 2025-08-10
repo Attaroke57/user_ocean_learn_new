@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:user_ocean_learn/Page/OtpVerification/OtpController.dart';
 import 'package:user_ocean_learn/Routing/ocean_learn_route.dart';
 import 'package:user_ocean_learn/Services/OtpService.dart';
+import 'package:user_ocean_learn/Services/ResendOtpService.dart';
 import 'package:user_ocean_learn/Widgets/OtpVerification/Otpcard.dart';
 
 class OtpVerificationScreen extends StatefulWidget {
@@ -18,6 +19,8 @@ final email = Get.arguments['email'] as String;
 
 class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   late OtpController _otpController;
+  final TextEditingController newPasswordController = TextEditingController();
+  final TextEditingController confirmPasswordController = TextEditingController();
 
   @override
   void initState() {
@@ -28,6 +31,8 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   @override
   void dispose() {
     _otpController.dispose();
+    newPasswordController.dispose();
+    confirmPasswordController.dispose();
     super.dispose();
   }
 
@@ -56,6 +61,12 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                 onCompleted: _handleOtpCompleted,
                 onResend: _handleResendCode,
               ),
+              const SizedBox(height: 20),
+              // New Password input
+              
+              const SizedBox(height: 12),
+              // Confirm Password input
+              
               const Spacer(),
               // Let's get started button
               Container(
@@ -75,12 +86,12 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                         ),
                         elevation: 0,
                       ),
-                      child: Text(
+                      child: const Text(
                         "Let's get started",
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: isComplete ? Colors.white : Colors.grey[400],
+                          color: Colors.white,
                         ),
                       ),
                     );
@@ -100,15 +111,29 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     // You can add your verification logic here
   }
 
-  void _handleResendCode() {
+  void _handleResendCode() async {
     // Handle resend code
-    _otpController.clearOtp();
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Verification code has been resent'),
-        backgroundColor: Color(0xFF00D4FF),
-      ),
-    );
+    final result = await ResendOtpService.resendOtp(widget.email);
+    
+    if (result['success']) {
+      // Successfully resent OTP
+      _otpController.clearOtp();
+      _otpController.restartResendCountdown();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Verification code has been resent'),
+          backgroundColor: Color(0xFF00D4FF),
+        ),
+      );
+    } else {
+      // Failed to resend OTP
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(result['message'] ?? 'Failed to resend verification code'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
 void _handleGetStarted() async {
@@ -135,4 +160,5 @@ void _handleGetStarted() async {
       ),
     );
   }
-}}
+}
+}

@@ -20,26 +20,25 @@ class ProfilePage extends StatelessWidget {
       appBar: _buildAppBar(),
       drawer: NavDrawer(),
       body: RefreshIndicator(
-  onRefresh: profileController.refreshSubscriptionStatus,
-  child: SingleChildScrollView(
-    physics: const AlwaysScrollableScrollPhysics(),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            _buildProfileCard(profileController),
-            const SizedBox(height: 16),
-            //_buildAccountSettingsCard(profileController),
-            const SizedBox(height: 16),
-            _buildAccountSettingsCard(profileController),
-            const SizedBox(height: 16),
-            _buildLogoutButton(profileController),
-          ],
+        onRefresh: profileController.refreshSubscriptionStatus,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                _buildProfileCard(profileController),
+                const SizedBox(height: 16),
+                //_buildAccountSettingsCard(profileController),
+                const SizedBox(height: 16),
+                _buildAccountSettingsCard(profileController),
+                const SizedBox(height: 16),
+                _buildLogoutButton(profileController),
+              ],
+            ),
+          ),
         ),
       ),
-  ),
-),
-
     );
   }
 
@@ -47,14 +46,13 @@ class ProfilePage extends StatelessWidget {
     return AppBar(
       backgroundColor: Colors.transparent,
       elevation: 0,
-      title: const Center(
-        child: Text(
-          'Manage your profile here!',
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w500,
-            color: Colors.black,
-          ),
+      centerTitle: true,
+      title: Text(
+        "Manage Your Profile Here!",
+        style: const TextStyle(
+          color: Colors.black,
+          fontWeight: FontWeight.bold,
+          fontSize: 18,
         ),
       ),
       leading: Builder(
@@ -63,12 +61,6 @@ class ProfilePage extends StatelessWidget {
           onPressed: () => Scaffold.of(context).openDrawer(),
         ),
       ),
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.notifications_outlined, color: Colors.black),
-          onPressed: () {},
-        ),
-      ],
     );
   }
 
@@ -108,42 +100,42 @@ class ProfilePage extends StatelessWidget {
 
   Widget _buildGreetingText(ProfileController controller) {
     return Obx(() => Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const Text(
-          'Hello, ',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        Text(
-          controller.userName,
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.blue,
-          ),
-        ),
-        const Text(
-          '!',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ],
-    ));
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              'Hello, ',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              controller.userName,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.blue,
+              ),
+            ),
+            const Text(
+              '!',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ));
   }
 
   Widget _buildUserEmail(ProfileController controller) {
     return Obx(() => Text(
-      controller.userEmail,
-      style: const TextStyle(
-        fontSize: 16,
-        color: Colors.grey,
-      ),
-    ));
+          controller.userEmail,
+          style: const TextStyle(
+            fontSize: 16,
+            color: Colors.grey,
+          ),
+        ));
   }
 
   Widget _buildSubscriptionButton(ProfileController controller) {
@@ -153,7 +145,7 @@ class ProfilePage extends StatelessWidget {
             text: controller.subscriptionButtonText,
             backgroundColor: controller.subscriptionButtonColor,
             textColor: controller.subscriptionTextColor,
-            fullWidth: true,  
+            fullWidth: true,
             onTap: controller.handleSubscriptionButtonTap,
           ));
   }
@@ -235,6 +227,7 @@ class ProfilePage extends StatelessWidget {
       ),
     );
   }
+
   Widget _buildLogoutButton(ProfileController controller) {
     return Container(
       width: double.infinity,

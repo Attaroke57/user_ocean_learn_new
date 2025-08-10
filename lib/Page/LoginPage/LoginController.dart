@@ -45,7 +45,7 @@ class LoginController extends GetxController {
           token: token,
           email: response.accountInfo!.email,
           name: response.accountInfo!.name,
-          role: response.accountInfo!.role,
+          role: response.accountInfo!.role ?? 'visitor',
         );
 
         final subscription = response.accountInfo?.subscription;
@@ -71,7 +71,7 @@ class LoginController extends GetxController {
             membership = subscription['status'];
           } else {
             // fallback ke role jika tidak ada status
-            if (response.accountInfo!.role == 'student') {
+            if ((response.accountInfo?.role ?? '') == 'student') {
               membership = 'basic';
             }
           }
@@ -112,6 +112,34 @@ class LoginController extends GetxController {
       } else {
         _showErrorDialog('Token not found in response');
       }
+    } else {
+      _showErrorDialog('Incorrect password or email');
+    }
+  }
+
+  Future<void> forgotPassword(String email) async {
+    if (email.isEmpty) {
+      _showErrorDialog('Please enter your email address');
+      return;
+    }
+
+    isLoading.value = true;
+    final response = await LoginService.forgotPassword(email);
+    isLoading.value = false;
+
+    if (response.status) {
+      Get.dialog(
+        AlertDialog(
+          title: const Text('Success'),
+          content: Text(response.message),
+          actions: [
+            TextButton(
+              onPressed: () => Get.back(),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
     } else {
       _showErrorDialog(response.message);
     }

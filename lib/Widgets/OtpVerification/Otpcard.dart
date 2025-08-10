@@ -174,21 +174,32 @@ class OtpCardWidget extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                   ],
-                  Row(
-                    children: [
-                      GestureDetector(
-                        onTap: onResend,
-                        child: const Text(
-                          'Resend Code in 00:08',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Color(0xFF00D4FF),
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
+          ValueListenableBuilder<int>(
+            valueListenable: controller.resendCountdownNotifier,
+            builder: (context, countdown, child) {
+              String resendText = countdown > 0 
+                ? 'Resend Code in 00:${countdown.toString().padLeft(2, '0')}'
+                : 'Resend Code';
+              
+              return Row(
+                children: [
+                  GestureDetector(
+                    onTap: onResend,
+                    child: Text(
+                      resendText,
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: countdown > 0 
+                          ? Colors.grey 
+                          : const Color(0xFF00D4FF),
+                        fontWeight: FontWeight.w500,
                       ),
-                    ],
+                    ),
                   ),
+                ],
+              );
+            },
+          ),
                   const SizedBox(height: 16),
                   GestureDetector(
                     onTap: () {

@@ -102,4 +102,34 @@ class CourseService {
       return isInSameWeek(course.date, dateToCheck);
     });
   }
+
+  // Get course by QR code URL
+  CourseModel? getCourseByQRCode(String qrData) {
+    try {
+      final uri = Uri.parse(qrData);
+      final courseId = uri.queryParameters['course_id'] ?? uri.queryParameters['class_id'];
+      
+      if (courseId == null) return null;
+      
+      return _courses.firstWhere(
+        (course) => course.id == courseId,
+        orElse: () => CourseModel(
+          id: '',
+          title: '',
+          description: '',
+          filePath: '',
+          date: DateTime.now(),
+          isLocked: true,
+        ),
+      );
+    } catch (e) {
+      return null;
+    }
+  }
+
+  // Validate if QR code belongs to expected course
+  bool validateQRCourseMatch(String qrData, String expectedCourseId) {
+    final course = getCourseByQRCode(qrData);
+    return course != null && course.id == expectedCourseId && course.id.isNotEmpty;
+  }
 }

@@ -109,7 +109,8 @@ class UserStorage {
       return true;
     }
     final now = DateTime.now();
-    print('UserStorage: Checking membership expiry. Now: $now, Expiry: $expiry');
+    print(
+        'UserStorage: Checking membership expiry. Now: $now, Expiry: $expiry');
     return now.isAfter(expiry);
   }
 
@@ -127,23 +128,23 @@ class UserStorage {
 
   // Simpan data subscription (dalam bentuk Map)
   static Future<void> saveSubscription(Map<String, dynamic> data) async {
-  final jsonStr = jsonEncode(data);
-  await _storage.write(SUBSCRIPTION_DATA_KEY, jsonStr);
-}
+    final jsonStr = jsonEncode(data);
+    await _storage.write(SUBSCRIPTION_DATA_KEY, jsonStr);
+  }
 
 // Ambil data subscription (return Map)
   static Map<String, dynamic>? getSubscription() {
-  final jsonStr = _storage.read(SUBSCRIPTION_DATA_KEY);
-  if (jsonStr != null) {
-    try {
-      return jsonDecode(jsonStr);
-    } catch (e) {
-      print('❌ Error parsing subscription JSON: $e');
-      return null;
+    final jsonStr = _storage.read(SUBSCRIPTION_DATA_KEY);
+    if (jsonStr != null) {
+      try {
+        return jsonDecode(jsonStr);
+      } catch (e) {
+        print('❌ Error parsing subscription JSON: $e');
+        return null;
+      }
     }
+    return null;
   }
-  return null;
-}
 
   // Upgrade user to premium
   static Future<void> upgradeToPremium({
@@ -153,6 +154,23 @@ class UserStorage {
     await _storage.write(ROLE_KEY, 'premium_user');
     await saveMembershipStatus(membershipType);
     await setMembershipExpiry(expiryDate);
+  }
+
+  // Simpan status kehadiran untuk course tertentu
+  static Future<void> saveAttendanceStatus(
+      String courseId, bool hasAttended) async {
+    await _storage.write('attendance_$courseId', hasAttended);
+  }
+  
+
+// Ambil status kehadiran untuk course tertentu
+  static bool getAttendanceStatus(String courseId) {
+    return _storage.read('attendance_$courseId') ?? false;
+  }
+
+// Hapus status kehadiran (opsional)
+  static Future<void> clearAttendanceStatus(String courseId) async {
+    await _storage.remove('attendance_$courseId');
   }
 
   // Downgrade user (when membership expires or cancelled)

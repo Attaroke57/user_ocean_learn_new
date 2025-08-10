@@ -4,40 +4,73 @@ import 'package:http/http.dart' as http;
 class QRService {
   static const String baseUrl = 'https://ocean-learn-api.rplrus.com/api/v1';
 
-  // Scan QR Code dan kirim ke API
-  static Future<Map<String, dynamic>> scanQR(String qrData, String token) async {
-  try {
-    final response = await http.get(
-      Uri.parse('$qrData'),
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': 'Bearer $token',
-      },
-    );
+  // Check attendance status
+  static Future<Map<String, dynamic>> checkAttendanceStatus(String courseId, String token) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/attendence/check/$courseId'),
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
 
-    if (response.statusCode == 200) {
-      final Map<String, dynamic> data = jsonDecode(response.body);
-      return {
-        'success': true,
-        'data': data,
-        'message': 'QR berhasil di-scan'
-      };
-    } else {
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = jsonDecode(response.body);
+        return {
+          'success': true,
+          'data': data,
+          'message': data['message'] ?? 'Berhasil mengecek status kehadiran'
+        };
+      } else {
+        return {
+          'success': false,
+          'message': 'Gagal mengecek status kehadiran: ${response.statusCode}',
+          'error': response.body
+        };
+      }
+    } catch (e) {
       return {
         'success': false,
-        'message': 'Gagal mengirim data QR: ${response.statusCode}',
-        'error': response.body
+        'message': 'Error: $e',
+        'error': e.toString()
       };
     }
-  } catch (e) {
-    return {
-      'success': false,
-      'message': 'Error: $e',
-      'error': e.toString()
-    };
   }
-}
 
+  // Scan QR Code dan kirim ke API
+  static Future<Map<String, dynamic>> scanQR(String qrData, String token) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$qrData'),
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = jsonDecode(response.body);
+        return {
+          'success': true,
+          'data': data,
+          'message': 'QR berhasil di-scan'
+        };
+      } else {
+        return {
+          'success': false,
+          'message': 'Gagal mengirim data QR: ${response.statusCode}',
+          'error': response.body
+        };
+      }
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Error: $e',
+        'error': e.toString()
+      };
+    }
+  }
 
   // Validasi format QR (opsional)
   static bool isValidQRFormat(String qrData) {

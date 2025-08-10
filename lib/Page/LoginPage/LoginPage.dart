@@ -17,7 +17,7 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final LoginController loginController = Get.put(LoginController());
-  
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -28,7 +28,6 @@ class _LoginScreenState extends State<LoginScreen> {
             padding: const EdgeInsets.all(16.0),
             child: Column(
               children: [
-                
                 // Header with Sign In/Sign Out buttons
                 Container(
                   decoration: BoxDecoration(
@@ -80,7 +79,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 15),
 
-                
                 SvgPicture.asset(
                   'Assets/images/login.svg',
                   fit: BoxFit.contain,
@@ -116,18 +114,19 @@ class _LoginScreenState extends State<LoginScreen> {
                           Row(
                             children: [
                               Obx(() => SizedBox(
-                                width: 24,
-                                height: 24,
-                                child: Checkbox(
-                                  value: loginController.rememberMe.value,
-                                  onChanged: (value) {
-                                    loginController.rememberMe.value = value ?? false;
-                                  },
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(4),
-                                  ),
-                                ),
-                              )),
+                                    width: 24,
+                                    height: 24,
+                                    child: Checkbox(
+                                      value: loginController.rememberMe.value,
+                                      onChanged: (value) {
+                                        loginController.rememberMe.value =
+                                            value ?? false;
+                                      },
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                    ),
+                                  )),
                               const SizedBox(width: 8),
                               MyText(
                                 text: "Remember me",
@@ -140,7 +139,8 @@ class _LoginScreenState extends State<LoginScreen> {
                           GestureDetector(
                             onTap: () {
                               // Navigate to forgot password screen
-                              // Add your navigation code here
+                              Get.toNamed(
+                                  OceanLearnRoutes.ForgotPasswordScreen);
                             },
                             child: MyText(
                               text: "Forgot password?",
@@ -151,21 +151,21 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ],
                       ),
-                     
 
                       const SizedBox(height: 20),
-                      
+
                       // Sign In Button - Connected to API login
-                      Obx(() => loginController.isLoading.value
-                        ? CircularProgressIndicator(color: secondarycolor)
-                        : MyButton(
-                            text: "Sign In",
-                            isPrimary: true,
-                            backgroundColor: secondarycolor,
-                            textColor: textcolor,
-                            fullWidth: true,
-                            onTap: () => loginController.login(),
-                          ),
+                      Obx(
+                        () => loginController.isLoading.value
+                            ? CircularProgressIndicator(color: secondarycolor)
+                            : MyButton(
+                                text: "Sign In",
+                                isPrimary: true,
+                                backgroundColor: secondarycolor,
+                                textColor: textcolor,
+                                fullWidth: true,
+                                onTap: () => loginController.login(),
+                              ),
                       ),
                     ],
                   ),

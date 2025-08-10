@@ -1,6 +1,9 @@
 import 'package:get/get.dart';
 import 'package:user_ocean_learn/Dashboard/dashboard.dart';
 import 'package:user_ocean_learn/Model/course_model.dart';
+
+import 'package:user_ocean_learn/Page/ForgotPasswordPage/ForgotPasswordPage.dart';
+import 'package:user_ocean_learn/Page/ForgotPasswordPage/ForgotPasswordVerificationPage.dart';
 import 'package:user_ocean_learn/Page/HistoryPage/HistoryPage.dart';
 import 'package:user_ocean_learn/Page/HomePage/Homepage.dart';
 import 'package:user_ocean_learn/Page/HomePage/binding.dart';
@@ -9,6 +12,7 @@ import 'package:user_ocean_learn/Page/LessonPage/LessonTitle.dart';
 import 'package:user_ocean_learn/Page/LoginPage/LoginPage.dart';
 import 'package:user_ocean_learn/Page/OtpVerification/OtpVerificationPage.dart';
 import 'package:user_ocean_learn/Page/ProfilePage/ProfilePage.dart';
+import 'package:user_ocean_learn/Page/QrScannerPage/QrScannerPage.dart';
 import 'package:user_ocean_learn/Page/SubscriptionPage/SubscriptionPage.dart';
 import 'package:user_ocean_learn/Page/RegisterPage/RegisterPage.dart';
 import 'package:user_ocean_learn/Page/SchedulePage/SchedulePage.dart';
@@ -30,6 +34,12 @@ class OceanLearnPages {
     GetPage(name: OceanLearnRoutes.splashScreen, page: () => SplashScreen()),
     GetPage(name: OceanLearnRoutes.historypage, page: () => PaymentPage()),
     GetPage(name: OceanLearnRoutes.verificationpage, page: () => OtpVerificationScreen()),
+    GetPage(name: OceanLearnRoutes.ForgotPasswordVerificationPage, page: () => ForgotPasswordVerificationPage()),
+    GetPage(name: OceanLearnRoutes.ForgotPasswordScreen, page: () => ForgotPasswordScreen()),
+    GetPage(name: OceanLearnRoutes.scanQRPage, page: () => ScanQRPage()),
+
+
+    
     GetPage(
   name: '/lesson-detail',
   page: () {

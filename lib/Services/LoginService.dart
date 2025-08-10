@@ -31,7 +31,114 @@ class LoginService {
       print('Login error: $e');
       return LoginResponseModel(
         status: false,
-        message: 'Incorrect email or password.',
+        message: 'Incorrect password or email',
+      );
+    }
+  }
+
+  static Future<LoginResponseModel> forgotPassword(String email) async {
+    try {
+      final Map<String, String> body = {
+        'email': email,
+      };
+      
+      // Get token and check if it's valid
+      final token = await UserStorage.getToken();
+      print('Token retrieved from storage: $token');
+      
+      // If token is null or empty, we should not include Authorization header
+      if (token == null || token.isEmpty) {
+        print('No valid token found, sending request without Authorization header');
+        final response = await http.post(
+          Uri.parse('$_baseUrl/api/v1/user/forgot-password'),
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Accept': 'application/json',
+          },
+          body: body,
+        );
+        
+        print('Forgot password response status code: ${response.statusCode}');
+        print('Forgot password response body: ${response.body}');
+        
+        return LoginResponseModel.fromJson(jsonDecode(response.body));
+      } else {
+        // If we have a valid token, include it in the request
+        print('Valid token found, sending request with Authorization header');
+        final response = await http.post(
+          Uri.parse('$_baseUrl/api/v1/user/forgot-password'),
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Accept': 'application/json',
+            'Authorization': 'Bearer $token',
+          },
+          body: body,
+        );
+        
+        print('Forgot password response status code: ${response.statusCode}');
+        print('Forgot password response body: ${response.body}');
+        
+        return LoginResponseModel.fromJson(jsonDecode(response.body));
+      }
+    } on TimeoutException {
+      return LoginResponseModel(
+        status: false,
+        message: 'Connection timeout. Please check your internet connection.',
+      );
+    } catch (e) {
+      print('Forgot password error: $e');
+      return LoginResponseModel(
+        status: false,
+        message: 'Failed to send forgot password request.',
+      );
+    }
+  }
+
+  static Future<LoginResponseModel> verifyForgotPassword({
+    required String email,
+    required String otp,
+    required String newPassword,
+    required String newPasswordConfirmation,
+  }) async {
+    try {
+      final Map<String, String> body = {
+        'email': email,
+        'otp': otp,
+        'new_password': newPassword,
+        'new_password_confirmation': newPasswordConfirmation,
+      };
+      final token = await UserStorage.getToken();
+      final response = await http.post(
+        Uri.parse('$_baseUrl/api/v1/user/verify-forgot-password'),
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: body,
+      );
+      print('Status Code: ${response.statusCode}');
+      print('Response Body: ${response.body}');
+
+// Coba cetak headers manual dari permintaan, ini alternatif
+      print('Authorization: Bearer $token');
+      if (response.statusCode != 200) {
+        return LoginResponseModel(
+          status: false,
+          message: 'Failed to verify forgot password request.',
+        );
+      }
+      return LoginResponseModel.fromJson(jsonDecode(response.body));
+    } on TimeoutException {
+      return LoginResponseModel(
+        status: false,
+        message: 'Connection timeout. Please check your internet connection.',
+      );
+    } catch (e) {
+      print('Verify forgot password error: $e');
+      return LoginResponseModel(
+        status: false,
+        message: 'Failed to verify forgot password request.',
       );
     }
   }
@@ -50,7 +157,8 @@ class LoginService {
 
     return LoginResponseModel.fromJson(jsonDecode(response.body));
   }
-   Future<Map<String, dynamic>> getUserDataFromAuth() async {
+
+  Future<Map<String, dynamic>> getUserDataFromAuth() async {
     final token = await UserStorage.getToken();
 
     final response = await http.post(
