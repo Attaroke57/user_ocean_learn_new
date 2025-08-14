@@ -5,6 +5,7 @@ class SubscriptionModel {
   final SubscriptionDetail detail;
   final String month;
   final String year;
+  
 
   SubscriptionModel({
     required this.id,

@@ -119,7 +119,6 @@ class NavDrawer extends StatelessWidget {
                     Get.toNamed(OceanLearnRoutes.schedulePage);
                   },
                 ),
-                if (isPremium) // ✅ Muncul hanya jika premium
                   _buildMenuItem(
                     icon: Icons.payment_sharp,
                     title: 'Payment History',
