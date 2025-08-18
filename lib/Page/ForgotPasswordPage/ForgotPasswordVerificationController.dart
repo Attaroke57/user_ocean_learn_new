@@ -5,6 +5,8 @@ import 'package:user_ocean_learn/Services/LoginService.dart';
 import 'package:user_ocean_learn/Model/login_service_model.dart';
 
 class ForgotPasswordVerificationController extends GetxController {
+  var obscureNewPassword = true.obs;
+  var obscureConfirmPassword = true.obs;
   // Controllers untuk input
   final TextEditingController otpController = TextEditingController();
   final TextEditingController newPasswordController = TextEditingController();

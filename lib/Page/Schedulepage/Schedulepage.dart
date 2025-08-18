@@ -36,7 +36,6 @@ class SchedulePage extends StatelessWidget {
             fontSize: 18,
           ),
         ),
-         
       ),
       drawer: NavDrawer(),
       body: Obx(() {
@@ -51,7 +50,6 @@ class SchedulePage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-              
                 const SizedBox(height: 16),
                 CalendarWidget(controller: controller),
                 const SizedBox(height: 16),
@@ -68,6 +66,11 @@ class SchedulePage extends StatelessWidget {
       ScheduleController controller, BuildContext context) {
     return Obx(() {
       final courses = controller.getCoursesForCurrentMonth();
+
+      // Logika akses premium yang benar
+      final isFreeUser = controller.isVisitor.value ||
+          !controller.isPremium.value ||
+          controller.isMembershipExpired.value;
 
       if (courses.isEmpty) {
         return Container(
@@ -108,6 +111,9 @@ class SchedulePage extends StatelessWidget {
             final isPast = controller.isDatePast(course.date);
             final formattedDate = DateFormat('MMMM d yyyy').format(course.date);
 
+            // Logika akses per course
+            final canAccess = controller.isPremium.value &&
+                !controller.isMembershipExpired.value;
             return Padding(
               padding:
                   EdgeInsets.only(bottom: index < courses.length - 1 ? 16 : 0),
@@ -116,13 +122,14 @@ class SchedulePage extends StatelessWidget {
                 date: formattedDate,
                 isPast: isPast,
                 title: course.title,
-                isFreeUser: controller.isVisitor.value || !controller.isPremium.value,
+                isFreeUser: !canAccess, // kalau free, tampilkan locked state
                 onViewDetails: () {
-                  if (controller.isVisitor.value || !controller.isPremium.value) {
+                  if (!canAccess) {
                     Get.dialog(
                       AlertDialog(
                         title: const Text('Access Denied'),
-                        content: const Text('Please upgrade to premium to view course details.'),
+                        content: const Text(
+                            'Please upgrade to premium to view course details.'),
                         actions: [
                           TextButton(
                             onPressed: () => Get.back(),
@@ -133,6 +140,7 @@ class SchedulePage extends StatelessWidget {
                     );
                     return;
                   }
+
                   Navigator.push(
                     context,
                     MaterialPageRoute(

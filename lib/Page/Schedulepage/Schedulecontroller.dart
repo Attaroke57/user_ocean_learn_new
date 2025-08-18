@@ -115,4 +115,8 @@ class ScheduleController extends GetxController {
     final now = DateTime.now();
     return date.isBefore(now);
   }
+  Future<void> refreshMembershipStatus() async {
+  await loadMembershipStatus();
+  await loadCourses();
+}
 }

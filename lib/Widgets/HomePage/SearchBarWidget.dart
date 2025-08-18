@@ -36,7 +36,7 @@ class SearchBarWidget extends StatelessWidget {
                     onChanged: onChanged,
                     decoration: InputDecoration(
                       border: InputBorder.none,
-                      hintText: 'Find your lesson',
+                      hintText: 'Find your course',
                       hintStyle: GoogleFonts.montserrat(color: Colors.grey.shade500),
                     ),
                   ),

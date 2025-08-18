@@ -52,34 +52,41 @@ class _HomePageState extends State<HomePage> {
                           physics: const AlwaysScrollableScrollPhysics(),
                           slivers: [
                             SliverPadding(
-                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              padding:
+                                  const EdgeInsets.symmetric(horizontal: 16),
                               sliver: SliverList(
                                 delegate: SliverChildListDelegate([
                                   const SizedBox(height: 20),
                                   FeaturedLessonCard(
                                     lessons: controller.lessons,
                                     courseService: controller.courseService,
-                                    onRefresh: (_) =>
-                                        controller.loadInitialLessons(),
+                                    onRefresh: (page) async {
+                                      await controller
+                                          .refreshMembershipStatus();
+                                    },
                                     controller: controller,
                                   ),
                                   const SizedBox(height: 20),
                                   Obx(() => SearchBarWidget(
                                         onChanged: controller.updateSearchQuery,
-                                        onTunePressed: controller.toggleSortOrder,
+                                        onTunePressed:
+                                            controller.toggleSortOrder,
                                         isNewest: controller.sortByNewest.value,
                                       )),
                                   const SizedBox(height: 20),
                                   Obx(() => LessonList(
                                         lessons: controller.filteredLessons,
                                         courseService: controller.courseService,
-                                        onRefresh: (_) =>
-                                            controller.loadInitialLessons(),
+                                        onRefresh: (page) async {
+                                          await controller
+                                              .refreshMembershipStatus();
+                                        },
                                         controller: controller,
                                       )),
                                   if (controller.isLoadingMore.value)
                                     const Padding(
-                                      padding: EdgeInsets.symmetric(vertical: 16.0),
+                                      padding:
+                                          EdgeInsets.symmetric(vertical: 16.0),
                                       child: Center(
                                           child: CircularProgressIndicator()),
                                     ),

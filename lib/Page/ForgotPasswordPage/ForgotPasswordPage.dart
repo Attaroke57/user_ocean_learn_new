@@ -92,7 +92,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       // Email TextField
                       MyTextField(
                         hintText: "Enter your email address",
-                        suffixIcon: Icons.email_outlined,
+                        suffixIcon: Icon(Icons.email_outlined),
                         controller: forgotPasswordController.emailController,
                         keyboardType: TextInputType.emailAddress,
                       ),

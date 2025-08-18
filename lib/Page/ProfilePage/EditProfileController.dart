@@ -32,25 +32,25 @@ class EditProfileController extends GetxController {
 
   void _loadCurrentAvatar() async {
     try {
-      // Try to get current avatar from storage or fetch from API
-      final avatarUrl = UserStorage.getAvatarUrl();
-      if (avatarUrl != null && avatarUrl.isNotEmpty) {
-        currentAvatarUrl.value = avatarUrl;
-      } else {
-        // If no avatar in storage, try to get from API
-        final result = await ProfileService.getProfile();
-        if (result['success'] && result['data'] != null) {
-          final accountInfo = result['data']['account_info'];
-          if (accountInfo['avatar'] != null) {
-            final avatarPath = accountInfo['avatar'].toString().replaceFirst(RegExp(r'^/+'), '');
-            final fullAvatarUrl = 'https://ocean-learn-api.rplrus.com/storage/$avatarPath';
-            currentAvatarUrl.value = fullAvatarUrl;
-            await UserStorage.saveAvatarUrl(fullAvatarUrl);
-          }
+      // Try to get current avatar from storage first
+      final storedAvatarUrl = UserStorage.getAvatarUrl();
+      if (storedAvatarUrl != null && storedAvatarUrl.isNotEmpty) {
+        currentAvatarUrl.value = storedAvatarUrl;
+        print('✅ Loaded avatar from storage: $storedAvatarUrl');
+      }
+      
+      // Also fetch fresh data from API
+      final result = await ProfileService.getProfile();
+      if (result['success'] && result['data'] != null) {
+        final avatarUrl = result['data']['avatar'];
+        if (avatarUrl != null && avatarUrl.toString().isNotEmpty) {
+          currentAvatarUrl.value = avatarUrl.toString();
+          await UserStorage.saveAvatarUrl(avatarUrl.toString());
+          print('✅ Updated avatar from API: $avatarUrl');
         }
       }
     } catch (e) {
-      print('Error loading current avatar: $e');
+      print('❌ Error loading current avatar: $e');
     }
   }
 
@@ -65,6 +65,7 @@ class EditProfileController extends GetxController {
       
       if (image != null) {
         selectedImage.value = File(image.path);
+        print('✅ Image selected: ${image.path}');
       }
     } catch (e) {
       Get.snackbar(
@@ -113,22 +114,18 @@ class EditProfileController extends GetxController {
           role: UserStorage.getRole() ?? '',
         );
 
-        // Save avatar URL if provided in response
-        if (result['avatarUrl'] != null) {
-          await UserStorage.saveAvatarUrl(result['avatarUrl']);
+        // Save new avatar URL if provided
+        if (result['avatarUrl'] != null && result['avatarUrl'].toString().isNotEmpty) {
+          final newAvatarUrl = result['avatarUrl'].toString();
+          await UserStorage.saveAvatarUrl(newAvatarUrl);
+          print('✅ Saved new avatar URL: $newAvatarUrl');
+          
+          // Update current avatar URL
+          currentAvatarUrl.value = newAvatarUrl;
         }
 
-        // Try to update ProfileController if exists
-        try {
-          if (Get.isRegistered<ProfileController>()) {
-            final profileController = Get.find<ProfileController>();
-            if (profileController.toString().contains('ProfileController')) {
-              profileController.refreshUserData();
-            }
-          }
-        } catch (e) {
-          print('ProfileController not found or method not available: $e');
-        }
+        // Update ProfileController if it exists
+        _updateProfileController(name, result['avatarUrl']);
 
         _showSuccessSnackbar('Profile updated successfully!');
 
@@ -139,10 +136,32 @@ class EditProfileController extends GetxController {
         _showErrorSnackbar(result['message'] ?? 'Failed to update profile');
       }
     } catch (e) {
-      print('Error updating profile: $e');
+      print('❌ Error updating profile: $e');
       _showErrorSnackbar('Failed to update profile. Please check your internet connection and try again.');
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  void _updateProfileController(String name, String? avatarUrl) {
+    try {
+      if (Get.isRegistered<ProfileController>()) {
+        final profileController = Get.find<ProfileController>();
+        
+        // Update the profile controller's data
+        profileController.userName.value = name;
+        if (avatarUrl != null && avatarUrl.isNotEmpty) {
+          profileController.avatarUrl.value = avatarUrl;
+        }
+        
+        // Force refresh profile data
+        profileController.fetchUserProfile();
+        profileController.refreshUserData();
+        
+        print('✅ ProfileController updated successfully');
+      }
+    } catch (e) {
+      print('❌ Error updating ProfileController: $e');
     }
   }
 

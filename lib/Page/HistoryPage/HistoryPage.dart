@@ -12,7 +12,8 @@ class PaymentPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final PaymentController controller = Get.put(PaymentController());
-    final DashboardController dashboardController = Get.find<DashboardController>();
+    final DashboardController dashboardController =
+        Get.find<DashboardController>();
 
     return Scaffold(
       backgroundColor: netralcolor,
@@ -40,8 +41,7 @@ class PaymentPage extends StatelessWidget {
       body: Column(
         children: [
           // Status indicator untuk user
-         
-          
+
           Expanded(child: _buildPaymentPageContent(controller)),
         ],
       ),
@@ -51,7 +51,8 @@ class PaymentPage extends StatelessWidget {
   Widget _buildPaymentPageContent(PaymentController controller) {
     return Obx(() {
       if (controller.isLoading.value) {
-        return const Center(child: CircularProgressIndicator(color: primarycolor));
+        return const Center(
+            child: CircularProgressIndicator(color: primarycolor));
       }
 
       if (controller.error.isNotEmpty) {
@@ -61,7 +62,8 @@ class PaymentPage extends StatelessWidget {
             children: [
               const Icon(Icons.error_outline, color: Colors.red, size: 48),
               const SizedBox(height: 16),
-              Text('Error: ${controller.error.value}', style: const TextStyle(color: textcolor)),
+              Text('Error: ${controller.error.value}',
+                  style: const TextStyle(color: textcolor)),
               const SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () => controller.refreshData(),
@@ -77,7 +79,8 @@ class PaymentPage extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.receipt_long_outlined, color: Colors.grey.shade400, size: 64),
+              Icon(Icons.receipt_long_outlined,
+                  color: Colors.grey.shade400, size: 64),
               const SizedBox(height: 16),
               Text(
                 'No payment history yet',
@@ -95,20 +98,6 @@ class PaymentPage extends StatelessWidget {
                   fontSize: 14,
                 ),
                 textAlign: TextAlign.center,
-              ),
-              const SizedBox(height: 24),
-              ElevatedButton.icon(
-                onPressed: () {
-                  // Navigate to subscription/payment page
-                  Get.back(); // or navigate to payment page
-                },
-                icon: const Icon(Icons.upgrade),
-                label: const Text('Upgrade to Premium'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: primarycolor,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                ),
               ),
             ],
           ),
@@ -140,15 +129,19 @@ class PaymentPage extends StatelessWidget {
                       itemCount: controller.months.length,
                       itemBuilder: (context, index) {
                         final month = controller.months[index];
-                        final isSelected = controller.selectedMonth.value == month;
-                        
+                        final isSelected =
+                            controller.selectedMonth.value == month;
+
                         return GestureDetector(
                           onTap: () => controller.changeSelectedMonth(month),
                           child: Container(
                             margin: const EdgeInsets.only(right: 12),
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 8),
                             decoration: BoxDecoration(
-                              color: isSelected ? primarycolor : Colors.grey.shade200,
+                              color: isSelected
+                                  ? primarycolor
+                                  : Colors.grey.shade200,
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Center(

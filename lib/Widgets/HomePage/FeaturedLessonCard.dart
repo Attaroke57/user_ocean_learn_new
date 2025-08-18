@@ -90,7 +90,8 @@ class FeaturedLessonCard extends StatelessWidget {
             ),
             child: const Text(
               "Upgrade Now",
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              style:
+                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
             ),
           ),
         ],
@@ -118,18 +119,19 @@ class FeaturedLessonCard extends StatelessWidget {
     );
   }
 
-  Future<void> _handleLessonAccess(BuildContext context, CourseModel lesson) async {
+  Future<void> _handleLessonAccess(
+      BuildContext context, CourseModel lesson) async {
     // Use synchronous check based on observables instead of async canAccessLesson
-    final isVisitor = controller.isVisitor.value;
+    final isfree = controller.isfree.value;
     final isPremium = controller.isPremium.value;
-    final isMembershipExpired = controller.isMembershipExpired.value;
+    final isExpired = controller.isMembershipExpired.value;
 
-    if (isVisitor) {
+    if (isfree) {
       _showMembershipDialog(context);
       return;
     }
 
-    if (lesson.isLocked && (!isPremium || isMembershipExpired)) {
+    if (lesson.isLocked && (!isPremium || isExpired)) {
       _showMembershipDialog(context);
       return;
     }
@@ -151,21 +153,20 @@ class FeaturedLessonCard extends StatelessWidget {
       }
 
       final lesson = lessons.first;
-      final isVisitor = controller.isVisitor.value;
+      final isfree = controller.isfree.value;
       final isPremium = controller.isPremium.value;
       final isMembershipExpired = controller.isMembershipExpired.value;
       final dateFormatted = DateFormat('MMMM d, yyyy').format(lesson.date);
 
-      final canAccess = !isVisitor && (!lesson.isLocked || (isPremium && !isMembershipExpired));
+      final canAccess =
+          (isPremium && !isMembershipExpired) || (isfree && !lesson.isLocked);
 
-      // Enforce locked UI for free users regardless of API locked flag
-      final isFreeUser = !isPremium && !isVisitor;
-      final showLockedUI = isFreeUser;
-
+// Ganti semua showLockedUI dengan !canAccess
       return Stack(
         children: [
           GestureDetector(
-            onTap: !showLockedUI ? () => _handleLessonAccess(context, lesson) : null,
+            onTap:
+                canAccess ? () => _handleLessonAccess(context, lesson) : null,
             child: Container(
               width: double.infinity,
               padding: const EdgeInsets.all(20),
@@ -188,7 +189,7 @@ class FeaturedLessonCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: showLockedUI ? Colors.grey.shade600 : Colors.black,
+                      color: !canAccess ? Colors.grey.shade600 : Colors.black,
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -208,13 +209,13 @@ class FeaturedLessonCard extends StatelessWidget {
                     alignment: Alignment.center,
                     children: [
                       Opacity(
-                        opacity: showLockedUI ? 0.3 : 1.0,
+                        opacity: !canAccess ? 0.3 : 1.0,
                         child: SvgPicture.asset(
                           'Assets/images/home.svg',
                           height: 150,
                         ),
                       ),
-                      if (showLockedUI)
+                      if (!canAccess)
                         Container(
                           width: 80,
                           height: 80,
@@ -243,14 +244,15 @@ class FeaturedLessonCard extends StatelessWidget {
                     width: double.infinity,
                     height: 50,
                     child: ElevatedButton(
-                      onPressed: !showLockedUI ? () => _handleLessonAccess(context, lesson) : null,
+                      onPressed: canAccess
+                          ? () => _handleLessonAccess(context, lesson)
+                          : null,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: showLockedUI
+                        backgroundColor: !canAccess
                             ? Colors.grey.shade300
                             : Colors.lightBlue.shade100,
-                        foregroundColor: showLockedUI
-                            ? Colors.grey.shade600
-                            : Colors.black87,
+                        foregroundColor:
+                            !canAccess ? Colors.grey.shade600 : Colors.black87,
                         elevation: 0,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(25),
@@ -259,7 +261,7 @@ class FeaturedLessonCard extends StatelessWidget {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          if (showLockedUI) ...[
+                          if (!canAccess) ...[
                             Icon(
                               Icons.lock_outline,
                               size: 18,
@@ -268,7 +270,7 @@ class FeaturedLessonCard extends StatelessWidget {
                             const SizedBox(width: 8),
                           ],
                           Text(
-                            showLockedUI ? 'Premium Required' : 'More Detail..',
+                            !canAccess ? 'Premium Required' : 'More Detail..',
                             style: const TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w500,
@@ -282,7 +284,7 @@ class FeaturedLessonCard extends StatelessWidget {
               ),
             ),
           ),
-          if (showLockedUI)
+          if (!canAccess)
             Positioned.fill(
               child: Container(
                 color: Colors.white.withOpacity(0.7),

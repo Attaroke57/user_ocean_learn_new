@@ -7,8 +7,8 @@ import 'package:user_ocean_learn/Services/ResendOtpService.dart';
 import 'package:user_ocean_learn/Widgets/OtpVerification/Otpcard.dart';
 
 class OtpVerificationScreen extends StatefulWidget {
-final email = Get.arguments['email'] as String;
-  
+  final email = Get.arguments['email'] as String;
+
   OtpVerificationScreen({
     Key? key,
   }) : super(key: key);
@@ -20,7 +20,8 @@ final email = Get.arguments['email'] as String;
 class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   late OtpController _otpController;
   final TextEditingController newPasswordController = TextEditingController();
-  final TextEditingController confirmPasswordController = TextEditingController();
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
 
   @override
   void initState() {
@@ -39,6 +40,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       backgroundColor: const Color(0xFFF5F7FA),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
@@ -49,12 +51,11 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
         ),
       ),
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(20.0),
           child: Column(
             children: [
               const SizedBox(height: 40),
-              // OTP Card Widget
               OtpCardWidget(
                 email: widget.email,
                 controller: _otpController,
@@ -62,46 +63,45 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                 onResend: _handleResendCode,
               ),
               const SizedBox(height: 20),
-              // New Password input
-              
+              // ...input password...
               const SizedBox(height: 12),
-              // Confirm Password input
-              
-              const Spacer(),
-              // Let's get started button
-              Container(
-                width: double.infinity,
-                height: 56,
-                margin: const EdgeInsets.only(bottom: 20),
-                child: ValueListenableBuilder<bool>(
-                  valueListenable: _otpController.isCompleteNotifier,
-                  builder: (context, isComplete, child) {
-                    return ElevatedButton(
-                      onPressed: isComplete ? _handleGetStarted : null,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF00D4FF),
-                        disabledBackgroundColor: const Color(0xFFE5F4F7),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        elevation: 0,
-                      ),
-                      child: const Text(
-                        "Let's get started",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white,
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
+              // ...input confirm password...
+              // Hapus tombol dari sini!
             ],
           ),
         ),
       ),
+      bottomNavigationBar: SafeArea(
+      child: Container(
+        width: double.infinity,
+        height: 56,
+        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        child: ValueListenableBuilder<bool>(
+          valueListenable: _otpController.isCompleteNotifier,
+          builder: (context, isComplete, child) {
+            return ElevatedButton(
+              onPressed: isComplete ? _handleGetStarted : null,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF00D4FF),
+                disabledBackgroundColor: const Color(0xFFE5F4F7),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                elevation: 0,
+              ),
+              child: const Text(
+                "Let's get started",
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    ),
     );
   }
 
@@ -114,7 +114,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   void _handleResendCode() async {
     // Handle resend code
     final result = await ResendOtpService.resendOtp(widget.email);
-    
+
     if (result['success']) {
       // Successfully resent OTP
       _otpController.clearOtp();
@@ -129,36 +129,37 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
       // Failed to resend OTP
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(result['message'] ?? 'Failed to resend verification code'),
+          content:
+              Text(result['message'] ?? 'Failed to resend verification code'),
           backgroundColor: Colors.red,
         ),
       );
     }
   }
 
-void _handleGetStarted() async {
-  final otp = _otpController.getOtp();
-  final email = widget.email;
+  void _handleGetStarted() async {
+    final otp = _otpController.getOtp();
+    final email = widget.email;
 
-  final result = await OtpService.verifyOtp(email, otp);
+    final result = await OtpService.verifyOtp(email, otp);
 
-  if (result['success']) {
-    // Berhasil verifikasi
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Verification successful!'),
-        backgroundColor: Colors.green,
-      ),
-    );
-    Get.offAllNamed(OceanLearnRoutes.loginPage); 
-  } else {
-    // Gagal
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(result['message'] ?? 'Verification failed'),
-        backgroundColor: Colors.red,
-      ),
-    );
+    if (result['success']) {
+      // Berhasil verifikasi
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Verification successful!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+      Get.offAllNamed(OceanLearnRoutes.loginPage);
+    } else {
+      // Gagal
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(result['message'] ?? 'Verification failed'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
-}
 }

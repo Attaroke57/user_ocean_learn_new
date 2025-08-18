@@ -8,6 +8,8 @@ import 'package:user_ocean_learn/Widgets/ColorPallete.dart';
 
 class ForgotPasswordVerificationPage extends StatelessWidget {
   final ForgotPasswordVerificationController controller = Get.put(ForgotPasswordVerificationController());
+  
+
 
   @override
   Widget build(BuildContext context) {
@@ -258,24 +260,46 @@ class ForgotPasswordVerificationPage extends StatelessWidget {
       case 0:
         return MyTextField(
           hintText: "Enter OTP code",
-          suffixIcon: Icons.lock_outline,
+          suffixIcon: Icon(Icons.send_outlined),
           controller: controller.otpController,
           keyboardType: TextInputType.number,
         );
       case 1:
-        return MyTextField(
-          hintText: "Enter new password",
-          suffixIcon: Icons.lock_outline,
-          controller: controller.newPasswordController,
-          obscureText: true,
-        );
-      case 2:
-        return MyTextField(
-          hintText: "Confirm new password",
-          suffixIcon: Icons.lock_outline,
-          controller: controller.newPasswordConfirmationController,
-          obscureText: true,
-        );
+  return Obx(() => MyTextField(
+        hintText: "Enter new password",
+        controller: controller.newPasswordController,
+        obscureText: controller.obscureNewPassword.value,
+        suffixIcon: IconButton(
+          icon: Icon(
+            controller.obscureNewPassword.value
+                ? Icons.visibility_off_outlined // mata tertutup
+                : Icons.visibility_outlined,    // mata terbuka
+          ),
+          onPressed: () {
+            controller.obscureNewPassword.value =
+                !controller.obscureNewPassword.value;
+          },
+        ),
+      ));
+
+case 2:
+  return Obx(() => MyTextField(
+        hintText: "Confirm new password",
+        controller: controller.newPasswordConfirmationController,
+        obscureText: controller.obscureConfirmPassword.value,
+        suffixIcon: IconButton(
+          icon: Icon(
+            controller.obscureConfirmPassword.value
+                ? Icons.visibility_off_outlined // mata tertutup
+                : Icons.visibility_outlined,    // mata terbuka
+          ),
+          onPressed: () {
+            controller.obscureConfirmPassword.value =
+                !controller.obscureConfirmPassword.value;
+          },
+        ),
+      ));
+
       default:
         return Container();
     }

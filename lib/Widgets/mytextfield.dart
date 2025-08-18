@@ -3,8 +3,8 @@ import 'package:user_ocean_learn/Widgets/ColorPallete.dart';
 
 class MyTextField extends StatelessWidget {
   final String hintText;
-  final IconData? suffixIcon;
-  final IconData? prefixIcon;
+  final Widget? suffixIcon;   // ⬅ ubah dari IconData? ke Widget?
+  final Widget? prefixIcon;   // ⬅ sama biar fleksibel
   final bool obscureText;
   final int? maxLines;
   final TextInputType? keyboardType;
@@ -44,10 +44,8 @@ class MyTextField extends StatelessWidget {
           border: InputBorder.none,
           enabledBorder: InputBorder.none,
           focusedBorder: InputBorder.none,
-          suffixIcon:
-              suffixIcon != null ? Icon(suffixIcon, color: Colors.black) : null,
-          prefixIcon:
-              prefixIcon != null ? Icon(prefixIcon, color: Colors.black) : null,
+          suffixIcon: suffixIcon,   // ⬅ sekarang bisa Icon atau IconButton
+          prefixIcon: prefixIcon,
         ),
       ),
     );

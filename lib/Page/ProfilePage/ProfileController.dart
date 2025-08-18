@@ -34,6 +34,7 @@ class ProfileController extends GetxController {
   DateTime? get membershipExpiry => _membershipExpiry.value;
   
   var isLoading = false.obs;
+  
   @override
   void onInit() {
     super.onInit();
@@ -47,93 +48,111 @@ class ProfileController extends GetxController {
     userName.value = UserStorage.getName() ?? 'User';
     userEmail.value = UserStorage.getEmail() ?? 'email@example.com';
     avatarUrl.value = UserStorage.getAvatarUrl() ?? '';
+    print("✅ Loaded user data - Avatar URL: ${avatarUrl.value}");
   }
- Future<void> fetchUserProfile() async {
-  try {
-    isLoading.value = true;
-    final response = await ProfileService.getProfile();
 
-    if (response['success']) {
-      final data = response['data'];
+  Future<void> fetchUserProfile() async {
+    try {
+      isLoading.value = true;
+      final response = await ProfileService.getProfile();
 
-      userName.value = data['name'] ?? userName.value;
-      userEmail.value = data['email'] ?? userEmail.value;
+      if (response['success']) {
+        final data = response['data'];
 
-      final newAvatar = data['avatar'] ?? '';
-      if (newAvatar.isNotEmpty) {
-        // ✅ Add timestamp to prevent caching
-        final timestamp = DateTime.now().millisecondsSinceEpoch;
-        final avatarWithTimestamp = '$newAvatar?t=$timestamp';
+        // Update basic user info
+        if (data['name'] != null) {
+          userName.value = data['name'];
+          await UserStorage.saveName(data['name']);
+        }
+
+        if (data['email'] != null) {
+          userEmail.value = data['email'];
+        }
+
+        // ✅ Handle avatar URL update properly
+        if (data['avatar'] != null && data['avatar'].isNotEmpty) {
+          final newAvatarUrl = data['avatar'];
+          
+          // Clear cache by setting empty first
+          final oldUrl = avatarUrl.value;
+          avatarUrl.value = '';
+          
+          // Small delay to ensure UI clears
+          await Future.delayed(Duration(milliseconds: 50));
+          
+          // Set new URL
+          avatarUrl.value = newAvatarUrl;
+          await UserStorage.saveAvatarUrl(newAvatarUrl);
+          
+          print("✅ Avatar URL updated in fetchUserProfile: $newAvatarUrl");
+          print("✅ Old URL was: $oldUrl");
+        }
+
+        // Force reactive updates
+        userName.refresh();
+        userEmail.refresh();
+        avatarUrl.refresh();
+        update(); // For GetBuilder widgets
         
-        avatarUrl.value = avatarWithTimestamp;
-        await UserStorage.saveAvatarUrl(avatarWithTimestamp);
-        
-        print("✅ Avatar URL updated in fetchUserProfile: $avatarWithTimestamp");
+      } else {
+        print("❌ Failed to fetch profile: ${response['message']}");
       }
-
-      // ✅ Force UI update
-      avatarUrl.refresh();
-      update();
-      
-    } else {
-      print("❌ Failed to fetch profile: ${response['message']}");
+    } catch (e) {
+      print("❌ Error in fetchUserProfile: $e");
+    } finally {
+      isLoading.value = false;
     }
-  } catch (e) {
-    print("❌ Error in fetchUserProfile: $e");
-  } finally {
-    isLoading.value = false;
   }
-}
-  // ✅ Update method updateProfile di ProfileController
-Future<void> updateProfile(String name, {String? avatarPath}) async {
-  try {
-    isLoading.value = true;
-    final response = await ProfileService.updateProfile(
-      name: name,
-      avatarFile: avatarPath != null ? File(avatarPath) : null,
-    );
 
-    if (response['success']) {
-      userName.value = name;
-      await UserStorage.saveName(name);
+  Future<void> updateProfile(String name, {String? avatarPath}) async {
+    try {
+      isLoading.value = true;
+      final response = await ProfileService.updateProfile(
+        name: name,
+        avatarFile: avatarPath != null ? File(avatarPath) : null,
+      );
 
-      // ✅ Handle avatar URL update properly
-      if (response['avatarUrl'] != null && response['avatarUrl'].isNotEmpty) {
-        final newAvatarUrl = response['avatarUrl'];
-        
-        // ✅ Clear old cached image first
-        final oldUrl = avatarUrl.value;
-        avatarUrl.value = '';
-        
-        // ✅ Set new URL after small delay to ensure cache is cleared
-        await Future.delayed(Duration(milliseconds: 100));
-        avatarUrl.value = newAvatarUrl;
-        await UserStorage.saveAvatarUrl(newAvatarUrl);
-        
-        print("✅ Avatar URL updated: $newAvatarUrl");
-        print("✅ Old URL was: $oldUrl");
-        
-        // ✅ Force UI update
+      if (response['success']) {
+        userName.value = name;
+        await UserStorage.saveName(name);
+
+        // ✅ Enhanced avatar URL update with cache busting
+        if (response['avatarUrl'] != null && response['avatarUrl'].isNotEmpty) {
+          final newAvatarUrl = response['avatarUrl'];
+          
+          // Clear old cached image first
+          avatarUrl.value = '';
+          await Future.delayed(Duration(milliseconds: 100));
+          
+          // Set new URL with cache busting parameter
+          final cacheBustedUrl = '$newAvatarUrl?timestamp=${DateTime.now().millisecondsSinceEpoch}';
+          avatarUrl.value = cacheBustedUrl;
+          await UserStorage.saveAvatarUrl(newAvatarUrl);
+          
+          print("✅ Avatar URL updated in updateProfile: $cacheBustedUrl");
+        }
+
+        // Force UI updates
+        userName.refresh();
         avatarUrl.refresh();
         update();
-      }
 
-      Get.snackbar("Success", response['message'] ?? "Profile updated");
-      
-      // ✅ Fetch fresh profile data to ensure consistency
-      await Future.delayed(Duration(milliseconds: 500));
-      await fetchUserProfile();
-      
-    } else {
-      Get.snackbar("Error", response['message'] ?? "Update failed");
+        Get.snackbar("Success", response['message'] ?? "Profile updated");
+        
+        // Fetch fresh data to ensure consistency
+        await Future.delayed(Duration(milliseconds: 300));
+        await fetchUserProfile();
+        
+      } else {
+        Get.snackbar("Error", response['message'] ?? "Update failed");
+      }
+    } catch (e) {
+      print("❌ Error in updateProfile: $e");
+      Get.snackbar("Error", "Something went wrong");
+    } finally {
+      isLoading.value = false;
     }
-  } catch (e) {
-    print("❌ Error in updateProfile: $e");
-    Get.snackbar("Error", "Something went wrong");
-  } finally {
-    isLoading.value = false;
   }
-}
 
   Future<void> _processSubscriptionFromAPI(Map<String, dynamic> subscription) async {
     try {
@@ -175,37 +194,33 @@ Future<void> updateProfile(String name, {String? avatarPath}) async {
   }
 
   Future<void> checkSubscription() async {
-  _isLoading.value = true;
-  try {
-    final sub = UserStorage.getSubscription();
-    print('🔥 Loaded subscription from storage: $sub');
-    final expiry = await UserStorage.getMembershipExpiry();
-    print('📅 Stored expiry date: $expiry');
-    final status = UserStorage.getMembershipStatus();
-    print('💡 Stored membership status: $status');
+    _isLoading.value = true;
+    try {
+      final sub = UserStorage.getSubscription();
+      print('🔥 Loaded subscription from storage: $sub');
+      final expiry = await UserStorage.getMembershipExpiry();
+      print('📅 Stored expiry date: $expiry');
+      final status = UserStorage.getMembershipStatus();
+      print('💡 Stored membership status: $status');
 
-    if (sub != null) {
-      await _processSubscriptionFromAPI(sub);
-    } else {
-      await _loadSubscriptionStatusFromHistory();
+      if (sub != null) {
+        await _processSubscriptionFromAPI(sub);
+      } else {
+        await _loadSubscriptionStatusFromHistory();
+      }
+    } catch (e) {
+      print('❌ Gagal checkSubscription: $e');
+    } finally {
+      _isLoading.value = false;
     }
-  } catch (e) {
-    print('❌ Gagal checkSubscription: $e');
-  } finally {
-    _isLoading.value = false;
   }
-}
-
 
   Future<void> _loadSubscriptionStatusFromHistory() async {
     try {
       final subscriptions = await Historyservice.getSubscriptions();
 
       if (subscriptions.isNotEmpty) {
-        // Include offline payment subscriptions as active
-        final activeSubscriptions = subscriptions
-            //.where((sub) => sub.detail.paymentMethod != 'offline payment')
-            .toList();
+        final activeSubscriptions = subscriptions.toList();
 
         if (activeSubscriptions.isNotEmpty) {
           activeSubscriptions.sort((a, b) => b.date.compareTo(a.date));
@@ -245,7 +260,6 @@ Future<void> updateProfile(String name, {String? avatarPath}) async {
     final isPremium = UserStorage.isPremiumUser();
 
     if (isPremium && !expired) {
-      // ❌ Sudah aktif dan belum expired → tombol tidak bisa ditekan
       return;
     }
 
@@ -289,21 +303,71 @@ Future<void> updateProfile(String name, {String? avatarPath}) async {
     }
   }
 
-  void handleEditPersonalDetails() {
-  Get.toNamed(OceanLearnRoutes.editProfilePage);
-}
-
-// Add this method
-void refreshUserData() {
-    _loadUserData();
-    // Force UI update for GetBuilder
-    update();
-    // Also trigger reactive updates
-    userName.refresh();
-    userEmail.refresh();
+  void handleEditPersonalDetails() async {
+    // ✅ Navigate and wait for result
+    final result = await Get.toNamed(OceanLearnRoutes.editProfilePage);
+    
+    // ✅ If edit was successful, refresh data
+    if (result == true) {
+      print("✅ Edit profile returned success, refreshing data...");
+      await refreshUserData();
+      await fetchUserProfile();
+    }
   }
-  
-  
+
+  // ✅ Enhanced refresh method
+  Future<void> refreshUserData() async {
+    try {
+      // Load from storage first
+      _loadUserData();
+      
+      // Force reactive updates
+      userName.refresh();
+      userEmail.refresh();
+      avatarUrl.refresh();
+      
+      // Force GetBuilder update
+      update();
+      
+      print("✅ User data refreshed - Avatar URL: ${avatarUrl.value}");
+    } catch (e) {
+      print("❌ Error refreshing user data: $e");
+    }
+  }
+
+  // ✅ Complete profile refresh method
+  Future<void> refreshEntireProfile() async {
+    try {
+      print("🔄 Starting complete profile refresh...");
+      
+      // Show loading indicator
+      isLoading.value = true;
+      
+      // Refresh all data in sequence
+      await Future.wait([
+        fetchUserProfile(),
+        refreshSubscriptionStatus(),
+        checkSubscription(),
+      ]);
+      
+      // Force complete UI refresh
+      update();
+      
+      // Optional: Show success feedback
+      Get.snackbar(
+        "Refreshed",
+        "Profile data updated successfully",
+        duration: Duration(seconds: 1),
+      );
+      
+      print("✅ Complete profile refresh finished");
+    } catch (e) {
+      print("❌ Error in complete profile refresh: $e");
+      Get.snackbar("Error", "Failed to refresh profile data");
+    } finally {
+      isLoading.value = false;
+    }
+  }
 
   void logout() {
     Get.dialog(
@@ -328,77 +392,77 @@ void refreshUserData() {
     );
   }
 
- Future<void> refreshSubscriptionStatus() async {
-  print('ProfileController: refreshSubscriptionStatus called');
-  _isLoading.value = true;
+  Future<void> refreshSubscriptionStatus() async {
+    print('ProfileController: refreshSubscriptionStatus called');
+    _isLoading.value = true;
 
-  const int maxRetries = 5;
-  const Duration retryDelay = Duration(seconds: 3);
-  int retryCount = 0;
+    const int maxRetries = 5;
+    const Duration retryDelay = Duration(seconds: 3);
+    int retryCount = 0;
 
-  while (retryCount < maxRetries) {
-    try {
-      // Fetch fresh user data from backend
-      final response = await LoginService.getAccountInfoWithToken();
-      print('ProfileController: full backend response: $response');
-      final user = response.accountInfo;
-      final subscription = user?.subscription;
+    while (retryCount < maxRetries) {
+      try {
+        // Fetch fresh user data from backend
+        final response = await LoginService.getAccountInfoWithToken();
+        print('ProfileController: full backend response: $response');
+        final user = response.accountInfo;
+        final subscription = user?.subscription;
 
-      print('ProfileController: subscription data from backend: $subscription');
+        print('ProfileController: subscription data from backend: $subscription');
 
-      if (user != null && subscription != null) {
-        final expirationDateRaw = subscription['expiration_date'];
-        final expirationDate = expirationDateRaw != null ? DateTime.tryParse(expirationDateRaw) : null;
-        final accessLevel = subscription['status'] ?? 'free';
+        if (user != null && subscription != null) {
+          final expirationDateRaw = subscription['expiration_date'];
+          final expirationDate = expirationDateRaw != null ? DateTime.tryParse(expirationDateRaw) : null;
+          final accessLevel = subscription['status'] ?? 'free';
 
-        print('ProfileController: parsed expirationDate: $expirationDate, accessLevel: $accessLevel');
+          print('ProfileController: parsed expirationDate: $expirationDate, accessLevel: $accessLevel');
 
-        if (expirationDate != null) {
-          // Update UserStorage with fresh data
-          await UserStorage.saveUserData(
-            token: user.tokens.first.token,
-            email: user.email,
-            name: user.name,
-            role: user.role,
-          );
-          await UserStorage.saveMembershipStatus(accessLevel);
-          await UserStorage.setMembershipExpiry(expirationDate);
+          if (expirationDate != null) {
+            // Update UserStorage with fresh data
+            await UserStorage.saveUserData(
+              token: user.tokens.first.token,
+              email: user.email,
+              name: user.name,
+              role: user.role,
+            );
+            await UserStorage.saveMembershipStatus(accessLevel);
+            await UserStorage.setMembershipExpiry(expirationDate);
 
-          // Process subscription to update UI
-          await _processSubscriptionFromAPI(subscription);
+            // Process subscription to update UI
+            await _processSubscriptionFromAPI(subscription);
 
-          break; // Exit loop on success
+            break; // Exit loop on success
+          } else {
+            print('ProfileController: expiration_date is null or invalid');
+            _subscriptionButtonText.value = 'Get Premium Membership';
+            _subscriptionButtonColor.value = secondarycolor;
+            _subscriptionTextColor.value = primarycolor;
+            break;
+          }
         } else {
-          print('ProfileController: expiration_date is null or invalid');
-          _subscriptionButtonText.value = 'Get Premium Membership';
-          _subscriptionButtonColor.value = secondarycolor;
-          _subscriptionTextColor.value = primarycolor;
+          // Fallback to local storage or history
+          final subscriptionLocal = UserStorage.getSubscription();
+          if (subscriptionLocal != null && subscriptionLocal.isNotEmpty) {
+            await _processSubscriptionFromAPI(subscriptionLocal);
+          } else {
+            await _loadSubscriptionStatusFromHistory();
+          }
           break;
         }
-      } else {
-        // Fallback to local storage or history
-        final subscriptionLocal = UserStorage.getSubscription();
-        if (subscriptionLocal != null && subscriptionLocal.isNotEmpty) {
-          await _processSubscriptionFromAPI(subscriptionLocal);
+      } catch (e) {
+        print('ProfileController: error in refreshSubscriptionStatus: $e');
+        if (retryCount == maxRetries - 1) {
+          _subscriptionButtonText.value = 'Failed to load status';
+          _subscriptionButtonColor.value = Colors.grey.shade300;
+          _subscriptionTextColor.value = Colors.black;
         } else {
-          await _loadSubscriptionStatusFromHistory();
+          print('ProfileController: retrying refreshSubscriptionStatus in $retryDelay');
+          await Future.delayed(retryDelay);
         }
-        break;
       }
-    } catch (e) {
-      print('ProfileController: error in refreshSubscriptionStatus: $e');
-      if (retryCount == maxRetries - 1) {
-        _subscriptionButtonText.value = 'Failed to load status';
-        _subscriptionButtonColor.value = Colors.grey.shade300;
-        _subscriptionTextColor.value = Colors.black;
-      } else {
-        print('ProfileController: retrying refreshSubscriptionStatus in $retryDelay');
-        await Future.delayed(retryDelay);
-      }
+      retryCount++;
     }
-    retryCount++;
-  }
 
-  _isLoading.value = false;
-}
+    _isLoading.value = false;
+  }
 }

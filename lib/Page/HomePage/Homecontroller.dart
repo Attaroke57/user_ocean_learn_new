@@ -9,7 +9,7 @@ class HomeController extends GetxController {
 
   var isLoading = true.obs;
   var isLoadingMore = false.obs;
-  var isVisitor = false.obs;
+  var isfree = false.obs;
   var name = ''.obs;
   var lessons = <CourseModel>[].obs;
   var searchQuery = ''.obs;
@@ -63,22 +63,28 @@ class HomeController extends GetxController {
 
   Future<void> loadMembershipStatus() async {
     final status = UserStorage.getMembershipStatus();
-    membershipStatus.value = status;
-    isVisitor.value = status == 'visitor';
-    final isPremiumUser = UserStorage.isPremiumUser();
-    final expired = await UserStorage.isMembershipExpired();
+  membershipStatus.value = status;
+  isfree.value = status == 'visitor';
+  final isPremiumUser = UserStorage.isPremiumUser();
+  final expired = await UserStorage.isMembershipExpired();
+  isPremium.value = isPremiumUser && !expired;
+  isMembershipExpired.value = expired;
 
     // Set isPremium hanya jika user premium dan tidak expired
     isPremium.value = isPremiumUser && !expired;
     isMembershipExpired.value = expired;
 
-    print('Membership Status: $status');
-    print('Is Visitor: ${isVisitor.value}');
+    print('Membership Status: ${membershipStatus.value}');
     print('Is Premium: ${isPremium.value}');
     print('Is Membership Expired: ${isMembershipExpired.value}');
 
     // Debug: print UserStorage data
     UserStorage.printStorageData();
+    final expiry = await UserStorage.getMembershipExpiry();
+    print('Expiry: $expiry');
+    print('isPremiumUser: ${UserStorage.isPremiumUser()}');
+    print('isMembershipExpired: ${await UserStorage.isMembershipExpired()}');
+
 
     // Reload lessons only if membership is active (not expired)
     if (isPremium.value && !isMembershipExpired.value) {
@@ -146,14 +152,14 @@ class HomeController extends GetxController {
 
   // Get user access level for display
   String getUserAccessLevelDisplay() {
-    if (isVisitor.value) return 'Visitor';
+    if (isfree.value) return 'Visitor';
     if (isPremium.value) return 'Premium Member';
     return 'Basic Member';
   }
 
   // Method to handle lesson access - PERBAIKAN UTAMA
   Future<bool> canAccessLesson(CourseModel lesson) async {
-    if (isVisitor.value) return false;
+    if (isfree.value) return false;
     // Enforce locking for free users regardless of API flag
     if (!isPremium.value && lesson.isLocked == false) {
       // Treat lesson as locked for free users
@@ -176,7 +182,7 @@ class HomeController extends GetxController {
 
   // Method untuk mendapatkan informasi status akses
   Future<String> getAccessStatusMessage(CourseModel lesson) async {
-    if (isVisitor.value) {
+    if (isfree.value) {
       return 'Please register to access lessons';
     }
 
@@ -195,6 +201,7 @@ class HomeController extends GetxController {
   Future<void> refreshMembershipStatus() async {
     await loadMembershipStatus();
     await loadInitialLessons();
+    
   }
 
   void checkMembership() async {

@@ -17,6 +17,7 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final LoginController loginController = Get.put(LoginController());
+  var obscurePassword = true.obs;
 
   @override
   Widget build(BuildContext context) {
@@ -94,17 +95,31 @@ class _LoginScreenState extends State<LoginScreen> {
                       // Directly use controller from LoginController
                       MyTextField(
                         hintText: "Email",
-                        suffixIcon: Icons.email_outlined,
+                        suffixIcon: Icon(Icons.email_outlined),
                         controller: loginController.emailController,
                       ),
                       const SizedBox(height: 12),
                       // Directly use controller from LoginController
-                      MyTextField(
-                        hintText: "Password",
-                        suffixIcon: Icons.lock_outline,
-                        obscureText: true,
-                        controller: loginController.passwordController,
-                      ),
+                      Obx(() => MyTextField(
+                            controller: loginController
+                                .passwordController, // pakai controller dari LoginController
+                            hintText: "Password",
+                            obscureText: obscurePassword
+                                .value, // pakai var obscurePassword di State
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                obscurePassword.value
+                                    ? Icons
+                                        .visibility_off_outlined // mata tertutup
+                                    : Icons.visibility_outlined, // mata terbuka
+                              ),
+                              onPressed: () {
+                                obscurePassword.value =
+                                    !obscurePassword.value; // toggle
+                              },
+                            ),
+                          )),
+
                       const SizedBox(height: 12),
 
                       // Remember me and forgot password

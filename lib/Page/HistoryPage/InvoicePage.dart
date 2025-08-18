@@ -21,7 +21,6 @@ class InvoicePage extends StatelessWidget {
     final username = UserStorage.getName() ?? 'User';
     final userEmail = UserStorage.getEmail() ?? 'email@example.com';
 
-
     return Scaffold(
       backgroundColor: netralcolor,
       appBar: AppBar(
@@ -125,7 +124,14 @@ class InvoicePage extends StatelessWidget {
                         _buildDetailRow('Email', userEmail),
                         _buildDetailRow('Amount', subscription.detail.amount),
                         _buildDetailRow('Status', subscription.status),
-                        _buildDetailRow('Paid At', subscription.detail.paidAt),
+                        _buildDetailRow(
+                          'Paid At',
+                          subscription.status.toLowerCase() == 'pending'
+                              ? '-'
+                              : subscription.status.toLowerCase() == 'canceled'
+                                  ? '-'
+                                  : subscription.detail.paidAt,
+                        ),
                       ],
                     ),
                   ),
@@ -247,13 +253,13 @@ class InvoicePage extends StatelessWidget {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(18),
                           side: BorderSide(
-                            color: primarycolor, 
+                            color: primarycolor,
                             width: 1, // Ketebalan garis
                           ),
                         ),
                         elevation: 0,
                       ),
-                      child:  Text(
+                      child: Text(
                         'Thank You!',
                         style: GoogleFonts.poppins(
                           fontSize: 16,

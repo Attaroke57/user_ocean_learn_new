@@ -4,19 +4,19 @@ class ScheduleCard extends StatelessWidget {
   final int weekNumber;
   final String date;
   final bool isPast;
-  final String? title;
-  final VoidCallback? onViewDetails;
-  final bool isFreeUser; // New parameter to indicate free user
+  final String title;
+  final bool isFreeUser; // ini sebenarnya "isLocked" di UI
+  final VoidCallback onViewDetails;
 
   const ScheduleCard({
-    Key? key,
+    super.key,
     required this.weekNumber,
     required this.date,
-    required this.isPast, 
-    this.title,
-    this.onViewDetails,
-    this.isFreeUser = false,
-  }) : super(key: key);
+    required this.isPast,
+    required this.title,
+    required this.isFreeUser,
+    required this.onViewDetails,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +37,7 @@ class ScheduleCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            "Week $weekNumber: ${title ?? 'Lecture Title'}",
+            "Week $weekNumber: $title",
             style: const TextStyle(
               fontWeight: FontWeight.bold,
               fontSize: 16,
@@ -51,30 +51,24 @@ class ScheduleCard extends StatelessWidget {
               fontSize: 14,
             ),
           ),
-          const SizedBox(height: 16),
-          InkWell(
-            onTap: isFreeUser ? null : onViewDetails,
-            child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: isFreeUser ? Colors.grey.shade300 : const Color(0xFFE1F5FE),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.info_outline, size: 18, color: isFreeUser ? Colors.grey : Colors.blue),
-                  const SizedBox(width: 8),
-                  Text(
-                    "View Course Details",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: isFreeUser ? Colors.grey : Colors.blue,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
+          const SizedBox(height: 8),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: !isFreeUser ? onViewDetails : null, // <-- enable jika !isFreeUser
+              icon: const Icon(Icons.info_outline),
+              label: const Text("View Course Details"),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: !isFreeUser
+                    ? Colors.blue.shade100
+                    : Colors.grey.shade200,
+                foregroundColor: !isFreeUser
+                    ? Colors.black87
+                    : Colors.grey.shade500,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
             ),
           ),

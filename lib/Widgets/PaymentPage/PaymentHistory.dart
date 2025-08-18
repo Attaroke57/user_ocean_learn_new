@@ -194,24 +194,7 @@ class PaymentHistory extends StatelessWidget {
       children: [
         // Confirm button for admin (cash payments only)
         if (paymentMethod == 'cash' && status == 'pending')
-          Expanded(
-            child: ElevatedButton.icon(
-              onPressed: () => controller.confirmCashPayment(subscription),
-              icon: const Icon(Icons.check, color: Colors.white, size: 16),
-              label: const Text(
-                'Confirm Payment',
-                style: TextStyle(color: Colors.white, fontSize: 12),
-              ),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                padding: const EdgeInsets.symmetric(vertical: 8),
-              ),
-            ),
-          ),
-        
+          
         if (paymentMethod == 'cash' && status == 'pending')
           const SizedBox(width: 8),
           
@@ -221,7 +204,7 @@ class PaymentHistory extends StatelessWidget {
             onPressed: () => controller.viewInvoice(subscription),
             icon: const Icon(Icons.receipt, color: primarycolor, size: 16),
             label: const Text(
-              'View Details',
+              'View Invoice',
               style: TextStyle(color: primarycolor, fontSize: 12),
             ),
             style: OutlinedButton.styleFrom(

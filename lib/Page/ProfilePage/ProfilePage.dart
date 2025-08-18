@@ -78,8 +78,9 @@ class ProfilePage extends StatelessWidget {
       padding: const EdgeInsets.all(16.0),
       child: Column(
         children: [
-          // ✅ Use GetBuilder to ensure UI updates when controller.update() is called
+          // ✅ Enhanced profile image with better reactive updates
           GetBuilder<ProfileController>(
+            id: 'avatar', // Specific ID for avatar updates
             builder: (controller) => Obx(() => _buildProfileImage(controller.avatarUrl.value)),
           ),
           const SizedBox(height: 16),
@@ -93,8 +94,10 @@ class ProfilePage extends StatelessWidget {
     );
   }
 
-  // ✅ Updated profile image widget with better caching handling
+  // ✅ Enhanced profile image widget with better error handling and caching
   Widget _buildProfileImage(String? photoUrl) {
+    print('🖼️ Building profile image with URL: $photoUrl');
+    
     return Container(
       width: 100,
       height: 100,
@@ -109,33 +112,65 @@ class ProfilePage extends StatelessWidget {
                 width: 100,
                 height: 100,
                 fit: BoxFit.cover,
-                // ✅ Add unique key to force rebuild when URL changes
-                key: ValueKey(photoUrl),
+                // ✅ Use unique key based on URL to force rebuild
+                key: ValueKey('avatar_$photoUrl'),
+                // ✅ Add cache headers to prevent aggressive caching
+                headers: {
+                  'Cache-Control': 'no-cache',
+                },
                 errorBuilder: (context, error, stackTrace) {
-                  print('❌ Error loading image: $error');
-                  return Icon(
-                    Icons.person,
-                    size: 50,
-                    color: Colors.grey[700],
+                  print('❌ Error loading avatar image: $error');
+                  print('❌ Stack trace: $stackTrace');
+                  return Container(
+                    width: 100,
+                    height: 100,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.grey[300],
+                    ),
+                    child: Icon(
+                      Icons.person,
+                      size: 50,
+                      color: Colors.grey[700],
+                    ),
                   );
                 },
                 loadingBuilder: (context, child, loadingProgress) {
-                  if (loadingProgress == null) return child;
-                  return Center(
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      value: loadingProgress.expectedTotalBytes != null
-                          ? loadingProgress.cumulativeBytesLoaded /
-                              loadingProgress.expectedTotalBytes!
-                          : null,
+                  if (loadingProgress == null) {
+                    print('✅ Avatar image loaded successfully');
+                    return child;
+                  }
+                  return Container(
+                    width: 100,
+                    height: 100,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: Colors.grey[200],
+                    ),
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        value: loadingProgress.expectedTotalBytes != null
+                            ? loadingProgress.cumulativeBytesLoaded /
+                                loadingProgress.expectedTotalBytes!
+                            : null,
+                      ),
                     ),
                   );
                 },
               )
-            : Icon(
-                Icons.person,
-                size: 50,
-                color: Colors.grey[700],
+            : Container(
+                width: 100,
+                height: 100,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.grey[300],
+                ),
+                child: Icon(
+                  Icons.person,
+                  size: 50,
+                  color: Colors.grey[700],
+                ),
               ),
       ),
     );
@@ -216,14 +251,14 @@ class ProfilePage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          const Divider(),
+          
           _buildSettingOption(
             title: 'Edit personal details',
             onTap: () async {
               // ✅ Navigate and refresh on return
-              await Get.toNamed(OceanLearnRoutes.editProfilePage);
-              // Refresh profile data when returning
-              _refreshProfileData(controller);
+              final result = await Get.toNamed(OceanLearnRoutes.editProfilePage);
+              // Refresh profile data when returning from edit page
+              await _refreshProfileData(controller);
             },
           ),
         ],
@@ -281,9 +316,19 @@ class ProfilePage extends StatelessWidget {
     );
   }
 
-  // ✅ Add this method to refresh profile after editing
-  void _refreshProfileData(ProfileController controller) {
-    controller.fetchUserProfile();
+  // ✅ Enhanced refresh method
+  Future<void> _refreshProfileData(ProfileController controller) async {
+    print('🔄 Refreshing profile data...');
+    
+    // Fetch fresh profile data
+    await controller.fetchUserProfile();
+    
+    // Refresh user data
     controller.refreshUserData();
+    
+    // Force avatar update specifically
+    controller.update(['avatar']);
+    
+    print('✅ Profile data refresh completed');
   }
 }

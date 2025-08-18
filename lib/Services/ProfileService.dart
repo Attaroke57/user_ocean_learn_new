@@ -5,7 +5,6 @@ import 'package:user_ocean_learn/Widgets/user_storage.dart';
 
 class ProfileService {
   static const String baseUrl = 'https://ocean-learn-api.rplrus.com/api';
-  static const String avatarBase = '$baseUrl/v1/avatar';
 
   /// Update profile (name + optional avatar)
   static Future<Map<String, dynamic>> updateProfile({
@@ -60,11 +59,12 @@ class ProfileService {
           if (accountInfo['avatar'] != null) {
             final avatarPath = accountInfo['avatar'].toString();
             if (avatarPath.isNotEmpty) {
+              // ✅ Build complete avatar URL with timestamp to prevent caching
               final cleanPath = avatarPath.replaceFirst(RegExp(r'^/+'), '');
-              // ✅ selalu pakai /v1/
-              avatarUrl = '$baseUrl/v1/$cleanPath';
               final timestamp = DateTime.now().millisecondsSinceEpoch;
-              avatarUrl = '$avatarUrl?t=$timestamp';
+              avatarUrl = '$baseUrl/v1/$cleanPath?t=$timestamp';
+              
+              print('✅ Built avatar URL: $avatarUrl');
             }
           }
 
@@ -110,16 +110,16 @@ class ProfileService {
 
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
-
         final data = jsonResponse['data'];
-        if (data['avatar'] != null) {
+        
+        // ✅ Process avatar URL consistently
+        if (data['avatar'] != null && data['avatar'].isNotEmpty) {
           final avatarPath = data['avatar'].toString();
-          if (avatarPath.isNotEmpty) {
-            final cleanPath = avatarPath.replaceFirst(RegExp(r'^/+'), '');
-            final timestamp = DateTime.now().millisecondsSinceEpoch;
-            // ✅ konsisten pakai /v1/
-            data['avatar'] = '$baseUrl/v1/$cleanPath?t=$timestamp';
-          }
+          final cleanPath = avatarPath.replaceFirst(RegExp(r'^/+'), '');
+          final timestamp = DateTime.now().millisecondsSinceEpoch;
+          data['avatar'] = '$baseUrl/v1/$cleanPath?t=$timestamp';
+          
+          print('✅ Processed avatar URL: ${data['avatar']}');
         }
 
         return {

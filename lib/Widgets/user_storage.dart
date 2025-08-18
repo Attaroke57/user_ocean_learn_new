@@ -21,7 +21,6 @@ class UserStorage {
   static const String SUBSCRIPTION_DATA_KEY = 'subscription_data';
   static const String AVATAR_URL_KEY = 'avatar_url';
 
-
   // Initialize storage
   static Future<void> init() async {
     await GetStorage.init('user_data');
@@ -31,10 +30,10 @@ class UserStorage {
   static String? getName() {
     return _storage.read(NAME_KEY);
   }
+
   static Future<void> saveName(String name) async {
     await _storage.write(NAME_KEY, name);
   }
-   
 
   static String? getRole() {
     return _storage.read(ROLE_KEY);
@@ -138,7 +137,7 @@ class UserStorage {
     await _storage.write(SUBSCRIPTION_DATA_KEY, jsonStr);
   }
 
-// Ambil data subscription (return Map)
+  // Ambil data subscription (return Map)
   static Map<String, dynamic>? getSubscription() {
     final jsonStr = _storage.read(SUBSCRIPTION_DATA_KEY);
     if (jsonStr != null) {
@@ -167,18 +166,16 @@ class UserStorage {
       String courseId, bool hasAttended) async {
     await _storage.write('attendance_$courseId', hasAttended);
   }
-  
 
-// Ambil status kehadiran untuk course tertentu
+  // Ambil status kehadiran untuk course tertentu
   static bool getAttendanceStatus(String courseId) {
     return _storage.read('attendance_$courseId') ?? false;
   }
 
-// Hapus status kehadiran (opsional)
+  // Hapus status kehadiran (opsional)
   static Future<void> clearAttendanceStatus(String courseId) async {
     await _storage.remove('attendance_$courseId');
   }
-  
 
   // Downgrade user (when membership expires or cancelled)
   static Future<void> downgradeToBasic() async {
@@ -196,7 +193,6 @@ class UserStorage {
   static bool isLoggedIn() {
     return _storage.hasData(TOKEN_KEY) && getToken() != null;
   }
-  
 
   // Save rememberMe
   static Future<void> saveRememberMe(bool value) async {
@@ -207,31 +203,33 @@ class UserStorage {
   static bool isRememberMeEnabled() {
     return _storage.read(REMEMBER_ME_KEY) ?? false;
   }
+
   // Add these methods to your existing UserStorage class:
 
   // Avatar URL methods
   static Future<void> saveAvatarUrl(String avatarUrl) async {
-  await _storage.write(AVATAR_URL_KEY, avatarUrl);
-}
-
-static String? getAvatarUrl() {
-  return _storage.read(AVATAR_URL_KEY);
-}
-static Future<void> saveUserDataWithAvatar({
-  required String token,
-  required String email,
-  required String name,
-  required String role,
-  String? avatarUrl,
-}) async {
-  await _storage.write(TOKEN_KEY, token);
-  await _storage.write(EMAIL_KEY, email);
-  await _storage.write(NAME_KEY, name);
-  await _storage.write(ROLE_KEY, role);
-  if (avatarUrl != null && avatarUrl.isNotEmpty) {
     await _storage.write(AVATAR_URL_KEY, avatarUrl);
   }
-}
+
+  static String? getAvatarUrl() {
+    return _storage.read(AVATAR_URL_KEY);
+  }
+
+  static Future<void> saveUserDataWithAvatar({
+    required String token,
+    required String email,
+    required String name,
+    required String role,
+    String? avatarUrl,
+  }) async {
+    await _storage.write(TOKEN_KEY, token);
+    await _storage.write(EMAIL_KEY, email);
+    await _storage.write(NAME_KEY, name);
+    await _storage.write(ROLE_KEY, role);
+    if (avatarUrl != null && avatarUrl.isNotEmpty) {
+      await _storage.write(AVATAR_URL_KEY, avatarUrl);
+    }
+  }
 
   // Get membership info for display
   static Future<Map<String, dynamic>> getMembershipInfo() async {
@@ -314,3 +312,4 @@ extension UserAccessLevelExtension on UserAccessLevel {
     }
   }
 }
+

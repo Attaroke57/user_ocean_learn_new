@@ -89,7 +89,8 @@ class LessonList extends StatelessWidget {
             ),
             child: const Text(
               "Upgrade Now",
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              style:
+                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
             ),
           ),
         ],
@@ -117,13 +118,14 @@ class LessonList extends StatelessWidget {
     );
   }
 
-  Future<void> _handleLessonAccess(BuildContext context, CourseModel lesson) async {
+  Future<void> _handleLessonAccess(
+      BuildContext context, CourseModel lesson) async {
     // Use synchronous check based on observables instead of async canAccessLesson
-    final isVisitor = controller.isVisitor.value;
+    final isfree = controller.isfree.value;
     final isPremium = controller.isPremium.value;
     final isMembershipExpired = controller.isMembershipExpired.value;
 
-    if (isVisitor) {
+    if (isfree) {
       _showMembershipDialog(context);
       return;
     }
@@ -160,7 +162,7 @@ class LessonList extends StatelessWidget {
     }
 
     return Obx(() {
-      final isVisitor = controller.isVisitor.value;
+      final isfree = controller.isfree.value;
       final isPremium = controller.isPremium.value;
       final isMembershipExpired = controller.isMembershipExpired.value;
 
@@ -172,11 +174,9 @@ class LessonList extends StatelessWidget {
           final lesson = lessons[index];
           final dateFormatted = DateFormat('MMMM d, yyyy').format(lesson.date);
 
-          final canAccess = !isVisitor && (!lesson.isLocked || (isPremium && !isMembershipExpired));
-
-          // Enforce locked UI for free users regardless of API locked flag
-          final isFreeUser = !isPremium && !isVisitor;
-          final showLockedUI = isFreeUser;
+          // Logika akses yang benar
+          final canAccess = (isPremium && !isMembershipExpired) ||
+              (isfree && !lesson.isLocked);
 
           return Container(
             margin: const EdgeInsets.only(bottom: 12),
@@ -193,7 +193,8 @@ class LessonList extends StatelessWidget {
               ],
             ),
             child: InkWell(
-              onTap: !showLockedUI ? () => _handleLessonAccess(context, lesson) : null,
+              onTap:
+                  canAccess ? () => _handleLessonAccess(context, lesson) : null,
               borderRadius: BorderRadius.circular(12),
               child: Row(
                 children: [
@@ -208,19 +209,17 @@ class LessonList extends StatelessWidget {
                     child: Stack(
                       alignment: Alignment.center,
                       children: [
-                        // Background icon dengan opacity jika locked
                         Opacity(
-                          opacity: showLockedUI ? 0.3 : 1.0,
+                          opacity: canAccess ? 1.0 : 0.3,
                           child: Icon(
                             Icons.play_circle_outline,
                             size: 30,
-                            color: showLockedUI
-                                ? Colors.grey.shade400
-                                : Colors.blue.shade600,
+                            color: canAccess
+                                ? Colors.blue.shade600
+                                : Colors.grey.shade400,
                           ),
                         ),
-                        // Lock overlay
-                        if (showLockedUI)
+                        if (!canAccess)
                           Container(
                             width: 24,
                             height: 24,
@@ -249,7 +248,8 @@ class LessonList extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
-                            color: showLockedUI ? Colors.grey.shade600 : Colors.black,
+                            color:
+                                canAccess ? Colors.black : Colors.grey.shade600,
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
@@ -267,7 +267,7 @@ class LessonList extends StatelessWidget {
                         // Status Badge
                         Row(
                           children: [
-                            if (showLockedUI) ...[
+                            if (!canAccess) ...[
                               Container(
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 8,
@@ -297,7 +297,7 @@ class LessonList extends StatelessWidget {
                                   ],
                                 ),
                               ),
-                            ] 
+                            ]
                           ],
                         ),
                       ],
@@ -307,7 +307,8 @@ class LessonList extends StatelessWidget {
                   Icon(
                     Icons.arrow_forward_ios,
                     size: 16,
-                    color: showLockedUI ? Colors.grey.shade300 : Colors.grey.shade400,
+                    color:
+                        canAccess ? Colors.grey.shade400 : Colors.grey.shade300,
                   ),
                 ],
               ),
