@@ -27,6 +27,8 @@ class AccountInfo {
   final String role;
   final List<Token> tokens;
   final Map<String, dynamic>? subscription;
+  final String? avatar;
+  final String? photoUrl;
 
   AccountInfo({
     required this.name,
@@ -34,6 +36,8 @@ class AccountInfo {
     required this.role,
     required this.tokens,
     this.subscription,
+    this.avatar,
+    this.photoUrl,
   });
 
   factory AccountInfo.fromJson(Map<String, dynamic> json) {
@@ -43,6 +47,8 @@ class AccountInfo {
       role: json['role'],
       tokens: List<Token>.from(json['token'].map((t) => Token.fromJson(t))),
       subscription: json['subscription'],
+      avatar: json['avatar'],
+      photoUrl: json['photo_url'],
     );
   }
 }

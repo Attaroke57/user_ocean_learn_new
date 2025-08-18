@@ -1,44 +1,139 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:user_ocean_learn/Dashboard/dashboardcontroller.dart';
+import 'package:user_ocean_learn/Model/login_service_model.dart';
 import 'package:user_ocean_learn/Model/subscribtion_model.dart';
 import 'package:user_ocean_learn/Page/LoginPage/LoginController.dart';
+import 'package:user_ocean_learn/Page/ProfilePage/EditProfile.dart';
 import 'package:user_ocean_learn/Page/SubscriptionPage/SubscriptionPage.dart';
+import 'package:user_ocean_learn/Routing/ocean_learn_route.dart';
 import 'package:user_ocean_learn/Services/HistoryService.dart';
+import 'package:user_ocean_learn/Services/ProfileService.dart';
 import 'package:user_ocean_learn/Widgets/ColorPallete.dart';
 import 'package:user_ocean_learn/Widgets/user_storage.dart';
 import 'package:user_ocean_learn/Services/LoginService.dart';
 
 class ProfileController extends GetxController {
+  
   final _subscriptionButtonText = 'My Subscription'.obs;
   final _subscriptionButtonColor = secondarycolor.obs;
   final _subscriptionTextColor = primarycolor.obs;
   final _membershipExpiry = Rxn<DateTime>();
   final _isLoading = true.obs;
-  final _userName = 'User'.obs;
-  final _userEmail = 'email@example.com'.obs;
+  var userName = ''.obs;
+  var userEmail = ''.obs;
+  var avatarUrl = ''.obs;
+  var loginResponse = Rxn<LoginResponseModel>();
 
   String get subscriptionButtonText => _subscriptionButtonText.value;
   Color get subscriptionButtonColor => _subscriptionButtonColor.value;
   Color get subscriptionTextColor => _subscriptionTextColor.value;
   DateTime? get membershipExpiry => _membershipExpiry.value;
-  bool get isLoading => _isLoading.value;
-  String get userName => _userName.value;
-  String get userEmail => _userEmail.value;
-
+  
+  var isLoading = false.obs;
   @override
   void onInit() {
     super.onInit();
     _loadUserData();
     refreshSubscriptionStatus();
     checkSubscription();
+    fetchUserProfile();
   }
 
   void _loadUserData() {
-    _userName.value = UserStorage.getName() ?? 'User';
-    _userEmail.value = UserStorage.getEmail() ?? 'email@example.com';
+    userName.value = UserStorage.getName() ?? 'User';
+    userEmail.value = UserStorage.getEmail() ?? 'email@example.com';
+    avatarUrl.value = UserStorage.getAvatarUrl() ?? '';
   }
+ Future<void> fetchUserProfile() async {
+  try {
+    isLoading.value = true;
+    final response = await ProfileService.getProfile();
+
+    if (response['success']) {
+      final data = response['data'];
+
+      userName.value = data['name'] ?? userName.value;
+      userEmail.value = data['email'] ?? userEmail.value;
+
+      final newAvatar = data['avatar'] ?? '';
+      if (newAvatar.isNotEmpty) {
+        // ✅ Add timestamp to prevent caching
+        final timestamp = DateTime.now().millisecondsSinceEpoch;
+        final avatarWithTimestamp = '$newAvatar?t=$timestamp';
+        
+        avatarUrl.value = avatarWithTimestamp;
+        await UserStorage.saveAvatarUrl(avatarWithTimestamp);
+        
+        print("✅ Avatar URL updated in fetchUserProfile: $avatarWithTimestamp");
+      }
+
+      // ✅ Force UI update
+      avatarUrl.refresh();
+      update();
+      
+    } else {
+      print("❌ Failed to fetch profile: ${response['message']}");
+    }
+  } catch (e) {
+    print("❌ Error in fetchUserProfile: $e");
+  } finally {
+    isLoading.value = false;
+  }
+}
+  // ✅ Update method updateProfile di ProfileController
+Future<void> updateProfile(String name, {String? avatarPath}) async {
+  try {
+    isLoading.value = true;
+    final response = await ProfileService.updateProfile(
+      name: name,
+      avatarFile: avatarPath != null ? File(avatarPath) : null,
+    );
+
+    if (response['success']) {
+      userName.value = name;
+      await UserStorage.saveName(name);
+
+      // ✅ Handle avatar URL update properly
+      if (response['avatarUrl'] != null && response['avatarUrl'].isNotEmpty) {
+        final newAvatarUrl = response['avatarUrl'];
+        
+        // ✅ Clear old cached image first
+        final oldUrl = avatarUrl.value;
+        avatarUrl.value = '';
+        
+        // ✅ Set new URL after small delay to ensure cache is cleared
+        await Future.delayed(Duration(milliseconds: 100));
+        avatarUrl.value = newAvatarUrl;
+        await UserStorage.saveAvatarUrl(newAvatarUrl);
+        
+        print("✅ Avatar URL updated: $newAvatarUrl");
+        print("✅ Old URL was: $oldUrl");
+        
+        // ✅ Force UI update
+        avatarUrl.refresh();
+        update();
+      }
+
+      Get.snackbar("Success", response['message'] ?? "Profile updated");
+      
+      // ✅ Fetch fresh profile data to ensure consistency
+      await Future.delayed(Duration(milliseconds: 500));
+      await fetchUserProfile();
+      
+    } else {
+      Get.snackbar("Error", response['message'] ?? "Update failed");
+    }
+  } catch (e) {
+    print("❌ Error in updateProfile: $e");
+    Get.snackbar("Error", "Something went wrong");
+  } finally {
+    isLoading.value = false;
+  }
+}
 
   Future<void> _processSubscriptionFromAPI(Map<String, dynamic> subscription) async {
     try {
@@ -194,13 +289,21 @@ class ProfileController extends GetxController {
     }
   }
 
-  void handleChangePassword() {
-    Get.snackbar('Info', 'Change password feature coming soon!');
-  }
-
   void handleEditPersonalDetails() {
-    Get.snackbar('Info', 'Edit personal details feature coming soon!');
+  Get.toNamed(OceanLearnRoutes.editProfilePage);
+}
+
+// Add this method
+void refreshUserData() {
+    _loadUserData();
+    // Force UI update for GetBuilder
+    update();
+    // Also trigger reactive updates
+    userName.refresh();
+    userEmail.refresh();
   }
+  
+  
 
   void logout() {
     Get.dialog(

@@ -19,6 +19,8 @@ class UserStorage {
   static const String _subscriptionStatusKey = 'subscription_status';
   static const String _subscriptionExpirationKey = 'subscription_expiration';
   static const String SUBSCRIPTION_DATA_KEY = 'subscription_data';
+  static const String AVATAR_URL_KEY = 'avatar_url';
+
 
   // Initialize storage
   static Future<void> init() async {
@@ -29,6 +31,10 @@ class UserStorage {
   static String? getName() {
     return _storage.read(NAME_KEY);
   }
+  static Future<void> saveName(String name) async {
+    await _storage.write(NAME_KEY, name);
+  }
+   
 
   static String? getRole() {
     return _storage.read(ROLE_KEY);
@@ -172,6 +178,7 @@ class UserStorage {
   static Future<void> clearAttendanceStatus(String courseId) async {
     await _storage.remove('attendance_$courseId');
   }
+  
 
   // Downgrade user (when membership expires or cancelled)
   static Future<void> downgradeToBasic() async {
@@ -189,6 +196,7 @@ class UserStorage {
   static bool isLoggedIn() {
     return _storage.hasData(TOKEN_KEY) && getToken() != null;
   }
+  
 
   // Save rememberMe
   static Future<void> saveRememberMe(bool value) async {
@@ -199,13 +207,31 @@ class UserStorage {
   static bool isRememberMeEnabled() {
     return _storage.read(REMEMBER_ME_KEY) ?? false;
   }
+  // Add these methods to your existing UserStorage class:
 
-  // Get user access level
-  static Future<UserAccessLevel> getUserAccessLevel() async {
-    if (isVisitor()) return UserAccessLevel.visitor;
-    if (await hasValidMembership()) return UserAccessLevel.premium;
-    return UserAccessLevel.basic;
+  // Avatar URL methods
+  static Future<void> saveAvatarUrl(String avatarUrl) async {
+  await _storage.write(AVATAR_URL_KEY, avatarUrl);
+}
+
+static String? getAvatarUrl() {
+  return _storage.read(AVATAR_URL_KEY);
+}
+static Future<void> saveUserDataWithAvatar({
+  required String token,
+  required String email,
+  required String name,
+  required String role,
+  String? avatarUrl,
+}) async {
+  await _storage.write(TOKEN_KEY, token);
+  await _storage.write(EMAIL_KEY, email);
+  await _storage.write(NAME_KEY, name);
+  await _storage.write(ROLE_KEY, role);
+  if (avatarUrl != null && avatarUrl.isNotEmpty) {
+    await _storage.write(AVATAR_URL_KEY, avatarUrl);
   }
+}
 
   // Get membership info for display
   static Future<Map<String, dynamic>> getMembershipInfo() async {

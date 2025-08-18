@@ -11,6 +11,7 @@ import 'package:user_ocean_learn/Page/IntroPage/IntroPage.dart';
 import 'package:user_ocean_learn/Page/LessonPage/LessonTitle.dart';
 import 'package:user_ocean_learn/Page/LoginPage/LoginPage.dart';
 import 'package:user_ocean_learn/Page/OtpVerification/OtpVerificationPage.dart';
+import 'package:user_ocean_learn/Page/ProfilePage/EditProfile.dart';
 import 'package:user_ocean_learn/Page/ProfilePage/ProfilePage.dart';
 import 'package:user_ocean_learn/Page/QrScannerPage/QrScannerPage.dart';
 import 'package:user_ocean_learn/Page/SubscriptionPage/SubscriptionPage.dart';
@@ -37,6 +38,8 @@ class OceanLearnPages {
     GetPage(name: OceanLearnRoutes.ForgotPasswordVerificationPage, page: () => ForgotPasswordVerificationPage()),
     GetPage(name: OceanLearnRoutes.ForgotPasswordScreen, page: () => ForgotPasswordScreen()),
     GetPage(name: OceanLearnRoutes.scanQRPage, page: () => ScanQRPage()),
+    GetPage(name: OceanLearnRoutes.editProfilePage, page: () => EditProfilePage()),
+    
 
 
     

@@ -21,5 +21,6 @@ class OceanLearnRoutes {
   static const ForgotPasswordVerificationPage = "/forgotpasswordverification";
   static const ForgotPasswordOtpVerificationScreen = "/forgotpasswordotp";
   static const scanQRPage = "/scanqrpage";
+  static const editProfilePage = "/editprofile";
 
 }

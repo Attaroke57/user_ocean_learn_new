@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:user_ocean_learn/Dashboard/dashboard.dart';
+import 'package:user_ocean_learn/Model/login_service_model.dart';
 import 'package:user_ocean_learn/Page/LoginPage/LoginController.dart';
 import 'package:user_ocean_learn/Page/ProfilePage/ProfileController.dart';
+import 'package:user_ocean_learn/Routing/ocean_learn_route.dart';
 import 'package:user_ocean_learn/Widgets/ColorPallete.dart';
 import 'package:user_ocean_learn/Widgets/mybutton.dart';
+import 'package:user_ocean_learn/Widgets/user_storage.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -14,13 +17,16 @@ class ProfilePage extends StatelessWidget {
     // Inisialisasi controller
     final profileController = Get.put(ProfileController());
     final loginController = Get.put(LoginController());
-
+    
     return Scaffold(
       backgroundColor: netralcolor,
       appBar: _buildAppBar(),
       drawer: NavDrawer(),
       body: RefreshIndicator(
-        onRefresh: profileController.refreshSubscriptionStatus,
+        onRefresh: () async {
+          await profileController.refreshSubscriptionStatus();
+          await profileController.fetchUserProfile();
+        },
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
           child: Padding(
@@ -28,8 +34,6 @@ class ProfilePage extends StatelessWidget {
             child: Column(
               children: [
                 _buildProfileCard(profileController),
-                const SizedBox(height: 16),
-                //_buildAccountSettingsCard(profileController),
                 const SizedBox(height: 16),
                 _buildAccountSettingsCard(profileController),
                 const SizedBox(height: 16),
@@ -74,7 +78,10 @@ class ProfilePage extends StatelessWidget {
       padding: const EdgeInsets.all(16.0),
       child: Column(
         children: [
-          _buildProfileImage(),
+          // ✅ Use GetBuilder to ensure UI updates when controller.update() is called
+          GetBuilder<ProfileController>(
+            builder: (controller) => Obx(() => _buildProfileImage(controller.avatarUrl.value)),
+          ),
           const SizedBox(height: 16),
           _buildGreetingText(controller),
           const SizedBox(height: 8),
@@ -86,60 +93,83 @@ class ProfilePage extends StatelessWidget {
     );
   }
 
-  Widget _buildProfileImage() {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(60),
-      child: Image.network(
-        'https://i.pinimg.com/736x/9f/be/f5/9fbef5a4ae96b3498fad7873a8ff9d09.jpg',
-        width: 120,
-        height: 120,
-        fit: BoxFit.cover,
+  // ✅ Updated profile image widget with better caching handling
+  Widget _buildProfileImage(String? photoUrl) {
+    return Container(
+      width: 100,
+      height: 100,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: Colors.grey[300],
+      ),
+      child: ClipOval(
+        child: (photoUrl != null && photoUrl.isNotEmpty)
+            ? Image.network(
+                photoUrl,
+                width: 100,
+                height: 100,
+                fit: BoxFit.cover,
+                // ✅ Add unique key to force rebuild when URL changes
+                key: ValueKey(photoUrl),
+                errorBuilder: (context, error, stackTrace) {
+                  print('❌ Error loading image: $error');
+                  return Icon(
+                    Icons.person,
+                    size: 50,
+                    color: Colors.grey[700],
+                  );
+                },
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return Center(
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      value: loadingProgress.expectedTotalBytes != null
+                          ? loadingProgress.cumulativeBytesLoaded /
+                              loadingProgress.expectedTotalBytes!
+                          : null,
+                    ),
+                  );
+                },
+              )
+            : Icon(
+                Icons.person,
+                size: 50,
+                color: Colors.grey[700],
+              ),
       ),
     );
   }
 
   Widget _buildGreetingText(ProfileController controller) {
     return Obx(() => Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text(
-              'Hello, ',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Text(
-              controller.userName,
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.blue,
-              ),
-            ),
-            const Text(
-              '!',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ));
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Text('Hello, ', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        Text(
+          controller.userName.value,
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.blue,
+          ),
+        ),
+      ],
+    ));
   }
 
   Widget _buildUserEmail(ProfileController controller) {
     return Obx(() => Text(
-          controller.userEmail,
-          style: const TextStyle(
-            fontSize: 16,
-            color: Colors.grey,
-          ),
-        ));
+      controller.userEmail.value,
+      style: const TextStyle(
+        fontSize: 16,
+        color: Colors.grey,
+      ),
+    ));
   }
 
   Widget _buildSubscriptionButton(ProfileController controller) {
-    return Obx(() => controller.isLoading
+    return Obx(() => controller.isLoading.value
         ? _buildLoadingButton()
         : MyButton(
             text: controller.subscriptionButtonText,
@@ -186,14 +216,15 @@ class ProfilePage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          _buildSettingOption(
-            title: 'Change my password',
-            onTap: controller.handleChangePassword,
-          ),
           const Divider(),
           _buildSettingOption(
             title: 'Edit personal details',
-            onTap: controller.handleEditPersonalDetails,
+            onTap: () async {
+              // ✅ Navigate and refresh on return
+              await Get.toNamed(OceanLearnRoutes.editProfilePage);
+              // Refresh profile data when returning
+              _refreshProfileData(controller);
+            },
           ),
         ],
       ),
@@ -248,5 +279,11 @@ class ProfilePage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  // ✅ Add this method to refresh profile after editing
+  void _refreshProfileData(ProfileController controller) {
+    controller.fetchUserProfile();
+    controller.refreshUserData();
   }
 }
