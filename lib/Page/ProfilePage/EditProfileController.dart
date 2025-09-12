@@ -112,6 +112,7 @@ class EditProfileController extends GetxController {
           email: emailController.text,
           name: name,
           role: UserStorage.getRole() ?? '',
+          avatarUrl: result['avatarUrl']?.toString(),
         );
 
         // Save new avatar URL if provided

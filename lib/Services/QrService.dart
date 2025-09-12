@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class QRService {
-  static const String baseUrl = 'https://ocean-learn-api.rplrus.com/api/v1';
+  static const String baseUrl = 'https://api.momentumoceanlearn.com/api/v1';
 
   // Check attendance status
   static Future<Map<String, dynamic>> checkAttendanceStatus(String courseId, String token) async {

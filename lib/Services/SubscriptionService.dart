@@ -5,7 +5,7 @@ import 'package:user_ocean_learn/Model/history_model.dart';
 import 'package:user_ocean_learn/Widgets/user_storage.dart';
 
 class SubscriptionService {
-  final String _baseUrl = 'https://ocean-learn-api.rplrus.com';
+  final String _baseUrl = 'https://api.momentumoceanlearn.com';
 
   /// ✅ Ambil token dari penyimpanan lokal dengan debug
   Future<String> _getUserToken() async {

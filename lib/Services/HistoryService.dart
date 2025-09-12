@@ -4,7 +4,7 @@ import 'package:user_ocean_learn/Model/subscribtion_model.dart';
 import 'package:user_ocean_learn/Widgets/user_storage.dart';
 
 class Historyservice {
-  static const String baseUrl = 'https://ocean-learn-api.rplrus.com/api/v1';
+  static const String baseUrl = 'https://api.momentumoceanlearn.com/api/v1';
   
   // Fetch all subscriptions
   static Future<List<SubscriptionModel>> getSubscriptions() async {

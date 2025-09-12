@@ -68,7 +68,7 @@ class SchedulePage extends StatelessWidget {
       final courses = controller.getCoursesForCurrentMonth();
 
       // Logika akses premium yang benar
-      final isFreeUser = controller.isVisitor.value ||
+      final isFreeUser = controller.isFree.value ||
           !controller.isPremium.value ||
           controller.isMembershipExpired.value;
 

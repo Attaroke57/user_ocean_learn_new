@@ -5,6 +5,8 @@ import 'package:user_ocean_learn/Widgets/user_storage.dart';
 class DashboardController extends GetxController {
   var name = ''.obs;
   var email = ''.obs;
+  var avatarUrl = ''.obs;
+  var status = ''.obs; // Default status
   RxBool isPremium = false.obs;
   RxString expiredDateText = ''.obs;
 
@@ -21,12 +23,14 @@ class DashboardController extends GetxController {
       // Load user name and email from UserStorage
       name.value = UserStorage.getName() ?? '';
       email.value = UserStorage.getEmail() ?? '';
+      status.value = UserStorage.getMembershipStatus();
+      avatarUrl.value = UserStorage.getAvatarUrl() ?? '';
+      
 
       // Load subscription status from UserStorage
-      final status = UserStorage.getMembershipStatus();
       final expiryDate = await UserStorage.getMembershipExpiry();
 
-      if (status == 'premium' && expiryDate != null) {
+      if (status.value == 'premium' && expiryDate != null) {
         if (DateTime.now().isBefore(expiryDate)) {
           isPremium.value = true;
           expiredDateText.value =

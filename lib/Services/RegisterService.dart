@@ -16,7 +16,7 @@ class RegisterService {
       
       // Use the exact URL for registration
       final response = await http.post(
-        Uri.parse('https://ocean-learn-api.rplrus.com/api/v1/user/register'),
+        Uri.parse('https://api.momentumoceanlearn.com/api/v1/user/register'),
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
         },

@@ -5,7 +5,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:user_ocean_learn/Dashboard/dashboardcontroller.dart';
 import 'package:user_ocean_learn/Page/LoginPage/LoginController.dart';
 import 'package:user_ocean_learn/Routing/ocean_learn_route.dart';
+import 'package:user_ocean_learn/Services/ProfileService.dart';
 import 'package:user_ocean_learn/Widgets/ColorPallete.dart';
+import 'package:user_ocean_learn/Widgets/user_storage.dart';
 
 class NavDrawer extends StatelessWidget {
   final DashboardController dashboardController =
@@ -63,10 +65,17 @@ class NavDrawer extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
             child: Row(
               children: [
-                CircleAvatar(
-                  radius: orientation == Orientation.portrait ? 25 : 20,
-                  backgroundImage: NetworkImage(
-                    'https://i.pinimg.com/736x/9f/be/f5/9fbef5a4ae96b3498fad7873a8ff9d09.jpg',
+                ClipOval(
+                  child: Image.network(
+                         ProfileService.getAvatarUrl(UserStorage.getAvatarUrl()),
+                                  width: 48,
+                                  height: 48,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return const Icon(
+                                      Icons.person,
+                                      size: 60,
+                                      color: Colors.grey,);},
                   ),
                 ),
                 const SizedBox(width: 15),
@@ -97,8 +106,6 @@ class NavDrawer extends StatelessWidget {
 
           // Menu Items
           Obx(() {
-            final isPremium = dashboardController.isPremium.value;
-
             return Column(
               children: [
                 _buildMenuItem(

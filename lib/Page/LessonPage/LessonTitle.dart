@@ -20,7 +20,6 @@ class CourseDetailPage extends StatefulWidget {
 }
 
 class _CourseDetailPageState extends State<CourseDetailPage> {
-  bool _isNoteVisible = false;
   bool _isLoading = false;
   bool _isStudent = false;
   late TextEditingController _noteController;
@@ -62,10 +61,9 @@ class _CourseDetailPageState extends State<CourseDetailPage> {
 
   if (courseDetail != null) {
     final prefs = await SharedPreferences.getInstance();
-    final role = prefs.getString('role') ?? 'visitor';
+    final subscription = prefs.getString('subsciption') ?? 'free';
 
-    if (courseDetail.isLocked && role.toLowerCase() == 'visitor') {
-      // ❌ Pengguna visitor tidak boleh akses
+    if (courseDetail.isLocked && subscription.toLowerCase() == 'free') {
       setState(() {
         _isLoading = false;
       });

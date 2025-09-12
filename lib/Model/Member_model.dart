@@ -81,7 +81,7 @@ class AccountInfo {
       avatar: json['avatar'],
       role: json['role'] ?? '',
       emailVerifiedAt: json['email_verified_at'],
-      subscription: Subscription.fromJson(json['subscription'] ?? {}),
+      subscription: json['subscription'] ?? { 'status': 'free' }
     );
   }
 }

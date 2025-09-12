@@ -62,7 +62,7 @@ class InvoicePage extends StatelessWidget {
                       Text(
                         'Premium For ',
                         style: GoogleFonts.montserrat(
-                          fontSize: 24,
+                          fontSize: 22,
                           fontWeight: FontWeight.bold,
                           color: textcolor,
                         ),
@@ -70,7 +70,7 @@ class InvoicePage extends StatelessWidget {
                       Text(
                         '${subscription.month}!',
                         style: GoogleFonts.montserrat(
-                          fontSize: 24,
+                          fontSize: 22,
                           fontWeight: FontWeight.bold,
                           color: primarycolor,
                         ),

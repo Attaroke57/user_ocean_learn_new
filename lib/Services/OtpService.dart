@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 
 class OtpService {
   static const String _url =
-      'https://ocean-learn-api.rplrus.com/api/v1/user/verify'; // Ganti dengan URL asli
+      'https://api.momentumoceanlearn.com/api/v1/user/verify'; // Ganti dengan URL asli
 
   static Future<Map<String, dynamic>> verifyOtp(
       String email, String otp) async {

@@ -121,7 +121,7 @@ class CalendarWidget extends StatelessWidget {
       final isToday = controller.isToday(date);
 
       // Determine if user is free user to disable access
-      final isFreeUser = controller.isVisitor.value ||
+      final isFreeUser = controller.isFree.value ||
           !controller.isPremium.value ||
           controller.isMembershipExpired.value;
 

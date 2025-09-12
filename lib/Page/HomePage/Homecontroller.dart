@@ -1,12 +1,16 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:user_ocean_learn/Dashboard/dashboardcontroller.dart';
 import 'package:user_ocean_learn/Model/course_model.dart';
+import 'package:user_ocean_learn/Model/login_service_model.dart';
 import 'package:user_ocean_learn/Services/CourseService.dart';
 import 'package:user_ocean_learn/Widgets/user_storage.dart';
 
 class HomeController extends GetxController {
   final CourseService courseService = CourseService();
-
+      
   var isLoading = true.obs;
   var isLoadingMore = false.obs;
   var isfree = false.obs;
@@ -14,7 +18,7 @@ class HomeController extends GetxController {
   var lessons = <CourseModel>[].obs;
   var searchQuery = ''.obs;
   var sortByNewest = true.obs;
-  var membershipStatus = 'visitor'.obs;
+  var membershipStatus = 'free'.obs;
   var isPremium = false.obs; // Pastikan default false!
   var isLoadingUser = true.obs;
   var isMembershipExpired = false.obs;
@@ -64,15 +68,10 @@ class HomeController extends GetxController {
   Future<void> loadMembershipStatus() async {
     final status = UserStorage.getMembershipStatus();
   membershipStatus.value = status;
-  isfree.value = status == 'visitor';
   final isPremiumUser = UserStorage.isPremiumUser();
   final expired = await UserStorage.isMembershipExpired();
   isPremium.value = isPremiumUser && !expired;
   isMembershipExpired.value = expired;
-
-    // Set isPremium hanya jika user premium dan tidak expired
-    isPremium.value = isPremiumUser && !expired;
-    isMembershipExpired.value = expired;
 
     print('Membership Status: ${membershipStatus.value}');
     print('Is Premium: ${isPremium.value}');
@@ -152,11 +151,10 @@ class HomeController extends GetxController {
 
   // Get user access level for display
   String getUserAccessLevelDisplay() {
-    if (isfree.value) return 'Visitor';
+    if (isfree.value) return 'Free Member';
     if (isPremium.value) return 'Premium Member';
     return 'Basic Member';
   }
-
   // Method to handle lesson access - PERBAIKAN UTAMA
   Future<bool> canAccessLesson(CourseModel lesson) async {
     if (isfree.value) return false;

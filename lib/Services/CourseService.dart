@@ -1,12 +1,13 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:user_ocean_learn/Model/Member_model.dart';
 import 'package:user_ocean_learn/Model/course_model.dart';
 import 'package:user_ocean_learn/Page/LoginPage/LoginController.dart';
 import 'package:user_ocean_learn/Widgets/user_storage.dart';
 
 class CourseService {
-  static const String baseUrl = 'https://ocean-learn-api.rplrus.com/api/v1';
+  static const String baseUrl = 'https://api.momentumoceanlearn.com/api/v1';
   List<CourseModel> _courses = [];
 
   int _currentPage = 1;
@@ -18,6 +19,7 @@ class CourseService {
   String? getToken() => UserStorage.getToken();
 
   String getUserRole() => UserStorage.getRole() ?? '';
+  String getSubscription() => UserStorage.getMembershipStatus();
 
   Future<void> loadLessons(int page) async {
     final token = getToken();
@@ -25,7 +27,7 @@ class CourseService {
 
     try {
       final response = await http.get(
-        Uri.parse('$baseUrl/course?page=$page'),
+        Uri.parse('$baseUrl/user/course/index?page=$page'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -36,8 +38,9 @@ class CourseService {
         final jsonData = jsonDecode(response.body);
         if (jsonData['status'] == true && jsonData['data'] != null) {
           final userRole = getUserRole();
+          final subscription = getSubscription();
           _courses = (jsonData['data'] as List)
-              .map((courseJson) => CourseModel.fromApiJson(courseJson, userRole))
+              .map((courseJson) => CourseModel.fromApiJson(courseJson, userRole, subscription))
               .toList();
 
           _currentPage = jsonData['meta']['current_page'] ?? page;
@@ -77,7 +80,7 @@ class CourseService {
       if (response.statusCode == 200) {
         final jsonData = jsonDecode(response.body);
         if (jsonData['status'] == true && jsonData['data'] != null) {
-          return CourseModel.fromApiJson(jsonData['data'], getUserRole());
+          return CourseModel.fromApiJson(jsonData['data'], getUserRole(), getSubscription());
         }
       }
     } catch (e) {

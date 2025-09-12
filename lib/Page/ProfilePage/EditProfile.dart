@@ -3,7 +3,9 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'package:user_ocean_learn/Page/ProfilePage/EditProfileController.dart';
+import 'package:user_ocean_learn/Services/ProfileService.dart';
 import 'package:user_ocean_learn/Widgets/ColorPallete.dart';
+import 'package:user_ocean_learn/Widgets/user_storage.dart';
 
 class EditProfilePage extends StatelessWidget {
   const EditProfilePage({super.key});
@@ -85,7 +87,7 @@ class EditProfilePage extends StatelessWidget {
                         : controller.currentAvatarUrl.value.isNotEmpty
                             ? ClipOval(
                                 child: Image.network(
-                                  controller.currentAvatarUrl.value,
+                                  ProfileService.getAvatarUrl(UserStorage.getAvatarUrl()),
                                   width: 120,
                                   height: 120,
                                   fit: BoxFit.cover,

@@ -6,6 +6,7 @@ import 'package:user_ocean_learn/Widgets/ColorPallete.dart';
 import 'package:user_ocean_learn/Widgets/HomePage/FeaturedLessonCard.dart';
 import 'package:user_ocean_learn/Widgets/HomePage/LessonList.dart';
 import 'package:user_ocean_learn/Widgets/HomePage/SearchBarWidget.dart';
+import 'package:user_ocean_learn/Widgets/HomePage/GuideDialog.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -31,12 +32,32 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
             centerTitle: true,
-            title: Text(
-              "Great To See You, ${controller.name.value}!",
-              style: const TextStyle(
-                color: Colors.black,
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
+            title: Expanded(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      "Great To See You, ${controller.name.value}!",
+                      style: const TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 18,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(
+                      Icons.info_outline,
+                      color: Colors.blue.shade600,
+                      size: 24,
+                    ),
+                    onPressed: AppGuideDialog.show,
+                    tooltip: "App Guide",
+                  ),
+                ],
               ),
             ),
           ),

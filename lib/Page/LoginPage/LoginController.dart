@@ -11,12 +11,12 @@ import 'package:user_ocean_learn/Services/FirebaseService.dart';
 import 'package:user_ocean_learn/Services/LoginService.dart';
 import 'package:user_ocean_learn/Widgets/user_storage.dart';
 
-
 class LoginController extends GetxController {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
   RxBool isLoading = false.obs;
   RxBool rememberMe = false.obs;
+  RxBool isLoggingOut = false.obs; // Tambahkan loading state untuk logout
 
   void login() async {
     final email = emailController.text.trim();
@@ -57,14 +57,14 @@ class LoginController extends GetxController {
         if (subscription != null) {
           await UserStorage.saveSubscription(subscription);
 
-        // expired_at
-        if (subscription['expired_at'] != null) {
-          final expiry = DateTime.tryParse(subscription['expired_at']);
-          if (expiry != null) {
-            print('Setting membership expiry to: $expiry');
-            await UserStorage.setMembershipExpiry(expiry);
+          // expired_at
+          if (subscription['expired_at'] != null) {
+            final expiry = DateTime.tryParse(subscription['expired_at']);
+            if (expiry != null) {
+              print('Setting membership expiry to: $expiry');
+              await UserStorage.setMembershipExpiry(expiry);
+            }
           }
-        }
 
           // status membership dari API
           if (subscription['status'] != null) {
@@ -193,32 +193,148 @@ class LoginController extends GetxController {
     }
   }
 
-  void logout() async {
-    final token = UserStorage.getToken() ?? '';
-    print('Token before logout: $token');
+  // FIXED LOGOUT METHOD
+  Future<void> logout() async {
+    try {
+      isLoggingOut.value = true;
+      print('🔄 Starting logout process...');
 
-    if (token.isNotEmpty) {
-      final result = await LoginService.logout(token);
-      print('Logout result: $result');
+      final token = UserStorage.getToken();
+      print('🔑 Token before logout: ${token ?? "No token found"}');
 
-      await UserStorage.clearUserData();
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove('access_level');
-
-      final success = result['success'] == true;
-      if (success) {
-        print('Navigating to: ${OceanLearnRoutes.homePage}');
-        Get.offNamed(OceanLearnRoutes.homePage);
+      // Step 1: Call server logout API (if token exists)
+      if (token != null && token.isNotEmpty) {
+        try {
+          print('🌐 Calling server logout API...');
+          final result = await LoginService.logout(token);
+          print('📥 Logout API result: $result');
+          
+          // Check if server logout was successful
+          final success = result['success'] == true;
+          if (!success) {
+            final message = result['message'] ?? 'Server logout failed';
+            print('⚠️ Server logout warning: $message');
+            // Continue with local cleanup even if server logout fails
+          } else {
+            print('✅ Server logout successful');
+          }
+        } catch (e) {
+          print('❌ Error calling logout API: $e');
+          // Continue with local cleanup even if API call fails
+        }
       } else {
-        final message = result['message'] ?? 'Unknown error during logout';
-        _showErrorDialog(message);
+        print('⚠️ No token found, skipping server logout');
       }
-    } else {
-      print('Token is empty, navigating to login');
-      Get.offAllNamed(OceanLearnRoutes.loginPage);
-    }
 
-    Get.offNamed(OceanLearnRoutes.loginPage);
+      // Step 2: Clear all local data
+      print('🧹 Clearing local storage...');
+      await _clearAllLocalData();
+
+      // Step 3: Reset controllers
+      print('🔄 Resetting controllers...');
+      await _resetControllers();
+
+      // Step 4: Navigate to login page
+      print('🚀 Navigating to login page...');
+      Get.offAllNamed(OceanLearnRoutes.loginPage);
+      
+      print('✅ Logout completed successfully');
+
+    } catch (e) {
+      print('❌ Error during logout: $e');
+      
+      // Even if there's an error, still try to clear data and navigate
+      try {
+        await _clearAllLocalData();
+        Get.offAllNamed(OceanLearnRoutes.loginPage);
+      } catch (clearError) {
+        print('❌ Critical error during cleanup: $clearError');
+      }
+      
+      _showErrorDialog('Logout failed: $e');
+    } finally {
+      isLoggingOut.value = false;
+    }
+  }
+
+  // Helper method to clear all local data
+  Future<void> _clearAllLocalData() async {
+    try {
+      print('🧹 Clearing UserStorage data...');
+      await UserStorage.clearUserData();
+      
+      print('🧹 Clearing SharedPreferences...');
+      final prefs = await SharedPreferences.getInstance();
+      
+      // Clear specific keys
+      await prefs.remove('access_level');
+      await prefs.remove('membership_expiry');
+      await prefs.remove('subscription_status');
+      await prefs.remove('subscription_expiration');
+      
+      // Optional: Clear all preferences if needed
+      // await prefs.clear();
+      
+      print('✅ Local data cleared successfully');
+    } catch (e) {
+      print('❌ Error clearing local data: $e');
+      rethrow;
+    }
+  }
+
+  // Helper method to reset controllers
+  Future<void> _resetControllers() async {
+    try {
+      // Clear form fields
+      emailController.clear();
+      passwordController.clear();
+      rememberMe.value = false;
+      
+      // Reset other controllers if they exist
+      if (Get.isRegistered<DashboardController>()) {
+        final dashboardController = Get.find<DashboardController>();
+        // Add any reset methods if available
+      }
+      
+      if (Get.isRegistered<HomeController>()) {
+        final homeController = Get.find<HomeController>();
+        // Add any reset methods if available
+      }
+      
+      if (Get.isRegistered<ProfileController>()) {
+        final profileController = Get.find<ProfileController>();
+        // Add any reset methods if available
+      }
+      
+      print('✅ Controllers reset successfully');
+    } catch (e) {
+      print('❌ Error resetting controllers: $e');
+      // Don't rethrow here, as this is not critical
+    }
+  }
+
+  // Method untuk emergency logout (jika logout biasa gagal)
+  Future<void> forceLogout() async {
+    try {
+      print('🚨 Force logout initiated...');
+      
+      await _clearAllLocalData();
+      await _resetControllers();
+      
+      // Force navigation
+      Get.offAllNamed(OceanLearnRoutes.loginPage);
+      
+      Get.snackbar(
+        'Logout',
+        'Force logout completed',
+        backgroundColor: Colors.orange,
+        colorText: Colors.white,
+      );
+      
+    } catch (e) {
+      print('❌ Force logout error: $e');
+      _showErrorDialog('Force logout failed: $e');
+    }
   }
 
   void _showErrorDialog(String message) {

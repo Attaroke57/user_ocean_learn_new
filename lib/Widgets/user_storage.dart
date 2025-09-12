@@ -16,10 +16,11 @@ class UserStorage {
   static const String MEMBERSHIP_KEY = 'membership_status';
   static const String MEMBERSHIP_EXPIRY_KEY = 'membership_expiry';
   static const String USER_ID_KEY = 'user_id';
-  static const String _subscriptionStatusKey = 'subscription_status';
+  static const String SUBSCRIPTION_KEY = 'subscription_status';
+    static const String _subscriptionStatusKey = 'subscription_status';
   static const String _subscriptionExpirationKey = 'subscription_expiration';
   static const String SUBSCRIPTION_DATA_KEY = 'subscription_data';
-  static const String AVATAR_URL_KEY = 'avatar_url';
+  static const String AVATAR_URL_KEY = 'avatar';
 
   // Initialize storage
   static Future<void> init() async {
@@ -39,8 +40,8 @@ class UserStorage {
     return _storage.read(ROLE_KEY);
   }
 
-  static bool isVisitor() {
-    return _storage.read(MEMBERSHIP_KEY) == 'visitor';
+  static bool isFree() {
+    return _storage.read(MEMBERSHIP_KEY) == 'free';
   }
 
   // Save user data
@@ -49,11 +50,15 @@ class UserStorage {
     required String email,
     required String name,
     required String role,
+    String? subscription,
+    String? avatarUrl,
   }) async {
     await _storage.write(TOKEN_KEY, token);
     await _storage.write(EMAIL_KEY, email);
     await _storage.write(NAME_KEY, name);
     await _storage.write(ROLE_KEY, role);
+    await _storage.write(SUBSCRIPTION_KEY, subscription);
+    await _storage.write(AVATAR_URL_KEY, avatarUrl);
   }
 
   // Get token
@@ -72,19 +77,18 @@ class UserStorage {
   }
 
   static String getMembershipStatus() {
-    return _storage.read(MEMBERSHIP_KEY) ?? 'visitor';
-  }
+  return _storage.read(MEMBERSHIP_KEY) ?? 'free';
+}
+
 
   static bool isPremiumUser() {
     final membership = getMembershipStatus();
-    return membership == 'premium' ||
-        membership == 'pro' ||
-        membership == 'member';
+    return membership == 'premium';
   }
 
-  static bool isBasicUser() {
+  static bool isFreeUser() {
     final membership = getMembershipStatus();
-    return membership == 'basic';
+    return membership == 'free';
   }
 
   static Future<void> setMembershipExpiry(DateTime date) async {
@@ -106,6 +110,7 @@ class UserStorage {
       return null;
     }
   }
+  
 
   static Future<bool> isMembershipExpired() async {
     final expiry = await getMembershipExpiry();
@@ -182,11 +187,11 @@ class UserStorage {
     await _storage.write(ROLE_KEY, 'basic_user');
     await saveMembershipStatus('basic');
   }
-
-  // Set as visitor
-  static Future<void> setAsVisitor() async {
-    await _storage.write(ROLE_KEY, 'visitor');
-    await saveMembershipStatus('visitor');
+  
+  // Set as free
+  static Future<void> setAsFree() async {
+    await _storage.write(ROLE_KEY, 'Free');
+    await saveMembershipStatus('Free');
   }
 
   // Check if user is logged in
@@ -238,7 +243,7 @@ class UserStorage {
     final valid = isPremiumUser() && !expired;
 
     return {
-      'role': getRole() ?? 'visitor',
+      'role': getRole() ?? 'free',
       'membership': getMembershipStatus(),
       'isPremium': isPremiumUser(),
       'isExpired': expired,
@@ -255,25 +260,160 @@ class UserStorage {
 
   static Future<UserAccessLevel> getUserAccessLevelAsync() async {
     final prefs = await SharedPreferences.getInstance();
-    final levelStr = prefs.getString('access_level') ?? 'visitor';
+    final levelStr = prefs.getString('access_level') ?? 'free';
 
     switch (levelStr) {
       case 'premium':
         return UserAccessLevel.premium;
-      case 'basic':
-        return UserAccessLevel.basic;
       default:
-        return UserAccessLevel.visitor;
+        return UserAccessLevel.free;
     }
   }
 
   // Clear all user data (logout)
   static Future<void> clearUserData() async {
-    await _storage.erase();
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('membership_expiry');
-    await prefs.remove('access_level');
+    try {
+      print('🧹 Starting UserStorage cleanup...');
+      
+      // Clear GetStorage data
+      print('📦 Clearing GetStorage...');
+      await _storage.erase();
+      
+      // Clear SharedPreferences data
+      print('🔧 Clearing SharedPreferences...');
+      final prefs = await SharedPreferences.getInstance();
+      
+      // List of specific keys to clear
+      final keysToRemove = [
+        'membership_expiry',
+        'access_level',
+        'subscription_status', 
+        'subscription_expiration',
+        'fcm_token',
+        'user_preferences',
+        'last_sync',
+        'app_settings',
+      ];
+      
+      // Remove specific keys
+      for (String key in keysToRemove) {
+        await prefs.remove(key);
+        print('🗑️ Removed key: $key');
+      }
+      
+      // Clear attendance data (courses with attendance_prefix)
+      print('📚 Clearing attendance data...');
+      final allKeys = prefs.getKeys();
+      final attendanceKeys = allKeys.where((key) => key.startsWith('attendance_'));
+      for (String key in attendanceKeys) {
+        await prefs.remove(key);
+        print('🗑️ Removed attendance key: $key');
+      }
+      
+      // Optional: If you want to clear ALL SharedPreferences (be careful!)
+      // await prefs.clear();
+      
+      print('✅ UserStorage cleanup completed successfully');
+      
+    } catch (e) {
+      print('❌ Error during UserStorage cleanup: $e');
+      
+      // Try alternative cleanup method
+      try {
+        print('🔄 Attempting alternative cleanup...');
+        await _alternativeClearData();
+      } catch (altError) {
+        print('❌ Alternative cleanup also failed: $altError');
+        rethrow;
+      }
+    }
   }
+  static Future<void> _alternativeClearData() async {
+    try {
+      // Force clear GetStorage by recreating it
+      await GetStorage.init('user_data_backup');
+      final backupStorage = GetStorage('user_data_backup');
+      await backupStorage.erase();
+      
+      // Manual key removal for critical data
+      final criticalKeys = [
+        TOKEN_KEY,
+        EMAIL_KEY, 
+        NAME_KEY,
+        ROLE_KEY,
+        MEMBERSHIP_KEY,
+        USER_ID_KEY,
+        SUBSCRIPTION_DATA_KEY,
+        AVATAR_URL_KEY,
+      ];
+      
+      for (String key in criticalKeys) {
+        _storage.remove(key);
+      }
+      
+      print('✅ Alternative cleanup completed');
+    } catch (e) {
+      print('❌ Alternative cleanup failed: $e');
+      rethrow;
+    }
+  }
+static Future<bool> verifyDataCleared() async {
+    try {
+      final token = getToken();
+      final email = getEmail();
+      final name = getName();
+      final role = getRole();
+      final membership = getMembershipStatus();
+      
+      final prefs = await SharedPreferences.getInstance();
+      final membershipExpiry = prefs.getString('membership_expiry');
+      final accessLevel = prefs.getString('access_level');
+      
+      final isCleared = token == null && 
+                       email == null && 
+                       name == null && 
+                       role == null &&
+                       membership == 'visitor' &&
+                       membershipExpiry == null &&
+                       accessLevel == null;
+      
+      print('🔍 Data verification result: ${isCleared ? "CLEARED" : "NOT CLEARED"}');
+      print('  - Token: $token');
+      print('  - Email: $email');  
+      print('  - Name: $name');
+      print('  - Role: $role');
+      print('  - Membership: $membership');
+      print('  - Membership Expiry: $membershipExpiry');
+      print('  - Access Level: $accessLevel');
+      
+      return isCleared;
+    } catch (e) {
+      print('❌ Error verifying data cleared: $e');
+      return false;
+    }
+  }
+
+  // Force reset method (nuclear option)
+  static Future<void> forceReset() async {
+    try {
+      print('🚨 FORCE RESET initiated...');
+      
+      // Recreate GetStorage
+      await GetStorage.init('user_data_new');
+      final newStorage = GetStorage('user_data_new'); 
+      await newStorage.erase();
+      
+      // Clear ALL SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.clear();
+      
+      print('✅ FORCE RESET completed');
+    } catch (e) {
+      print('❌ FORCE RESET failed: $e');
+      rethrow;
+    }
+  }
+
 
   // For debugging (optional)
   static void printStorageData() {
@@ -286,8 +426,7 @@ class UserStorage {
 }
 
 enum UserAccessLevel {
-  visitor,
-  basic,
+  free,
   premium,
 }
 
@@ -297,18 +436,16 @@ extension UserAccessLevelExtension on UserAccessLevel {
     return this == UserAccessLevel.premium;
   }
 
-  bool get canAccessBasicContent {
-    return this != UserAccessLevel.visitor;
+  bool get canAccessFreeContent {
+    return this != UserAccessLevel.free;
   }
 
   String get displayName {
     switch (this) {
-      case UserAccessLevel.visitor:
-        return 'Visitor';
-      case UserAccessLevel.basic:
-        return 'Basic User';
+      case UserAccessLevel.free:
+        return 'free';
       case UserAccessLevel.premium:
-        return 'Premium User';
+        return 'premium';
     }
   }
 }

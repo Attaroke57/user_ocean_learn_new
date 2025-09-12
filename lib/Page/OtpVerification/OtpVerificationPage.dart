@@ -151,7 +151,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
           backgroundColor: Colors.green,
         ),
       );
-      Get.offAllNamed(OceanLearnRoutes.loginPage);
+      Get.offAllNamed(OceanLearnRoutes.homePage);
     } else {
       // Gagal
       ScaffoldMessenger.of(context).showSnackBar(

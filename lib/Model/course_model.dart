@@ -1,3 +1,5 @@
+import 'package:user_ocean_learn/Model/Member_model.dart';
+
 class CourseModel {
   final String id;
   final String title;
@@ -24,7 +26,7 @@ class CourseModel {
     required this.isLocked,
   });
 
-  factory CourseModel.fromApiJson(Map<String, dynamic> json, String userRole) {
+  factory CourseModel.fromApiJson(Map<String, dynamic> json, String userRole, String subscription) {
     final data = json['data'] ?? json;
     final dateData = json['date'] ?? {};
     final qrData = json['qr_data'] ?? {};
@@ -40,16 +42,15 @@ class CourseModel {
     // PERBAIKAN UTAMA: Logic locking yang lebih jelas
     bool finalLockStatus = false;
     
-    // Jika visitor, semua lesson selalu terkunci
-    if (userRole.toLowerCase() == 'visitor') {
+    if (userRole.toLowerCase() == 'free') {
       finalLockStatus = true;
     } 
     // Jika user basic/free dan lesson dari API dikunci, tetap dikunci
-    else if ((userRole.toLowerCase() == 'basic' || userRole.toLowerCase() == 'student') && isLockedFromApi) {
+    else if ((userRole.toLowerCase() == 'free' || userRole.toLowerCase() == 'student') && isLockedFromApi) {
       finalLockStatus = true;
     }
     // Jika user premium/pro, ikuti status dari API
-    else if (userRole.toLowerCase() == 'premium' || userRole.toLowerCase() == 'pro' || userRole.toLowerCase() == 'member') {
+    else if (userRole.toLowerCase() == 'premium' || userRole.toLowerCase() == 'student') {
       finalLockStatus = isLockedFromApi;
     }
     // Default: ikuti status dari API
@@ -62,6 +63,7 @@ class CourseModel {
     print('Raw isLocked from API: $isLockedFromApiRaw');
     print('Parsed isLocked from API: $isLockedFromApi');
     print('User Role: $userRole');
+    print('User Subscription: $subscription');
     print('Final Lock Status: $finalLockStatus');
     print('==========================');
 

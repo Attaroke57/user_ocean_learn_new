@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -15,9 +17,10 @@ import 'package:user_ocean_learn/Services/ProfileService.dart';
 import 'package:user_ocean_learn/Widgets/ColorPallete.dart';
 import 'package:user_ocean_learn/Widgets/user_storage.dart';
 import 'package:user_ocean_learn/Services/LoginService.dart';
+import 'package:http/http.dart' as http;
 
 class ProfileController extends GetxController {
-  
+  static const String baseUrl = 'https://ocean-learn-api.rplrus.com/api';
   final _subscriptionButtonText = 'My Subscription'.obs;
   final _subscriptionButtonColor = secondarycolor.obs;
   final _subscriptionTextColor = primarycolor.obs;
@@ -27,6 +30,8 @@ class ProfileController extends GetxController {
   var userEmail = ''.obs;
   var avatarUrl = ''.obs;
   var loginResponse = Rxn<LoginResponseModel>();
+  var avatarBytes = Rx<Uint8List?>(null);
+
 
   String get subscriptionButtonText => _subscriptionButtonText.value;
   Color get subscriptionButtonColor => _subscriptionButtonColor.value;
@@ -38,6 +43,7 @@ class ProfileController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    GetAvatar();
     _loadUserData();
     refreshSubscriptionStatus();
     checkSubscription();
@@ -51,14 +57,43 @@ class ProfileController extends GetxController {
     print("✅ Loaded user data - Avatar URL: ${avatarUrl.value}");
   }
 
+  Future<void> GetAvatar() async {     
+    try {
+    final token = UserStorage.getToken();
+      final avatar = UserStorage.getAvatarUrl();
+          if (avatar == null || avatar.isEmpty) return;
+      final response = await http.get(
+        
+        Uri.parse('$baseUrl/v1/$avatar'),
+        headers: {
+          'Authorization': 'Bearer $token',
+        },);
+    if (response.statusCode == 200) {
+      avatarBytes.value = response.bodyBytes;
+      print("✅ Avatar fetched successfully");
+    } else {
+      print("❌ Failed to fetch avatar: ${response.statusCode}");
+    }
+  } catch (e) {
+    print("❌ Error in getAvatar: $e");
+  }
+  }
+
+
   Future<void> fetchUserProfile() async {
     try {
       isLoading.value = true;
-      final response = await ProfileService.getProfile();
-
-      if (response['success']) {
-        final data = response['data'];
-
+      // final response = await ProfileService.getProfile();
+      final token = UserStorage.getToken();
+      final response = await http.post(
+        Uri.parse('$baseUrl/v1/user/update'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+        },
+      );
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
         // Update basic user info
         if (data['name'] != null) {
           userName.value = data['name'];
@@ -95,7 +130,7 @@ class ProfileController extends GetxController {
         update(); // For GetBuilder widgets
         
       } else {
-        print("❌ Failed to fetch profile: ${response['message']}");
+        print("❌ Failed to fetch profile: {$response.statusCode} - ${response.body}");
       }
     } catch (e) {
       print("❌ Error in fetchUserProfile: $e");
@@ -117,15 +152,15 @@ class ProfileController extends GetxController {
         await UserStorage.saveName(name);
 
         // ✅ Enhanced avatar URL update with cache busting
-        if (response['avatarUrl'] != null && response['avatarUrl'].isNotEmpty) {
-          final newAvatarUrl = response['avatarUrl'];
+        if (response['avatar'] != null && response['avatar'].isNotEmpty) {
+          final newAvatarUrl = response['avatar'];
           
           // Clear old cached image first
           avatarUrl.value = '';
           await Future.delayed(Duration(milliseconds: 100));
           
           // Set new URL with cache busting parameter
-          final cacheBustedUrl = '$newAvatarUrl?timestamp=${DateTime.now().millisecondsSinceEpoch}';
+          final cacheBustedUrl = '$newAvatarUrl';
           avatarUrl.value = cacheBustedUrl;
           await UserStorage.saveAvatarUrl(newAvatarUrl);
           
@@ -403,34 +438,22 @@ class ProfileController extends GetxController {
     while (retryCount < maxRetries) {
       try {
         // Fetch fresh user data from backend
-        final response = await LoginService.getAccountInfoWithToken();
-        print('ProfileController: full backend response: $response');
-        final user = response.accountInfo;
-        final subscription = user?.subscription;
-
+        final subscription = UserStorage.getSubscription();
         print('ProfileController: subscription data from backend: $subscription');
 
-        if (user != null && subscription != null) {
+        if (subscription != null) {
           final expirationDateRaw = subscription['expiration_date'];
           final expirationDate = expirationDateRaw != null ? DateTime.tryParse(expirationDateRaw) : null;
           final accessLevel = subscription['status'] ?? 'free';
 
-          print('ProfileController: parsed expirationDate: $expirationDate, accessLevel: $accessLevel');
+        
 
           if (expirationDate != null) {
-            // Update UserStorage with fresh data
-            await UserStorage.saveUserData(
-              token: user.tokens.first.token,
-              email: user.email,
-              name: user.name,
-              role: user.role,
-            );
+            // Update UserStorage with fresh dat
             await UserStorage.saveMembershipStatus(accessLevel);
             await UserStorage.setMembershipExpiry(expirationDate);
-
             // Process subscription to update UI
             await _processSubscriptionFromAPI(subscription);
-
             break; // Exit loop on success
           } else {
             print('ProfileController: expiration_date is null or invalid');

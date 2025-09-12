@@ -5,7 +5,7 @@ import 'package:user_ocean_learn/Model/login_service_model.dart';
 import 'package:user_ocean_learn/Widgets/user_storage.dart';
 
 class LoginService {
-  static const String _baseUrl = 'https://ocean-learn-api.rplrus.com';
+  static const String _baseUrl = 'https://api.momentumoceanlearn.com';
 
   static Future<LoginResponseModel> login(String email, String password) async {
     try {
@@ -145,7 +145,7 @@ class LoginService {
 
   static Future<LoginResponseModel> getAccountInfoWithToken() async {
     final token = await UserStorage.getToken();
-    final response = await http.post(
+    final response = await http.get(
       Uri.parse('$_baseUrl/api/v1/user/show'),
       headers: {
         'Authorization': 'Bearer $token',

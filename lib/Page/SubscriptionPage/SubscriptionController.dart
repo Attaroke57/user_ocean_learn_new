@@ -246,8 +246,8 @@ class SubscriptionController extends GetxController {
     final subscription = user?.subscription;
 
     if (user != null && subscription != null) {
-      final paidAt = DateTime.parse(subscription['paid_at']);
-      final accessLevel = subscription['access_level'] ?? 'basic';
+      final expiryDate = DateTime.parse(subscription['expiration_date']);
+      final accessLevel = subscription['status'] ?? 'free';
 
       // Simpan ke UserStorage
       await UserStorage.saveUserData(
@@ -255,25 +255,24 @@ class SubscriptionController extends GetxController {
         email: user.email,
         name: user.name,
         role: user.role,
+        avatarUrl: user.avatar
       );
       await UserStorage.saveMembershipStatus(accessLevel);
-      await UserStorage.setMembershipExpiry(paidAt.add(Duration(days: 30)));
+      await UserStorage.setMembershipExpiry(expiryDate);
 
       // Panggil ProfileController atau DashboardController untuk refresh
       final dashboard = Get.find<DashboardController>();
       await dashboard.loadUserData();
 
       // Refresh HomeController membership status and lessons
-      if (Get.isRegistered<HomeController>()) {
         final homeController = Get.find<HomeController>();
         await homeController.refreshMembershipStatus();
-      }
+      
 
       // Refresh ProfileController subscription status
-      if (Get.isRegistered<ProfileController>()) {
         final profileController = Get.find<ProfileController>();
-        await profileController.refreshSubscriptionStatus();
-      }
+        await profileController.refreshEntireProfile();
+      
     }
   } catch (e) {
     print('❌ Gagal refresh user setelah payment: $e');

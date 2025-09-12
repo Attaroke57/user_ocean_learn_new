@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 
 class ResendOtpService {
   static const String _url =
-      'https://ocean-learn-api.rplrus.com/api/v1/user/resend-otp';
+      'https://api.momentumoceanlearn.com/api/v1/user/resend-otp';
 
   static Future<Map<String, dynamic>> resendOtp(String email) async {
     try {

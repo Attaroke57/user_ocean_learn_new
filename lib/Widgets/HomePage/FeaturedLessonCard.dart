@@ -158,8 +158,7 @@ class FeaturedLessonCard extends StatelessWidget {
       final isMembershipExpired = controller.isMembershipExpired.value;
       final dateFormatted = DateFormat('MMMM d, yyyy').format(lesson.date);
 
-      final canAccess =
-          (isPremium && !isMembershipExpired) || (isfree && !lesson.isLocked);
+      final canAccess = (isPremium && !isMembershipExpired) || (isfree && !lesson.isLocked);
 
 // Ganti semua showLockedUI dengan !canAccess
       return Stack(
@@ -189,7 +188,9 @@ class FeaturedLessonCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: !canAccess ? Colors.grey.shade600 : Colors.black,
+                      color: !canAccess 
+                      ? Colors.grey.shade600 
+                      : Colors.black,
                     ),
                     textAlign: TextAlign.center,
                   ),

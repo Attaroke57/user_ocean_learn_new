@@ -2,16 +2,30 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 class LessonService {
-  static const String _baseUrl = 'https://ocean-learn-api.rplrus.com/api/v1/course/1';
+  static const String _baseUrl = 'https://api.momentumoceanlearn.com/api/v1/user/course';
 
-  static Future<Map<String, dynamic>?> fetchLessonDetail(int courseId) async {
-    final response = await http.get(Uri.parse('$_baseUrl/courses/$courseId'));
+  // Ambil semua course
+  static Future<Map<String, dynamic>?> fetchCourses() async {
+    final response = await http.get(Uri.parse('$_baseUrl/index'));
 
     if (response.statusCode == 200) {
-      final data = json.decode(response.body);
-      return data;
+      return json.decode(response.body);
     } else {
-      print('Failed to fetch lesson detail: ${response.statusCode}');
+      print('❌ Failed to fetch courses: ${response.statusCode}');
+      print(response.body);
+      return null;
+    }
+  }
+
+  // Ambil detail course berdasarkan ID
+  static Future<Map<String, dynamic>?> fetchLessonDetail(int id) async {
+    final response = await http.get(Uri.parse('$_baseUrl/show/$id'));
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      print('❌ Failed to fetch lesson detail: ${response.statusCode}');
+      print(response.body);
       return null;
     }
   }

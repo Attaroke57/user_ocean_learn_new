@@ -5,6 +5,7 @@ import 'package:user_ocean_learn/Model/login_service_model.dart';
 import 'package:user_ocean_learn/Page/LoginPage/LoginController.dart';
 import 'package:user_ocean_learn/Page/ProfilePage/ProfileController.dart';
 import 'package:user_ocean_learn/Routing/ocean_learn_route.dart';
+import 'package:user_ocean_learn/Services/ProfileService.dart';
 import 'package:user_ocean_learn/Widgets/ColorPallete.dart';
 import 'package:user_ocean_learn/Widgets/mybutton.dart';
 import 'package:user_ocean_learn/Widgets/user_storage.dart';
@@ -16,8 +17,7 @@ class ProfilePage extends StatelessWidget {
   Widget build(BuildContext context) {
     // Inisialisasi controller
     final profileController = Get.put(ProfileController());
-    final loginController = Get.put(LoginController());
-    
+
     return Scaffold(
       backgroundColor: netralcolor,
       appBar: _buildAppBar(),
@@ -78,11 +78,8 @@ class ProfilePage extends StatelessWidget {
       padding: const EdgeInsets.all(16.0),
       child: Column(
         children: [
-          // ✅ Enhanced profile image with better reactive updates
-          GetBuilder<ProfileController>(
-            id: 'avatar', // Specific ID for avatar updates
-            builder: (controller) => Obx(() => _buildProfileImage(controller.avatarUrl.value)),
-          ),
+          // ✅ FIXED: Enhanced profile image with better reactive updates
+          _buildProfileImage(controller),
           const SizedBox(height: 16),
           _buildGreetingText(controller),
           const SizedBox(height: 8),
@@ -94,10 +91,34 @@ class ProfilePage extends StatelessWidget {
     );
   }
 
-  // ✅ Enhanced profile image widget with better error handling and caching
-  Widget _buildProfileImage(String? photoUrl) {
-    print('🖼️ Building profile image with URL: $photoUrl');
-    
+  // ✅ FIXED: Completely rewritten profile image widget
+  Widget _buildProfileImage(ProfileController controller) {
+  return Obx(() {
+    final avatarUrl = controller.avatarUrl.value; // simpan string URL
+    print('🖼️ Building profile image with URL: $avatarUrl');
+
+    if (avatarUrl.isNotEmpty) {
+      return ClipOval(
+        child: Image.network(
+          ProfileService.getAvatarUrl(avatarUrl),
+          fit: BoxFit.cover,
+          width: 100,
+          height: 100,
+          headers: ProfileService.getProfileHeader(),
+          errorBuilder: (context, error, stackTrace) {
+            return _buildDefaultAvatar(); // fallback kalau gagal load
+          },
+        ),
+      );
+    } else {
+      return _buildDefaultAvatar();
+    }
+  });
+}
+
+  }
+
+  Widget _buildDefaultAvatar() {
     return Container(
       width: 100,
       height: 100,
@@ -105,102 +126,60 @@ class ProfilePage extends StatelessWidget {
         shape: BoxShape.circle,
         color: Colors.grey[300],
       ),
-      child: ClipOval(
-        child: (photoUrl != null && photoUrl.isNotEmpty)
-            ? Image.network(
-                photoUrl,
-                width: 100,
-                height: 100,
-                fit: BoxFit.cover,
-                // ✅ Use unique key based on URL to force rebuild
-                key: ValueKey('avatar_$photoUrl'),
-                // ✅ Add cache headers to prevent aggressive caching
-                headers: {
-                  'Cache-Control': 'no-cache',
-                },
-                errorBuilder: (context, error, stackTrace) {
-                  print('❌ Error loading avatar image: $error');
-                  print('❌ Stack trace: $stackTrace');
-                  return Container(
-                    width: 100,
-                    height: 100,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.grey[300],
-                    ),
-                    child: Icon(
-                      Icons.person,
-                      size: 50,
-                      color: Colors.grey[700],
-                    ),
-                  );
-                },
-                loadingBuilder: (context, child, loadingProgress) {
-                  if (loadingProgress == null) {
-                    print('✅ Avatar image loaded successfully');
-                    return child;
-                  }
-                  return Container(
-                    width: 100,
-                    height: 100,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.grey[200],
-                    ),
-                    child: Center(
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        value: loadingProgress.expectedTotalBytes != null
-                            ? loadingProgress.cumulativeBytesLoaded /
-                                loadingProgress.expectedTotalBytes!
-                            : null,
-                      ),
-                    ),
-                  );
-                },
-              )
-            : Container(
-                width: 100,
-                height: 100,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.grey[300],
-                ),
-                child: Icon(
-                  Icons.person,
-                  size: 50,
-                  color: Colors.grey[700],
-                ),
-              ),
+      child: Icon(
+        Icons.person,
+        size: 50,
+        color: Colors.blue[700],
+      ),
+    );
+  }
+
+  Widget _buildLoadingAvatar(ImageChunkEvent loadingProgress) {
+    return Container(
+      width: 100,
+      height: 100,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: Colors.grey[200],
+      ),
+      child: Center(
+        child: CircularProgressIndicator(
+          strokeWidth: 2,
+          value: loadingProgress.expectedTotalBytes != null
+              ? loadingProgress.cumulativeBytesLoaded /
+                  loadingProgress.expectedTotalBytes!
+              : null,
+        ),
       ),
     );
   }
 
   Widget _buildGreetingText(ProfileController controller) {
     return Obx(() => Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const Text('Hello, ', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-        Text(
-          controller.userName.value,
-          style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.blue,
-          ),
-        ),
-      ],
-    ));
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text('Hello, ',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            Text(
+              controller.userName.value,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.blue,
+              ),
+            ),
+          ],
+        ));
   }
 
   Widget _buildUserEmail(ProfileController controller) {
     return Obx(() => Text(
-      controller.userEmail.value,
-      style: const TextStyle(
-        fontSize: 16,
-        color: Colors.grey,
-      ),
-    ));
+          controller.userEmail.value,
+          style: const TextStyle(
+            fontSize: 16,
+            color: Colors.grey,
+          ),
+        ));
   }
 
   Widget _buildSubscriptionButton(ProfileController controller) {
@@ -251,14 +230,16 @@ class ProfilePage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          
           _buildSettingOption(
             title: 'Edit personal details',
             onTap: () async {
-              // ✅ Navigate and refresh on return
+              // ✅ FIXED: Navigate and refresh with proper result handling
               final result = await Get.toNamed(OceanLearnRoutes.editProfilePage);
-              // Refresh profile data when returning from edit page
-              await _refreshProfileData(controller);
+              
+              print('🔄 Returned from edit profile with result: $result');
+              
+              // ✅ Always refresh profile data when returning
+              await _refreshProfileDataComplete(controller);
             },
           ),
         ],
@@ -316,19 +297,37 @@ class ProfilePage extends StatelessWidget {
     );
   }
 
-  // ✅ Enhanced refresh method
-  Future<void> _refreshProfileData(ProfileController controller) async {
-    print('🔄 Refreshing profile data...');
-    
-    // Fetch fresh profile data
-    await controller.fetchUserProfile();
-    
-    // Refresh user data
-    controller.refreshUserData();
-    
-    // Force avatar update specifically
-    controller.update(['avatar']);
-    
-    print('✅ Profile data refresh completed');
+  // ✅ FIXED: Complete profile refresh method
+  Future<void> _refreshProfileDataComplete(ProfileController controller) async {
+    print('🔄 Starting complete profile data refresh...');
+
+    try {
+      // 1. Clear old avatar URL first
+      final oldUrl = controller.avatarUrl.value;
+      controller.avatarUrl.value = '';
+      
+      // 2. Small delay to ensure UI clears
+      await Future.delayed(Duration(milliseconds: 100));
+      
+      // 3. Fetch fresh profile data from API
+      await controller.fetchUserProfile();
+      
+      // 4. Refresh local data
+      controller.refreshUserData();
+      
+      // 5. Force complete rebuild
+      controller.update();
+      
+      // 6. Force reactive updates
+      controller.userName.refresh();
+      controller.userEmail.refresh(); 
+      controller.avatarUrl.refresh();
+      
+      print('✅ Profile data refresh completed');
+      print('🖼️ Old avatar URL: $oldUrl');
+      print('🖼️ New avatar URL: ${controller.avatarUrl.value}');
+      
+    } catch (e) {
+      print('❌ Error in profile refresh: $e');
+    }
   }
-}
