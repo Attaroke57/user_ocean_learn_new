@@ -3,7 +3,9 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:user_ocean_learn/Dashboard/dashboardcontroller.dart';
+import 'package:user_ocean_learn/Page/HomePage/HomeController.dart';
 import 'package:user_ocean_learn/Page/LoginPage/LoginController.dart';
+import 'package:user_ocean_learn/Page/ProfilePage/ProfileController.dart';
 import 'package:user_ocean_learn/Routing/ocean_learn_route.dart';
 import 'package:user_ocean_learn/Services/ProfileService.dart';
 import 'package:user_ocean_learn/Widgets/ColorPallete.dart';
@@ -12,6 +14,7 @@ import 'package:user_ocean_learn/Widgets/user_storage.dart';
 class NavDrawer extends StatelessWidget {
   final DashboardController dashboardController =
       Get.find<DashboardController>();
+  final ProfileController controller = Get.put(ProfileController());
 
   @override
   Widget build(BuildContext context) {
@@ -67,36 +70,41 @@ class NavDrawer extends StatelessWidget {
               children: [
                 ClipOval(
                   child: Image.network(
-                         ProfileService.getAvatarUrl(UserStorage.getAvatarUrl()),
-                                  width: 48,
-                                  height: 48,
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return const Icon(
-                                      Icons.person,
-                                      size: 60,
-                                      color: Colors.grey,);},
+                    ProfileService.getAvatarUrl(UserStorage.getAvatarUrl()),
+                    width: 48,
+                    height: 48,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return const Icon(
+                        Icons.person,
+                        size: 60,
+                        color: Colors.grey,
+                      );
+                    },
                   ),
                 ),
                 const SizedBox(width: 15),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      "${dashboardController.name.value}",
-                      style: GoogleFonts.montserrat(
-                        fontWeight: FontWeight.w600,
-                        fontSize: orientation == Orientation.portrait ? null : 14,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "${controller.userName.value}",
+                        style: GoogleFonts.montserrat(
+                          fontWeight: FontWeight.w600,
+                          fontSize:
+                              orientation == Orientation.portrait ? null : 14,
+                        ),
                       ),
-                    ),
-                    Text(
-                      "${dashboardController.email.value}",
-                      style: GoogleFonts.montserrat(
-                        fontSize: orientation == Orientation.portrait ? 12 : 10,
-                        color: textcolor,
+                      Text(
+                        "${controller.userEmail.value}",
+                        style: GoogleFonts.montserrat(
+                          fontSize: orientation == Orientation.portrait ? 12 : 10,
+                          color: textcolor,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -126,15 +134,15 @@ class NavDrawer extends StatelessWidget {
                     Get.toNamed(OceanLearnRoutes.schedulePage);
                   },
                 ),
-                  _buildMenuItem(
-                    icon: Icons.payment_sharp,
-                    title: 'Payment History',
-                    isActive: dashboardController.selectedIndex.value == 2,
-                    onTap: () {
-                      dashboardController.changeMenu(2);
-                      Get.toNamed(OceanLearnRoutes.historypage);
-                    },
-                  ),
+                _buildMenuItem(
+                  icon: Icons.payment_sharp,
+                  title: 'Payment History',
+                  isActive: dashboardController.selectedIndex.value == 2,
+                  onTap: () {
+                    dashboardController.changeMenu(2);
+                    Get.toNamed(OceanLearnRoutes.historypage);
+                  },
+                ),
                 _buildMenuItem(
                   icon: Icons.person,
                   title: 'Profile',
@@ -164,27 +172,27 @@ class NavDrawer extends StatelessWidget {
                   'Log out',
                   style: TextStyle(color: Colors.blue),
                 ),
-              onPressed: () {
-                Get.dialog(
-                  AlertDialog(
-                    title: const Text('Confirm Logout'),
-                    content: const Text('Are you sure you want to log out?'),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Get.back(),
-                        child: const Text('Cancel'),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          Get.back(); // Close dialog
-                          Get.find<LoginController>().logout();
-                        },
-                        child: const Text('Log out'),
-                      ),
-                    ],
-                  ),
-                );
-              },
+                onPressed: () {
+                  Get.dialog(
+                    AlertDialog(
+                      title: const Text('Confirm Logout'),
+                      content: const Text('Are you sure you want to log out?'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Get.back(),
+                          child: const Text('Cancel'),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Get.back(); // Close dialog
+                            Get.find<LoginController>().logout();
+                          },
+                          child: const Text('Log out'),
+                        ),
+                      ],
+                    ),
+                  );
+                },
               ),
             ),
           ),

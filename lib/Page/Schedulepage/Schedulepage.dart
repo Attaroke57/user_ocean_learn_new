@@ -5,6 +5,7 @@ import 'package:user_ocean_learn/Dashboard/dashboard.dart';
 import 'package:user_ocean_learn/Page/LessonPage/LessonTitle.dart';
 import 'package:user_ocean_learn/Page/Schedulepage/Schedulecontroller.dart';
 import 'package:user_ocean_learn/Widgets/ColorPallete.dart';
+import 'package:user_ocean_learn/Widgets/HomePage/GuideDIalog.dart';
 import 'package:user_ocean_learn/Widgets/SchedulePage/ScheduleCalendar.dart';
 import 'package:user_ocean_learn/Widgets/SchedulePage/ScheduleCard.dart';
 
@@ -36,6 +37,17 @@ class SchedulePage extends StatelessWidget {
             fontSize: 18,
           ),
         ),
+        // actions: [
+        //   IconButton(
+        //     icon: Icon(
+        //       Icons.info_outline,
+        //       color: Colors.blue.shade600,
+        //       size: 24,
+        //     ),
+        //     onPressed: AppGuideDialog.show,
+        //     tooltip: "App Guide",
+        //   ),
+        // ],
       ),
       drawer: NavDrawer(),
       body: Obx(() {

@@ -15,171 +15,159 @@ class SubscriptionPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: Stack(
+        child: Column(
           children: [
-            Column(
-              children: [
-                // App Bar
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                      horizontal: 16.0, vertical: 12.0),
-                  child: Stack(
-                    alignment: Alignment.center,
+            // App Bar
+            Padding(
+              padding: const EdgeInsets.symmetric(
+                  horizontal: 16.0, vertical: 12.0),
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: GestureDetector(
+                      onTap: () {
+                        Navigator.pop(context);
+                      },
+                      child: Icon(Icons.arrow_back),
+                    ),
+                  ),
+                  Center(
+                    child: MyText.header('Manage your subscription here!'),
+                  ),
+                ],
+              ),
+            ),
+
+            Expanded(
+              child: SingleChildScrollView(
+                child: Container(
+                  margin: EdgeInsets.all(16.0),
+                  padding: EdgeInsets.all(24.0),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.grey.withOpacity(0.1),
+                        spreadRadius: 1,
+                        blurRadius: 10,
+                        offset: Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Align(
-                        alignment: Alignment.centerLeft,
-                        child: GestureDetector(
-                          onTap: () {
-                            Navigator.pop(context);
-                          },
-                          child: Icon(Icons.arrow_back),
+                      // Title
+                      MyText(
+                        text: 'Oceans Divers!',
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      SizedBox(height: 24),
+
+                      // Illustration
+                      Center(
+                        child: SvgPicture.asset(
+                          'Assets/images/subscribe.svg',
+                          fit: BoxFit.contain,
+                          height: 200,
+                          width: double.infinity,
                         ),
                       ),
-                      Center(
-                        child: MyText.header('Manage your subscription here!'),
+                      SizedBox(height: 32),
+
+                      // Features section title
+                      MyText(
+                        text: 'Exclusive Features:',
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      SizedBox(height: 20),
+
+                      // Feature 1
+                      _buildFeatureItem(
+                        icon: Icons.book_outlined,
+                        title: 'Unlimited Class Access',
+                        description:
+                            'Get full access to all materials & save personal notes.',
+                      ),
+                      SizedBox(height: 20),
+
+                      // Feature 2
+                      _buildFeatureItem(
+                        icon: Icons.alarm,
+                        title: 'Smart Reminders & Attendance',
+                        description:
+                            'Never miss a class, stay on track with friendly reminders!',
+                      ),
+                      SizedBox(height: 20),
+
+                      // Feature 3
+                      _buildFeatureItem(
+                        icon: Icons.question_answer_outlined,
+                        title: 'Ask Your Mentor Anything!',
+                        description:
+                            'Get exclusive Q&A sessions with mentors for deeper learning.',
+                      ),
+                      SizedBox(height: 40),
+
+                      // Price section
+                      Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.symmetric(vertical: 16),
+                        decoration: BoxDecoration(
+                          color: Color(0xFFE8F4FD),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: MyText(
+                          text: 'Rp 160.000 per Month',
+                          fontSize: 18,
+                          fontWeight: FontWeight.w600,
+                          textAlign: TextAlign.center,
+                          color: Colors.blue.shade800,
+                        ),
+                      ),
+                      SizedBox(height: 16),
+
+                      // Subscribe Now Button - Modified to show bottom sheet
+                      Container(
+                        width: double.infinity,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            _showPaymentBottomSheet(context);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Color(0xFFD6EEFB),
+                            foregroundColor: Colors.blue.shade800,
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 32, vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: MyText(
+                            text: 'Subscribe Now',
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.blue.shade800,
+                          ),
+                        ),
                       ),
                     ],
                   ),
                 ),
-
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: Container(
-                      margin: EdgeInsets.all(16.0),
-                      padding: EdgeInsets.all(24.0),
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(16),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.grey.withOpacity(0.1),
-                            spreadRadius: 1,
-                            blurRadius: 10,
-                            offset: Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Title
-                          MyText(
-                            text: 'Oceans Divers!',
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          SizedBox(height: 24),
-
-                          // Illustration
-                          Center(
-                            child: SvgPicture.asset(
-                              'Assets/images/subscribe.svg',
-                              fit: BoxFit.contain,
-                              height: 200,
-                              width: double.infinity,
-                            ),
-                          ),
-                          SizedBox(height: 32),
-
-                          // Features section title
-                          MyText(
-                            text: 'Exclusive Features:',
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          SizedBox(height: 20),
-
-                          // Feature 1
-                          _buildFeatureItem(
-                            icon: Icons.book_outlined,
-                            title: 'Unlimited Class Access',
-                            description:
-                                'Get full access to all materials & save personal notes.',
-                          ),
-                          SizedBox(height: 20),
-
-                          // Feature 2
-                          _buildFeatureItem(
-                            icon: Icons.alarm,
-                            title: 'Smart Reminders & Attendance',
-                            description:
-                                'Never miss a class, stay on track with friendly reminders!',
-                          ),
-                          SizedBox(height: 20),
-
-                          // Feature 3
-                          _buildFeatureItem(
-                            icon: Icons.question_answer_outlined,
-                            title: 'Ask Your Mentor Anything!',
-                            description:
-                                'Get exclusive Q&A sessions with mentors for deeper learning.',
-                          ),
-                          SizedBox(height: 40),
-
-                          // Price section
-                          Container(
-                            width: double.infinity,
-                            padding: EdgeInsets.symmetric(vertical: 16),
-                            decoration: BoxDecoration(
-                              color: Color(0xFFE8F4FD),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: MyText(
-                              text: 'Rp 160.000 per Month',
-                              fontSize: 18,
-                              fontWeight: FontWeight.w600,
-                              textAlign: TextAlign.center,
-                              color: Colors.blue.shade800,
-                            ),
-                          ),
-                          SizedBox(height: 16),
-
-                          // Subscribe Now Button - Modified to show bottom sheet
-                          Container(
-                            width: double.infinity,
-                            child: ElevatedButton(
-                              onPressed: () {
-                                _showPaymentBottomSheet(context);
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Color(0xFFD6EEFB),
-                                foregroundColor: Colors.blue.shade800,
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 32, vertical: 16),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                              child: MyText(
-                                text: 'Subscribe Now',
-                                fontSize: 16,
-                                fontWeight: FontWeight.w600,
-                                color: Colors.blue.shade800,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+              ),
             ),
-
-            // Transfer Dialog Overlay
-            Obx(() {
-              if (_subscriptionController.showTransferDialog.value) {
-                return _buildTransferDialog(context);
-              }
-              return SizedBox.shrink();
-            }),
           ],
         ),
       ),
     );
   }
 
-  // New Bottom Sheet for Payment Options
+  // Modified Bottom Sheet for Payment Options (removed transfer dialog)
   void _showPaymentBottomSheet(BuildContext context) {
     Get.bottomSheet(
       Container(
@@ -264,11 +252,11 @@ class SubscriptionPage extends StatelessWidget {
             
             SizedBox(height: 12),
             
-            // Transfer Payment Option
+            // Transfer Payment Option - Modified to only create pending invoice
             GestureDetector(
               onTap: () {
                 Get.back();
-                _subscriptionController.handleTransferPayment(context);
+                _subscriptionController.handleTransferPaymentSimplified(context);
               },
               child: Container(
                 width: double.infinity,
@@ -300,7 +288,7 @@ class SubscriptionPage extends StatelessWidget {
                             color: Colors.orange.shade800,
                           ),
                           MyText(
-                            text: 'Transfer to BCA Virtual Account',
+                            text: 'Create pending invoice for transfer',
                             fontSize: 12,
                             color: Colors.orange.shade600,
                           ),
@@ -329,167 +317,6 @@ class SubscriptionPage extends StatelessWidget {
       ),
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-    );
-  }
-
-  Widget _buildTransferDialog(BuildContext context) {
-    return Container(
-      color: Colors.black.withOpacity(0.5),
-      child: Center(
-        child: Container(
-          margin: EdgeInsets.all(20),
-          padding: EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Header
-              MyText(
-                text: 'Please Transfer to this BCA VA',
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                textAlign: TextAlign.center,
-              ),
-              SizedBox(height: 24),
-
-              // Account Number Field
-              Container(
-                width: double.infinity,
-                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.blue.shade300),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    MyText(
-                      text: ' 0980578518  (BCA) ',
-                      fontSize: 20,
-                      color: textcolor,
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: 16),
-
-              // Upload Screenshot Button
-              Container(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    _subscriptionController.pickScreenshot();
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue.shade100,
-                    foregroundColor: Colors.blue.shade800,
-                    padding: EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: MyText(
-                    text: 'Upload Screenshot',
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.blue.shade800,
-                  ),
-                ),
-              ),
-
-              // Show selected image
-              Obx(() {
-                if (_subscriptionController.screenshotFile.value != null) {
-                  return Column(
-                    children: [
-                      SizedBox(height: 16),
-                      Container(
-                        height: 100,
-                        width: 100,
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey.shade300),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: Image.file(
-                            _subscriptionController.screenshotFile.value!,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ),
-                      SizedBox(height: 8),
-                      MyText(
-                        text: 'Screenshot selected',
-                        fontSize: 12,
-                        color: Colors.green.shade600,
-                      ),
-                    ],
-                  );
-                }
-                return SizedBox.shrink();
-              }),
-
-              SizedBox(height: 24),
-
-              // Action Buttons
-              Row(
-                children: [
-                  Expanded(
-                    child: TextButton(
-                      onPressed: () {
-                        _subscriptionController.hideTransferPaymentDialog();
-                      },
-                      child: MyText(
-                        text: 'Cancel',
-                        fontSize: 16,
-                        color: Colors.grey.shade600,
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: 16),
-                  Expanded(
-                    child: Obx(() => ElevatedButton(
-                          onPressed: _subscriptionController.isLoading.value
-                              ? null
-                              : () {
-                                  _subscriptionController.submitTransferProof();
-                                },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue.shade600,
-                            foregroundColor: Colors.white,
-                            padding: EdgeInsets.symmetric(vertical: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          child: _subscriptionController.isLoading.value
-                              ? SizedBox(
-                                  height: 20,
-                                  width: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                        Colors.white),
-                                  ),
-                                )
-                              : MyText(
-                                  text: 'Submit',
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w600,
-                                  color: Colors.white,
-                                ),
-                        )),
-                  ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 

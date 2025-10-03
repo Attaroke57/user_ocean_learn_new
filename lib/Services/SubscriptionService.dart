@@ -27,188 +27,117 @@ class SubscriptionService {
  
 
   /// ✅ Membuat subscription baru dengan debug yang lebih detail
-  Future<String?> createSubscription() async {
-    final url = Uri.parse('$_baseUrl/api/v1/subscription/transfer');
-    print('🌐 Calling URL: $url');
+  Future<Map<String, dynamic>?> createSubscription() async {
+  final url = Uri.parse('$_baseUrl/api/v1/subscription/transfer');
+  print('🌐 Calling URL: $url');
 
-    try {
-      final token = await _getUserToken();
-      if (token.isEmpty) {
-        print('❌ Token is empty, cannot proceed');
-        return null;
-      }
-
-      print('📤 Sending request with headers...');
-      final response = await http.post(
-        url,
-        headers: {
-          'Authorization': 'Bearer $token',
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-        },
-      ).timeout(Duration(seconds: 30));
-
-      print('📥 Response received');
-      print('Status code: ${response.statusCode}');
-      print('Response headers: ${response.headers}');
-      print('Body: ${response.body}');
-
-      if (response.statusCode == 200) {
-        try {
-          final data = jsonDecode(response.body);
-          print('✅ Parsed JSON successfully');
-          print('Invoice URL: ${data['invoice_url']}');
-          return data['invoice_url'];
-        } catch (jsonError) {
-          print('❌ JSON parsing error: $jsonError');
-          return null;
-        }
-      } else if (response.statusCode == 401) {
-        print('❌ Unauthorized - Token might be expired');
-        return null;
-      } else if (response.statusCode == 422) {
-        print('❌ Validation error - Check request format');
-        return null;
-      } else {
-        print('❌ HTTP Error ${response.statusCode}');
-        return null;
-      }
-    } catch (e) {
-      if (e.toString().contains('TimeoutException')) {
-        print('⏱️ Request timeout - Check internet connection');
-      } else if (e.toString().contains('SocketException')) {
-        print('🌐 Network error - Check internet connection');
-      } else {
-        print('❌ Exception during subscription: $e');
-      }
+  try {
+    final token = await _getUserToken();
+    if (token.isEmpty) {
+      print('❌ Token is empty, cannot proceed');
       return null;
     }
-  }
 
-  /// ✅ IMPROVED: Submit transfer proof dengan gambar dan validasi yang lebih baik
-  Future<Map<String, dynamic>?> createTransferWithProof(File imageFile) async {
-    print('📤 Starting transfer with proof submission...');
-
-    try {
-      // Validasi file
-      if (!await imageFile.exists()) {
-        print('❌ Image file does not exist');
-        return {'status': 'error', 'message': 'Image file not found'};
-      }
-
-      // Cek ukuran file (maksimal 5MB)
-      final fileSizeInBytes = await imageFile.length();
-      final fileSizeInMB = fileSizeInBytes / (1024 * 1024);
-      print('📁 File size: ${fileSizeInMB.toStringAsFixed(2)} MB');
-
-      if (fileSizeInMB > 5) {
-        return {
-          'status': 'error',
-          'message': 'File size too large. Maximum 5MB allowed.'
-        };
-      }
-
-      final token = await _getUserToken();
-      if (token.isEmpty) {
-        print('❌ Token is empty, cannot proceed');
-        return {'status': 'error', 'message': 'Authentication token not found'};
-      }
-
-      final url = Uri.parse("$_baseUrl/api/v1/subscription/transfer");
-      print('🌐 Calling URL: $url');
-
-      var request = http.MultipartRequest('POST', url);
-      request.headers.addAll({
+    print('📤 Sending request with headers...');
+    final response = await http.post(
+      url,
+      headers: {
         'Authorization': 'Bearer $token',
         'Accept': 'application/json',
-      });
+        'Content-Type': 'application/json',
+      },
+    ).timeout(const Duration(seconds: 30));
 
-      // Tambahkan file dengan field name yang benar
-      print('📎 Adding file to request...');
-      request.files.add(await http.MultipartFile.fromPath(
-        'proof', // Pastikan field name sesuai dengan API
-        imageFile.path,
-        // Anda bisa menambahkan content type jika diperlukan
-        // contentType: MediaType('image', 'jpeg'),
-      ));
+    print('📥 Response received');
+    print('Status code: ${response.statusCode}');
+    print('Body: ${response.body}');
 
-      // Tambahkan field lain jika diperlukan
-      // request.fields['payment_method'] = 'transfer';
-      // request.fields['amount'] = '160000';
-
-      print('📤 Sending multipart request...');
-      final streamedResponse =
-          await request.send().timeout(Duration(seconds: 60));
-      final response = await http.Response.fromStream(streamedResponse);
-
-      print('📥 Response received');
-      print('Status Code: ${response.statusCode}');
-      print('Response Headers: ${response.headers}');
-      print('Body: ${response.body}');
-
-      if (response.statusCode == 200) {
-        try {
-          final data = jsonDecode(response.body);
-          print('✅ Transfer proof submitted successfully');
-          return data;
-        } catch (jsonError) {
-          print('❌ JSON parsing error: $jsonError');
-          return {'status': 'error', 'message': 'Invalid response format'};
-        }
-      } else if (response.statusCode == 401) {
-        print('❌ Unauthorized - Token might be expired');
-        return {
-          'status': 'error',
-          'message': 'Unauthorized. Please login again.'
-        };
-      } else if (response.statusCode == 422) {
-        print('❌ Validation error');
-        try {
-          final errorData = jsonDecode(response.body);
-          return {
-            'status': 'error',
-            'message': errorData['message'] ?? 'Validation failed',
-            'errors': errorData['errors'] ?? {}
-          };
-        } catch (e) {
-          return {'status': 'error', 'message': 'Validation failed'};
-        }
-      } else {
-        print('❌ HTTP Error ${response.statusCode}');
-        try {
-          final errorData = jsonDecode(response.body);
-          return {
-            'status': 'error',
-            'message': errorData['message'] ?? 'Server error occurred',
-          };
-        } catch (e) {
-          return {
-            'status': 'error',
-            'message': 'HTTP Error ${response.statusCode}',
-          };
-        }
+    if (response.statusCode == 200) {
+      try {
+        final data = jsonDecode(response.body);
+        print('✅ Parsed JSON successfully: $data');
+        return data; // return full response JSON
+      } catch (jsonError) {
+        print('❌ JSON parsing error: $jsonError');
+        return null;
       }
-    } catch (e) {
-      print('❌ Exception during transfer proof submission: $e');
-
-      if (e.toString().contains('TimeoutException')) {
-        return {
-          'status': 'error',
-          'message': 'Request timeout. Please check your connection.'
-        };
-      } else if (e.toString().contains('SocketException')) {
-        return {
-          'status': 'error',
-          'message': 'Network error. Please check your connection.'
-        };
-      } else {
-        return {
-          'status': 'error',
-          'message': 'An unexpected error occurred: ${e.toString()}'
-        };
-      }
+    } else if (response.statusCode == 401) {
+      print('❌ Unauthorized - Token might be expired');
+      return {'status': 'error', 'message': 'Unauthorized'};
+    } else if (response.statusCode == 422) {
+      print('❌ Validation error - Check request format');
+      return {'status': 'error', 'message': 'Validation error'};
+    } else {
+      print('❌ HTTP Error ${response.statusCode}');
+      return {'status': 'error', 'message': 'Server error'};
+    }
+  } catch (e) {
+    if (e.toString().contains('TimeoutException')) {
+      print('⏱️ Request timeout - Check internet connection');
+      return {'status': 'error', 'message': 'Request timeout'};
+    } else if (e.toString().contains('SocketException')) {
+      print('🌐 Network error - Check internet connection');
+      return {'status': 'error', 'message': 'Network error'};
+    } else {
+      print('❌ Exception during subscription: $e');
+      return {'status': 'error', 'message': e.toString()};
     }
   }
+}
+
+  /// ✅ IMPROVED: Submit transfer proof dengan gambar dan validasi yang lebih baik
+ Future<Map<String, dynamic>?> createTransferWithProof(
+    File imageFile, String externalId) async {
+  print('📤 Starting transfer with proof submission...');
+
+  try {
+    if (!await imageFile.exists()) {
+      return {'status': 'error', 'message': 'Image file not found'};
+    }
+
+    final fileSizeInBytes = await imageFile.length();
+    final fileSizeInMB = fileSizeInBytes / (1024 * 1024);
+    if (fileSizeInMB > 5) {
+      return {
+        'status': 'error',
+        'message': 'File size too large. Maximum 5MB allowed.'
+      };
+    }
+
+    final token = await _getUserToken();
+    if (token.isEmpty) {
+      return {'status': 'error', 'message': 'Authentication token not found'};
+    }
+
+    final url = Uri.parse("$_baseUrl/api/v1/subscription/$externalId/proof");
+    print('🌐 Calling URL: $url');
+
+    var request = http.MultipartRequest('POST', url);
+    request.headers.addAll({
+      'Authorization': 'Bearer $token',
+      'Accept': 'application/json',
+    });
+    
+    request.files.add(await http.MultipartFile.fromPath(
+      'proof',
+      imageFile.path,
+    ));
+
+    final streamedResponse =
+        await request.send().timeout(Duration(seconds: 60));
+    final response = await http.Response.fromStream(streamedResponse);
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      return jsonDecode(response.body);
+    }
+  } catch (e) {
+    return {'status': 'error', 'message': e.toString()};
+  }
+}
+
+  
 
   /// ✅ Cash payment dengan debug yang lebih detail
   Future<Map<String, dynamic>?> payWithCash() async {

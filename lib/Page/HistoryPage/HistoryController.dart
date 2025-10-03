@@ -4,6 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:user_ocean_learn/Model/Member_model.dart';
 import 'package:user_ocean_learn/Model/subscribtion_model.dart';
 import 'package:user_ocean_learn/Page/HistoryPage/InvoicePage.dart';
+import 'package:user_ocean_learn/Page/SubscriptionPage/SubscriptionController.dart';
 import 'package:user_ocean_learn/Services/HistoryService.dart';
 import 'package:user_ocean_learn/Services/SubscriptionService.dart';
 import 'package:user_ocean_learn/Widgets/user_storage.dart';
@@ -19,7 +20,7 @@ class PaymentController extends GetxController {
 
   final selectedMonth = ''.obs;
   final months = <String>[].obs;
-  
+
   // Status counters
   final pendingCount = 0.obs;
   final paidCount = 0.obs;
@@ -40,7 +41,7 @@ class PaymentController extends GetxController {
       await Future.wait([
         fetchSubscriptions(),
       ]);
-      
+
       _updateStatusCounters();
     } catch (e) {
       error.value = e.toString();
@@ -58,7 +59,8 @@ class PaymentController extends GetxController {
       final allSubscriptions = await Historyservice.getSubscriptions();
       subscriptions.value = allSubscriptions;
 
-      final groupedSubscriptions = await Historyservice.getSubscriptionsByMonth();
+      final groupedSubscriptions =
+          await Historyservice.getSubscriptionsByMonth();
       subscriptionsByMonth.value = groupedSubscriptions;
 
       months.value = groupedSubscriptions.keys.toList();
@@ -73,7 +75,7 @@ class PaymentController extends GetxController {
 
   void _updateStatusCounters() {
     int pending = 0, paid = 0, failed = 0;
-    
+
     for (var subscription in subscriptions) {
       switch (subscription.status.toLowerCase()) {
         case 'pending':
@@ -87,7 +89,7 @@ class PaymentController extends GetxController {
           break;
       }
     }
-    
+
     pendingCount.value = pending;
     paidCount.value = paid;
     failedCount.value = failed;
@@ -149,8 +151,9 @@ class PaymentController extends GetxController {
   }
 
   List<SubscriptionModel> getSubscriptionsByStatus(String status) {
-    return subscriptions.where((sub) => 
-      sub.status.toLowerCase() == status.toLowerCase()).toList();
+    return subscriptions
+        .where((sub) => sub.status.toLowerCase() == status.toLowerCase())
+        .toList();
   }
 
   void viewInvoice(SubscriptionModel subscription) async {
@@ -160,14 +163,12 @@ class PaymentController extends GetxController {
     if (subscription.detail.paymentMethod.toLowerCase() == 'cash' ||
         invoiceUrl.isEmpty ||
         invoiceUrl.toLowerCase() == "offline payment") {
-      Get.to(
-        () => InvoicePage(
-          subscription: subscription,
-          controller: this,
-        ),
-        transition: Transition.rightToLeft,
-        duration: const Duration(milliseconds: 300),
-      );
+      Get.to(() => InvoicePage(
+            subscription: subscription,
+            controller: Get.put(PaymentController()), // PaymentController
+            
+          ));
+
       return;
     }
 
@@ -217,10 +218,14 @@ class PaymentController extends GetxController {
                     ),
                     const SizedBox(height: 12),
                     _buildConfirmationDetail('Username', username),
-                    _buildConfirmationDetail('Email', getUserEmailFromId(subscription.userId)),
-                    _buildConfirmationDetail('Amount', 'Rp ${subscription.detail.amount}'),
-                    _buildConfirmationDetail('Payment Method', subscription.detail.paymentMethod),
-                    _buildConfirmationDetail('Month', '${subscription.month} ${subscription.year}'),
+                    _buildConfirmationDetail(
+                        'Email', getUserEmailFromId(subscription.userId)),
+                    _buildConfirmationDetail(
+                        'Amount', 'Rp ${subscription.detail.amount}'),
+                    _buildConfirmationDetail(
+                        'Payment Method', subscription.detail.paymentMethod),
+                    _buildConfirmationDetail(
+                        'Month', '${subscription.month} ${subscription.year}'),
                   ],
                 ),
               ),
@@ -274,7 +279,7 @@ class PaymentController extends GetxController {
 
       // Simulate API call for payment confirmation
       await Future.delayed(const Duration(seconds: 2));
-      
+
       // Update subscription status locally
       final index = subscriptions.indexWhere((s) => s.id == subscription.id);
       if (index != -1) {
@@ -288,24 +293,26 @@ class PaymentController extends GetxController {
           detail: SubscriptionDetail(
             amount: subscription.detail.amount,
             paymentMethod: subscription.detail.paymentMethod,
-            paidAt: DateTime.now().toString().substring(0, 19), // Update paid time
+            paidAt:
+                DateTime.now().toString().substring(0, 19), // Update paid time
             invoiceUrl: subscription.detail.invoiceUrl,
-          ),
+          ), externalId: '',
         );
-        
+
         subscriptions[index] = updatedSubscription;
-        
+
         // Update grouped subscriptions
         final monthKey = '${subscription.month} ${subscription.year}';
         if (subscriptionsByMonth.containsKey(monthKey)) {
           final monthSubscriptions = subscriptionsByMonth[monthKey]!;
-          final monthIndex = monthSubscriptions.indexWhere((s) => s.id == subscription.id);
+          final monthIndex =
+              monthSubscriptions.indexWhere((s) => s.id == subscription.id);
           if (monthIndex != -1) {
             monthSubscriptions[monthIndex] = updatedSubscription;
           }
         }
       }
-      
+
       _updateStatusCounters();
 
       Get.snackbar(
@@ -316,7 +323,6 @@ class PaymentController extends GetxController {
         icon: const Icon(Icons.check_circle, color: Colors.white),
         duration: const Duration(seconds: 4),
       );
-
     } catch (e) {
       Get.snackbar(
         'Error',
@@ -372,7 +378,9 @@ class PaymentController extends GetxController {
 
   double getTotalAmount() {
     return subscriptions.fold(0.0, (sum, sub) {
-      final amount = double.tryParse(sub.detail.amount.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0.0;
+      final amount = double.tryParse(
+              sub.detail.amount.replaceAll(RegExp(r'[^0-9.]'), '')) ??
+          0.0;
       return sum + amount;
     });
   }

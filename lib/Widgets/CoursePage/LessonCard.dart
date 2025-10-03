@@ -169,7 +169,7 @@ class _LessonCardState extends State<LessonCard> {
 
   Future<void> _downloadAndOpenPdf(BuildContext context) async {
     final token = await UserStorage.getToken();
-    final url = 'https://ocean-learn-api.rplrus.com/api/v1/courses/${widget.course.id}/download';
+    final url = 'https://api.momentumoceanlearn.com/api/v1/courses/${widget.course.id}/download';
 
     try {
       final response = await http.get(

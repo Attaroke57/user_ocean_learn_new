@@ -99,7 +99,7 @@ class PaymentHistory extends StatelessWidget {
               ],
             ),
 
-            // Status description
+            // Status description - Modified for transfer payments
             if (subscription.status.toLowerCase() == 'pending')
               Container(
                 margin: const EdgeInsets.only(top: 12),
@@ -115,7 +115,9 @@ class PaymentHistory extends StatelessWidget {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        'Payment is awaiting admin confirmation. You will be notified once approved.',
+                        subscription.detail.paymentMethod.toLowerCase() == 'transfer'
+                            ? 'Transfer payment pending. Click "View Invoice" to upload transfer proof.'
+                            : 'Cash payment awaiting admin confirmation.',
                         style: TextStyle(
                           fontSize: 12,
                           color: Colors.orange.shade700,
@@ -192,20 +194,22 @@ class PaymentHistory extends StatelessWidget {
 
     return Row(
       children: [
-        // Confirm button for admin (cash payments only)
-        if (paymentMethod == 'cash' && status == 'pending')
-          
-        if (paymentMethod == 'cash' && status == 'pending')
-          const SizedBox(width: 8),
-          
-        // View Invoice button - always available
+        // View Invoice button - always available, but text changes for pending transfer
         Expanded(
           child: OutlinedButton.icon(
             onPressed: () => controller.viewInvoice(subscription),
-            icon: const Icon(Icons.receipt, color: primarycolor, size: 16),
-            label: const Text(
-              'View Invoice',
-              style: TextStyle(color: primarycolor, fontSize: 12),
+            icon: Icon(
+              status == 'pending' && paymentMethod == 'transfer' 
+                  ? Icons.upload_file 
+                  : Icons.receipt, 
+              color: primarycolor, 
+              size: 16
+            ),
+            label: Text(
+              status == 'pending' && paymentMethod == 'transfer'
+                  ? 'Upload Proof'
+                  : 'View Invoice',
+              style: const TextStyle(color: primarycolor, fontSize: 12),
             ),
             style: OutlinedButton.styleFrom(
               side: const BorderSide(color: primarycolor),

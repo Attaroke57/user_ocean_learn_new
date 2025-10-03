@@ -7,6 +7,8 @@ import 'package:user_ocean_learn/Page/ProfilePage/ProfileController.dart';
 import 'package:user_ocean_learn/Routing/ocean_learn_route.dart';
 import 'package:user_ocean_learn/Services/ProfileService.dart';
 import 'package:user_ocean_learn/Widgets/ColorPallete.dart';
+import 'package:user_ocean_learn/Widgets/HomePage/GuideDIalog.dart';
+import 'package:user_ocean_learn/Widgets/ProfilePage/GuideDialogProfile.dart';
 import 'package:user_ocean_learn/Widgets/mybutton.dart';
 import 'package:user_ocean_learn/Widgets/user_storage.dart';
 
@@ -65,6 +67,17 @@ class ProfilePage extends StatelessWidget {
           onPressed: () => Scaffold.of(context).openDrawer(),
         ),
       ),
+      actions: [
+        IconButton(
+          icon: Icon(
+            Icons.info_outline,
+            color: Colors.blue.shade600,
+            size: 24,
+          ),
+          onPressed: ProfileGuideDialog.show,
+          tooltip: "App Guide",
+        ),
+      ]
     );
   }
 

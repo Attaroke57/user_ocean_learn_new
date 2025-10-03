@@ -148,7 +148,7 @@ class RegisterScreen extends StatelessWidget {
                       // Username field with controller
                       MyTextField(
                         controller: _usernameController,
-                        hintText: "Username",
+                        hintText: "Name",
                         suffixIcon: Icon(Icons.person_outline),
                       ),
                       const SizedBox(height: 12),

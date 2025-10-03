@@ -14,7 +14,6 @@ import 'package:user_ocean_learn/Widgets/user_storage.dart';
 class SubscriptionController extends GetxController {
   // Observables
   RxBool showPaymentButtons = false.obs;
-  RxBool showTransferDialog = false.obs;
   RxBool isLoading = false.obs;
   Rx<File?> screenshotFile = Rx<File?>(null);
   RxList<SubscriptionModel> subscriptions = <SubscriptionModel>[].obs;
@@ -53,11 +52,6 @@ class SubscriptionController extends GetxController {
 
   void showPaymentOptions() => showPaymentButtons.value = true;
   void hidePaymentOptions() => showPaymentButtons.value = false;
-  void showTransferPaymentDialog() => showTransferDialog.value = true;
-  void hideTransferPaymentDialog() {
-    showTransferDialog.value = false;
-    screenshotFile.value = null;
-  }
 
   Future<void> handleCashPayment(BuildContext context) async {
     try {
@@ -114,12 +108,30 @@ class SubscriptionController extends GetxController {
     }
   }
 
-  Future<void> handleTransferPayment(BuildContext context) async {
+  // New simplified transfer payment method - only creates pending invoice
+  Future<void> handleTransferPaymentSimplified(BuildContext context) async {
     try {
       isLoading.value = true;
-      showTransferPaymentDialog();
+
+      final result = await subscriptionService.createSubscription();
+
+      if (result != null) {
+        await loadSubscriptions();
+        hidePaymentOptions();
+        Get.snackbar(
+          'Invoice Created',
+          'Pending invoice created! Please check payment history to upload transfer proof.',
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.blue.shade100,
+          colorText: Colors.blue.shade800,
+          icon: Icon(Icons.info, color: Colors.blue.shade800),
+          duration: Duration(seconds: 5),
+        );
+      } else {
+        Get.snackbar('Failed', 'Failed to create invoice.');
+      }
     } catch (e) {
-      Get.snackbar('Error', 'Error during transfer: ${e.toString()}',
+      Get.snackbar('Error', 'Error creating invoice: ${e.toString()}',
           snackPosition: SnackPosition.TOP,
           backgroundColor: Colors.red.shade100,
           colorText: Colors.red.shade800,
@@ -129,6 +141,7 @@ class SubscriptionController extends GetxController {
     }
   }
 
+  // Moved image picker and submission methods for use in InvoicePage
   Future<void> pickScreenshot() async {
     try {
       final XFile? image = await _picker.pickImage(
@@ -162,123 +175,126 @@ class SubscriptionController extends GetxController {
     }
   }
 
-  Future<void> submitTransferProof() async {
-    final dashboardController = Get.find<DashboardController>();
-    await dashboardController.loadUserData();
-    if (screenshotFile.value == null) {
-      Get.snackbar('No Image', 'Please upload screenshot first',
-          snackPosition: SnackPosition.TOP,
-          backgroundColor: Colors.red.shade100,
-          colorText: Colors.red.shade800,
-          icon: Icon(Icons.error, color: Colors.red.shade800));
-      return;
-    }
-
-    try {
-      isLoading.value = true;
-      final result = await subscriptionService
-          .createTransferWithProof(screenshotFile.value!);
-
-      if (result != null && result['status'] == 'success') {
-        await UserStorage.saveUserAccessLevel(UserAccessLevel.premium);
-        await Get.find<DashboardController>().refreshSubscriptionStatus();
-        // Refresh ProfileController subscription status
-        final profileController = Get.find<ProfileController>();
-        await profileController.refreshSubscriptionStatus();
-
-        // Refresh user data from backend to get latest subscription info
-        await refreshUserAfterPayment();
-
-        hideTransferPaymentDialog();
-        hidePaymentOptions();
-
-        Get.snackbar('Subscription Active',
-            result['message'] ?? 'Activated successfully',
-            snackPosition: SnackPosition.TOP,
-            backgroundColor: Colors.green.shade100,
-            colorText: Colors.green.shade800,
-            icon: Icon(Icons.check_circle, color: Colors.green.shade800));
-      } else if (result != null && result['status'] == 'pending') {
-        hideTransferPaymentDialog();
-        hidePaymentOptions();
-
-        Get.snackbar(
-            'Proof Submitted', result['message'] ?? 'Waiting for verification',
-            snackPosition: SnackPosition.TOP,
-            backgroundColor: Colors.orange.shade100,
-            colorText: Colors.orange.shade800,
-            icon: Icon(Icons.info, color: Colors.orange.shade800));
-      } else if (result != null && result['status'] == 'error') {
-        String message = result['message'] ?? 'Submission failed.';
-        if (result['errors'] is Map) {
-          (result['errors'] as Map).forEach((key, value) {
-            message += '\n• ${value is List ? value.join(', ') : value}';
-          });
-        }
-
-        Get.snackbar('Failed', message,
-            snackPosition: SnackPosition.TOP,
-            backgroundColor: Colors.red.shade100,
-            colorText: Colors.red.shade800,
-            icon: Icon(Icons.error, color: Colors.red.shade800));
-      } else {
-        Get.snackbar(
-            'You are premium!', 'Please create an invoice for next month..',
-            snackPosition: SnackPosition.TOP,
-            backgroundColor: Colors.green.shade100,
-            colorText: Colors.green.shade800,
-            icon: Icon(Icons.check_circle, color: Colors.green.shade800));
-      }
-    } catch (e) {
-      Get.snackbar('Error', 'Error submitting proof: ${e.toString()}',
-          snackPosition: SnackPosition.TOP,
-          backgroundColor: Colors.red.shade100,
-          colorText: Colors.red.shade800,
-          icon: Icon(Icons.error, color: Colors.red.shade800));
-    } finally {
-      isLoading.value = false;
-    }
+  Future<void> submitTransferProof(SubscriptionModel subscription) async {
+  if (screenshotFile.value == null) {
+    Get.snackbar("Error", "No proof selected!");
+    return;
   }
-  Future<void> refreshUserAfterPayment() async {
+
   try {
-    final response = await LoginService.getAccountInfoWithToken();
-    final user = response.accountInfo;
-    final subscription = user?.subscription;
+    isLoading.value = true;
 
-    if (user != null && subscription != null) {
-      final expiryDate = DateTime.parse(subscription['expiration_date']);
-      final accessLevel = subscription['status'] ?? 'free';
+    print('🔍 Submitting transfer proof for subscription:');
+    print('   External ID: ${subscription.externalId}');
+    print('   Status: ${subscription.status}');
+    print('   Month: ${subscription.month}');
+    
+    // Use externalId which now contains the UUID from API
+    final result = await subscriptionService.createTransferWithProof(
+      screenshotFile.value!,
+      subscription.externalId, // This now correctly contains the UUID
+    );
 
-      // Simpan ke UserStorage
-      await UserStorage.saveUserData(
-        token: user.tokens.first.token,
-        email: user.email,
-        name: user.name,
-        role: user.role,
-        avatarUrl: user.avatar
+    print('📥 Transfer proof submission result: $result');
+
+    if (result != null && result['status'] == 'paid') {
+      screenshotFile.value = null;  
+
+      Get.snackbar(
+        'Proof Uploaded',
+        'Transfer proof uploaded successfully! Awaiting admin confirmation.',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.green.shade100,
+        colorText: Colors.green.shade800,
+        icon: Icon(Icons.check_circle, color: Colors.green.shade800),
+        duration: Duration(seconds: 4),
       );
-      await UserStorage.saveMembershipStatus(accessLevel);
-      await UserStorage.setMembershipExpiry(expiryDate);
 
-      // Panggil ProfileController atau DashboardController untuk refresh
-      final dashboard = Get.find<DashboardController>();
-      await dashboard.loadUserData();
-
-      // Refresh HomeController membership status and lessons
-        final homeController = Get.find<HomeController>();
-        await homeController.refreshMembershipStatus();
+      // Refresh subscriptions data
+      await loadSubscriptions();
       
+      // Refresh user data after payment
+      await refreshUserAfterPayment();
 
-      // Refresh ProfileController subscription status
-        final profileController = Get.find<ProfileController>();
-        await profileController.refreshEntireProfile();
+      // Go back to previous screen
+      Get.back();
+    } else {
+      String message = result?['message'] ?? 'Upload failed.';
       
+      // Handle validation errors if they exist
+      if (result != null && result['errors'] is Map) {
+        message += '\n';
+        (result['errors'] as Map).forEach((key, value) {
+          if (value is List) {
+            message += '\n• ${value.join(', ')}';
+          } else {
+            message += '\n• $value';
+          }
+        });
+      }
+
+      Get.snackbar(
+        'Upload Failed',
+        message,
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.red.shade100,
+        colorText: Colors.red.shade800,
+        icon: Icon(Icons.error, color: Colors.red.shade800),
+        duration: Duration(seconds: 5),
+      );
     }
   } catch (e) {
-    print('❌ Gagal refresh user setelah payment: $e');
+    print('❌ Exception during transfer proof submission: $e');
+    
+    Get.snackbar(
+      'Error',
+      'Error uploading proof: ${e.toString()}',
+      snackPosition: SnackPosition.TOP,
+      backgroundColor: Colors.red.shade100,
+      colorText: Colors.red.shade800,
+      icon: Icon(Icons.error, color: Colors.red.shade800),
+      duration: Duration(seconds: 5),
+    );
+  } finally {
+    isLoading.value = false;
   }
 }
+  Future<void> refreshUserAfterPayment() async {
+    try {
+      final response = await LoginService.getAccountInfoWithToken();
+      final user = response.accountInfo;
+      final subscription = user?.subscription;
 
+      if (user != null && subscription != null) {
+        final expiryDate = DateTime.parse(subscription['expiration_date']);
+        final accessLevel = subscription['status'] ?? 'free';
+
+        // Simpan ke UserStorage
+        await UserStorage.saveUserData(
+            token: user.tokens.first.token,
+            email: user.email,
+            name: user.name,
+            role: user.role,
+            avatarUrl: user.avatar);
+        await UserStorage.saveMembershipStatus(accessLevel);
+        await UserStorage.setMembershipExpiry(expiryDate);
+
+        // Panggil ProfileController atau DashboardController untuk refresh
+        final dashboard = Get.find<DashboardController>();
+        await dashboard.loadUserData();
+
+        // Refresh HomeController membership status and lessons
+        final homeController = Get.find<HomeController>();
+        await homeController.refreshMembershipStatus();
+
+        // Refresh ProfileController subscription status
+        final profileController = Get.find<ProfileController>();
+        await profileController.refreshEntireProfile();
+      }
+    } catch (e) {
+      print('❌ Gagal refresh user setelah payment: $e');
+    }
+  }
 
   Future<bool?> _showCashPaymentDialog(BuildContext context) {
     return showDialog<bool>(
@@ -299,7 +315,6 @@ class SubscriptionController extends GetxController {
 
   void resetPaymentState() {
     showPaymentButtons.value = false;
-    showTransferDialog.value = false;
     isLoading.value = false;
     screenshotFile.value = null;
   }

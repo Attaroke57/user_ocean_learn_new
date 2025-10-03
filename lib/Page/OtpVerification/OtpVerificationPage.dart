@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:user_ocean_learn/Page/OtpVerification/OtpController.dart';
 import 'package:user_ocean_learn/Routing/ocean_learn_route.dart';
+import 'package:user_ocean_learn/Services/LoginService.dart';
 import 'package:user_ocean_learn/Services/OtpService.dart';
 import 'package:user_ocean_learn/Services/ResendOtpService.dart';
 import 'package:user_ocean_learn/Widgets/OtpVerification/Otpcard.dart';
+import 'package:user_ocean_learn/Widgets/user_storage.dart';
 
 class OtpVerificationScreen extends StatefulWidget {
   final email = Get.arguments['email'] as String;
@@ -137,29 +139,62 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     }
   }
 
-  void _handleGetStarted() async {
-    final otp = _otpController.getOtp();
-    final email = widget.email;
+  // otpPage.dart
+void _handleGetStarted() async {
+  final otp = _otpController.getOtp();
+  final email = widget.email;
+  final password = Get.arguments['password']; // ⬅️ ambil password dari register
 
-    final result = await OtpService.verifyOtp(email, otp);
+  final result = await OtpService.verifyOtp(email, otp);
 
-    if (result['success']) {
-      // Berhasil verifikasi
+  if (result['success']) {
+    // ✅ OTP benar → sekarang login otomatis
+    final loginResult = await LoginService.login(email, password);
+
+    if (loginResult.status && loginResult.accountInfo != null) {
+      final token = loginResult.accountInfo!.tokens[0].token;
+
+
+      if (token.isNotEmpty) {
+        await UserStorage.saveUserData(
+          token: token,
+          email: loginResult.accountInfo!.email,
+          name: loginResult.accountInfo!.name,
+          role: loginResult.accountInfo!.role ?? 'visitor',
+        );
+
+        // arahkan ke dashboard
+        Get.offAllNamed(OceanLearnRoutes.homePage);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Verification successful!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Token not found after login'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Verification successful!'),
-          backgroundColor: Colors.green,
-        ),
-      );
-      Get.offAllNamed(OceanLearnRoutes.homePage);
-    } else {
-      // Gagal
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(result['message'] ?? 'Verification failed'),
+          content: Text('Login failed after OTP'),
           backgroundColor: Colors.red,
         ),
       );
     }
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(result['message'] ?? 'Verification failed'),
+        backgroundColor: Colors.red,
+      ),
+    );
   }
+}
+
 }
